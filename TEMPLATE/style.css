@@ -86,7 +86,6 @@ h2, h1 {text-transform:capitalize;}
     animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
 }
 
-/* login screen */
 #login-view { 
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); 
     z-index: 100; 
@@ -126,7 +125,6 @@ h2, h1 {text-transform:capitalize;}
 .btn-login { width: 100%; padding: 15px; background: #00A6FF; color: white; border: none; border-radius: 16px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px; }
 .btn-login:active { transform: scale(0.98); }
 
-/* header */
 .app-header { padding: 16px 16px 0 16px; background: var(--bg-app); transition: background-color 0.3s ease; }
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .brand-info { display: flex; align-items: center; gap: 10px; }
@@ -140,11 +138,9 @@ h2, h1 {text-transform:capitalize;}
 .icon-btn:active { transform: scale(0.95); }
 .badge-count { position: absolute; top: -4px; right: -4px; background: var(--accent); color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-app); z-index: 10; }
 
-/* search */
 .search-box { background: var(--card-bg); display: flex; align-items: center; padding: 10px 14px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
 .search-box input { border: none; outline: none; width: 100%; margin-left: 8px; background: transparent; font-size: 13px; color: var(--text-main); font-weight: 500; }
 
-/* dashboard */
 .dashboard-card { background: var(--card-bg); border-radius: 18px; padding: 16px; border: 1px solid var(--border); margin-bottom: 14px; box-shadow: var(--shadow-sm); }
 
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
@@ -172,7 +168,6 @@ h2, h1 {text-transform:capitalize;}
 
 .category-scroll::-webkit-scrollbar { display: none; }
 
-/* FAB */
 .btn-fab {
     position: fixed !important;
     bottom: 75px !important;
@@ -199,7 +194,6 @@ h2, h1 {text-transform:capitalize;}
 .cat-chip { flex: 0 0 auto; padding: 8px 14px; background: var(--card-bg); border-radius: 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: var(--shadow-sm); }
 .cat-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2); }
 
-/* product */
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 .product-card { background: var(--card-bg); border-radius: 16px; padding: 6px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-sm); position: relative; transition: transform 0.2s ease; }
 .product-card:hover { transform: translateY(-2px); }
@@ -216,7 +210,6 @@ h2, h1 {text-transform:capitalize;}
 .admin-btn-edit { background: var(--accent); }
 .admin-btn-delete { background: var(--danger); }
 
-/* cart */
 .cart-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
 .qty-control { display: flex; align-items: center; gap: 8px; }
 .qty-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); cursor: pointer; font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: center; }
@@ -233,7 +226,6 @@ h2, h1 {text-transform:capitalize;}
 .quick-cash-btn { padding: 8px 4px; background: var(--border-light); color: var(--text-main); border: 1px solid var(--border); border-radius: 16px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s; }
 .quick-cash-btn:hover { background: var(--accent); color: var(--card-bg); border-color: var(--accent); }
 
-/* profile accordion */
 .profile-menu-container { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 .profile-menu-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); }
 .profile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-main); }
@@ -246,7 +238,6 @@ h2, h1 {text-transform:capitalize;}
 .profile-version-card span { font-size: 13px; font-weight: 700; color: var(--text-main); }
 .profile-version-card .badge-ver { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 4px 10px; border-radius: 8px; }
 
-/* modal */
 .modal-overlay { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 200; display: none; justify-content: center; align-items: center; padding: 16px; }
 .modal-card { background: var(--modal-bg); width: 100%; max-width: 340px; border-radius: 20px; padding: 20px; box-shadow: var(--shadow-lg); max-height: 85vh; overflow-y: auto; border: 1px solid var(--border); animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 
@@ -255,7 +246,6 @@ h2, h1 {text-transform:capitalize;}
 .receipt-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-muted); font-size: 12px; }
 .receipt-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 14px; color: var(--text-main); margin-top: 8px; }
 
-/* bottom nav */
 .bottom-nav { 
     position: absolute; 
     bottom: 12px; 
@@ -280,7 +270,6 @@ h2, h1 {text-transform:capitalize;}
 .nav-item.order-btn-nav:active i { transform: scale(0.9) translateY(-20px); }
 .nav-item.order-btn-nav .badge-count { top: -22px; right: 2px; }
 
-/* flying dot */
 .flying-dot {
     position: fixed;
     width: 22px;
@@ -318,7 +307,6 @@ h2, h1 {text-transform:capitalize;}
     to { opacity: 1; transform: scale(1); }
 }
 
-/* tablet & desktop */
 @media (min-width: 600px) {
     body { padding: 0; background: var(--bg-app); }
     .app-container { width: 100%; height: 100vh; height: 100dvh; max-height: none; border-radius: 0; box-shadow: none; }
@@ -329,7 +317,6 @@ h2, h1 {text-transform:capitalize;}
     .app-header, .view { max-width: 1024px; margin: 0 auto; width: 100%; }
 }
 
-/* print */
 @media print {
     @page { size: 58mm auto; margin: 0 !important; }
     html, body {
@@ -397,7 +384,6 @@ h2, h1 {text-transform:capitalize;}
     .no-print { display: none !important; }
 }
 
-/* custom checkbox */
 .custom-theme-checkbox {
     appearance: none;
     -webkit-appearance: none;
@@ -487,7 +473,6 @@ input, textarea {
     overflow: hidden;
 }
 
-/* cloud status indicator */
 #cloud-status {
     position: fixed;
     top: 8px;
@@ -508,9 +493,6 @@ input, textarea {
 #cloud-status.online { color: var(--success); border-color: var(--success); }
 #cloud-status.offline { color: var(--danger); border-color: var(--danger); }
 
-/* =========================================================
-   SYNC BUTTON
-   ========================================================= */
 @keyframes spinSync {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
@@ -539,9 +521,6 @@ input, textarea {
     color: var(--danger, #ef4444) !important;
 }
 
-/* =========================================================
-   EMPTY STATE — Centered Responsive
-   ========================================================= */
 .empty-state-centered {
     display: flex;
     flex-direction: column;
@@ -577,23 +556,10 @@ input, textarea {
     color: var(--text-muted);
     margin: 0;
 }
-/* =========================================================
-   HISTORY DROPDOWN — Hover Effect
-   ========================================================= */
+
 .history-dropdown-item:hover {
     background: var(--border-light) !important;
 }
 .history-dropdown-item:active {
     transform: scale(0.98);
-}
-
-/* Force Black Font di History Section */
-#history .history-card,
-#history .history-card strong,
-#history .history-card span {
-    color: #0f172a !important;
-}
-#history .history-card span[style*="var(--text-muted)"],
-#history .history-card .history-muted {
-    color: #64748b !important;
 }
