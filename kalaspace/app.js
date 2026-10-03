@@ -1,7 +1,7 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FINAL)
-   Fix: tax configurable, shift receipt branding, date/time,
-   delete permanent, empty state, dynamic title, auto sync
+   POS KASIR - APP LOGIC (FINAL v2)
+   Fix: tax 0%, bills sync, date/time, delete permanent,
+        empty state, dynamic title, auto sync
    ========================================================= */
 
 /* ==========================================
@@ -11,7 +11,12 @@ const CFG = window.APP_CONFIG || {};
 const API_URL   = CFG.API_URL   || '';
 const API_TOKEN = CFG.API_TOKEN || '';
 const STORE_NAME = CFG.STORE_NAME || 'Kala Space Cafe';
-const TAX_RATE_CONST = (CFG.TAX_PERCENT || 10) / 100;
+
+// ✅ FIX: Tax falsy bug — 0 harus valid
+const __taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null && !isNaN(CFG.TAX_PERCENT)) 
+    ? Number(CFG.TAX_PERCENT) 
+    : 10;
+const TAX_RATE_CONST = __taxPercent / 100;
 
 const api = {
     async call(action, payload = {}) {
@@ -65,7 +70,12 @@ function updateCloudStatus(online) {
 function syncToCloud() {
     clearTimeout(__syncTimer);
     __syncTimer = setTimeout(async () => {
-        const res = await api.bulkSave({ products, coupons });
+        // ✅ FIX: sertakan bills
+        const res = await api.bulkSave({ 
+            products, 
+            coupons, 
+            bills: savedBills 
+        });
         if (res) {
             updateCloudStatus(true);
             console.log('☁️ Sync to cloud OK');
@@ -92,6 +102,11 @@ async function loadFromCloud() {
     if (cloud.coupons && cloud.coupons.length) {
         coupons = cloud.coupons;
         localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
+    }
+    // ✅ FIX: muat bills
+    if (cloud.bills && cloud.bills.length) {
+        savedBills = cloud.bills;
+        localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(savedBills));
     }
     updateCloudStatus(true);
     console.log('☁️ Load from cloud OK');
@@ -129,6 +144,12 @@ async function silentRefresh() {
         if (fresh.coupons && hashData(fresh.coupons) !== hashData(coupons)) {
             coupons = fresh.coupons;
             localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
+            hasChange = true;
+        }
+        // ✅ FIX: cek bills juga
+        if (fresh.bills && hashData(fresh.bills) !== hashData(savedBills)) {
+            savedBills = fresh.bills;
+            localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(savedBills));
             hasChange = true;
         }
         if (hasChange) {
@@ -173,6 +194,11 @@ async function manualSync() {
         if (fresh.coupons) {
             coupons = fresh.coupons;
             localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
+        }
+        // ✅ FIX: muat bills
+        if (fresh.bills) {
+            savedBills = fresh.bills;
+            localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(savedBills));
         }
         renderProducts(products, 'menu-items');
         renderPopularItems();
@@ -234,14 +260,14 @@ function applyBranding() {
     const badge = document.getElementById('version-badge');
     if (badge && CFG.VERSION) badge.textContent = CFG.VERSION;
 
-    // ✨ Update label pajak di UI
-    const taxPercent = CFG.TAX_PERCENT || 10;
+    // ✅ FIX: Tax label — handle 0%
+    const taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null) ? CFG.TAX_PERCENT : 10;
     const taxLabelEl = document.getElementById('tax-label');
     if (taxLabelEl) taxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
     const modalTaxLabelEl = document.getElementById('modal-tax-label');
     if (modalTaxLabelEl) modalTaxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
 
-    // ✨ Update nama toko di struk rekap shift
+    // Update nama toko di struk rekap shift
     const srStoreNameEl = document.getElementById('sr-store-name');
     if (srStoreNameEl) srStoreNameEl.textContent = STORE_NAME.toUpperCase();
 
@@ -1093,6 +1119,7 @@ function updateCart() {
     }
     const totalAllDiscount = productDiscount + couponDiscountAmount;
     const netSubtotal = Math.max(0, rawSubtotal - totalAllDiscount);
+    // ✅ FIX: pakai TAX_RATE_CONST yang sudah handle 0%
     const tax = Math.round(netSubtotal * TAX_RATE_CONST);
     grandTotal = netSubtotal + tax;
     const subtotalElem = document.getElementById('subtotal-val');
@@ -1179,6 +1206,8 @@ function confirmSaveBill() {
         });
     }
     saveState();
+    // ✅ FIX: langsung sync bills ke cloud
+    api.bulkSave({ products, coupons, bills: savedBills });
     clearCurrentCartState();
     closeSaveBillModal();
     renderSavedBills();
@@ -1269,6 +1298,7 @@ function processPayment() {
     }, 0);
     const totalDiscount = productDiscount + (couponDiscountAmount || 0);
     const subtotalAfterAllDiscount = Math.max(0, rawSubtotal - totalDiscount);
+    // ✅ FIX: pakai TAX_RATE_CONST
     const tax = Math.round(subtotalAfterAllDiscount * TAX_RATE_CONST);
     const change = paidAmount - grandTotal;
     const now = new Date();
@@ -1299,10 +1329,12 @@ function processPayment() {
     transactionHistory.unshift(newTrx);
     if (currentEditingBillId) savedBills = savedBills.filter(b => b.id !== currentEditingBillId);
     saveState();
+    // ✅ Sync transaksi + bills (karena bill mungkin sudah dihapus)
     api.saveTransaction(newTrx).then(res => {
         if (res) { updateCloudStatus(true); console.log('☁️ Trx tersimpan:', newTrx.id); }
         else updateCloudStatus(false);
     });
+    api.bulkSave({ products, coupons, bills: savedBills });
     showReceiptModal(newTrx);
     clearCurrentCartState();
     renderSavedBills();
