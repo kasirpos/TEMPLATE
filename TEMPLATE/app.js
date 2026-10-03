@@ -1,6 +1,10 @@
 /* =========================================================
-   POS KASIR - APP LOGIC
-   Fix: date/time + delete permanent + empty state + dynamic title
+   POS KASIR - APP LOGIC (FINAL)
+   - Date/time fixed
+   - Delete permanent
+   - Empty state centered (cart, bill, history)
+   - Dynamic title
+   - Auto sync 30s + manual sync button
    ========================================================= */
 
 /* ==========================================
@@ -47,6 +51,7 @@ const api = {
 
 let __syncTimer = null;
 let __cloudOnline = false;
+let __refreshLock = false;
 
 function updateCloudStatus(online) {
     __cloudOnline = online;
@@ -97,8 +102,165 @@ async function loadFromCloud() {
     return true;
 }
 
+/* =========================================
+   AUTO SYNC + MANUAL SYNC
+   ========================================= */
+function hashData(obj) {
+    try { return JSON.stringify(obj); } catch(e) { return ''; }
+}
+
+async function silentRefresh() {
+    // Skip kalau user sedang input
+    const activeTag = document.activeElement?.tagName;
+    if (activeTag && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) {
+        return;
+    }
+    
+    // Skip kalau manual sync sedang jalan
+    const syncBtn = document.getElementById('sync-btn');
+    if (syncBtn && syncBtn.classList.contains('syncing')) return;
+    
+    // Skip kalau sedang ada request lain
+    if (__refreshLock) return;
+    __refreshLock = true;
+    
+    try {
+        const fresh = await api.getAll();
+        if (!fresh) {
+            updateCloudStatus(false);
+            return;
+        }
+        
+        let hasChange = false;
+        
+        if (fresh.products && hashData(fresh.products) !== hashData(products)) {
+            products = fresh.products;
+            localStorage.setItem('luxe_pos_products', JSON.stringify(products));
+            hasChange = true;
+        }
+        if (fresh.transactions && hashData(fresh.transactions) !== hashData(transactionHistory)) {
+            transactionHistory = fresh.transactions;
+            localStorage.setItem('luxe_pos_history', JSON.stringify(transactionHistory));
+            hasChange = true;
+        }
+        if (fresh.coupons && hashData(fresh.coupons) !== hashData(coupons)) {
+            coupons = fresh.coupons;
+            localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
+            hasChange = true;
+        }
+        
+        if (hasChange) {
+            console.log('🔄 Data berubah dari cloud — render ulang');
+            renderProducts(products, 'menu-items');
+            renderPopularItems();
+            renderHistory();
+            renderSavedBills();
+            updateDashboardMetrics();
+            if (typeof renderCouponManagement === 'function' && currentUserRole === 'admin') {
+                renderCouponManagement();
+            }
+            if (document.getElementById('laporan')?.classList.contains('active')) {
+                renderLaporanData();
+            }
+        }
+        
+        updateCloudStatus(true);
+    } catch (err) {
+        console.error('❌ Silent refresh error:', err);
+    } finally {
+        __refreshLock = false;
+    }
+}
+
+async function manualSync() {
+    const btn = document.getElementById('sync-btn');
+    if (!btn || btn.classList.contains('syncing')) return;
+    
+    btn.classList.remove('success', 'error');
+    btn.classList.add('syncing');
+    
+    try {
+        const fresh = await api.getAll();
+        
+        if (!fresh) {
+            updateCloudStatus(false);
+            btn.classList.add('error');
+            setTimeout(() => btn.classList.remove('error'), 2000);
+            return;
+        }
+        
+        if (fresh.products) {
+            products = fresh.products;
+            localStorage.setItem('luxe_pos_products', JSON.stringify(products));
+        }
+        if (fresh.transactions) {
+            transactionHistory = fresh.transactions;
+            localStorage.setItem('luxe_pos_history', JSON.stringify(transactionHistory));
+        }
+        if (fresh.coupons) {
+            coupons = fresh.coupons;
+            localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
+        }
+        
+        // Render ulang semua UI
+        renderProducts(products, 'menu-items');
+        renderPopularItems();
+        renderHistory();
+        renderSavedBills();
+        updateDashboardMetrics();
+        
+        if (typeof renderCouponManagement === 'function' && currentUserRole === 'admin') {
+            renderCouponManagement();
+        }
+        if (document.getElementById('laporan')?.classList.contains('active')) {
+            renderLaporanData();
+        }
+        
+        updateCloudStatus(true);
+        
+        // Feedback visual
+        btn.classList.add('success');
+        setTimeout(() => btn.classList.remove('success'), 1200);
+        
+        console.log('✅ Manual sync OK');
+    } catch (err) {
+        console.error('❌ Manual sync error:', err);
+        btn.classList.add('error');
+        setTimeout(() => btn.classList.remove('error'), 2000);
+    } finally {
+        setTimeout(() => {
+            btn.classList.remove('syncing');
+        }, 400);
+    }
+}
+
+function setupAutoSync() {
+    // 1. Saat tab kembali aktif (dari app lain)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            console.log('👁️ Tab aktif — sync dari cloud');
+            silentRefresh();
+        }
+    });
+    
+    // 2. Saat window dapat focus
+    window.addEventListener('focus', () => {
+        silentRefresh();
+    });
+    
+    // 3. Saat koneksi kembali online
+    window.addEventListener('online', () => {
+        console.log('🌐 Kembali online — sync dari cloud');
+        silentRefresh();
+    });
+    
+    // 4. Polling tiap 30 detik
+    setInterval(silentRefresh, 30000);
+    
+    console.log('✅ Auto sync aktif (30s polling + focus + visibility + online)');
+}
+
 function applyBranding() {
-    // Dynamic title
     document.title = 'POS Kasir App : ' + STORE_NAME;
 
     const loginTitle = document.getElementById('login-store-name');
@@ -1173,15 +1335,16 @@ function updateCart() {
     if (cartList) {
         if (cart.length === 0) {
             cartList.innerHTML = `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; text-align: center;">
-                    <div style="width: 54px; height: 54px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <div class="empty-state-centered" style="min-height: 240px;">
+                    <div class="empty-icon" style="width: 54px; height: 54px;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="9" cy="21" r="1"></circle>
                             <circle cx="20" cy="21" r="1"></circle>
                             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                         </svg>
                     </div>
-                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Belum ada pesanan.</span>
+                    <div class="empty-title">Belum ada pesanan</div>
+                    <p class="empty-desc">Tambahkan menu dari tab Menu untuk memulai.</p>
                 </div>
             `;
         } else {
@@ -2253,14 +2416,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const kitchenNotes = document.getElementById('kitchen-order-notes');
     if (kitchenNotes) kitchenNotes.addEventListener('input', updateKitchenPreview);
 
-    setInterval(async () => {
-        const fresh = await api.getAll();
-        if (fresh && fresh.transactions) {
-            transactionHistory = fresh.transactions;
-            if (fresh.products) products = fresh.products;
-            renderHistory();
-            updateDashboardMetrics();
-            renderProducts(products, 'menu-items');
-        }
-    }, 120000);
+    // 🔥 Aktifkan auto sync 30 detik + tombol manual
+    setupAutoSync();
 });
