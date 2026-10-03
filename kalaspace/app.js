@@ -1,7 +1,6 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FINAL v3)
-   Fix: tax 0%, bills sync, click card to toggle checkbox,
-        date/time, delete permanent, empty state, auto sync
+   POS KASIR - APP LOGIC (FINAL v4)
+   Fix: tax config, bills sync, click card toggle, dropdown theme
    ========================================================= */
 
 /* ==========================================
@@ -12,7 +11,6 @@ const API_URL   = CFG.API_URL   || '';
 const API_TOKEN = CFG.API_TOKEN || '';
 const STORE_NAME = CFG.STORE_NAME || 'Kala Space Cafe';
 
-// ✅ FIX: Tax falsy bug — 0 harus valid
 const __taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null && !isNaN(CFG.TAX_PERCENT)) 
     ? Number(CFG.TAX_PERCENT) 
     : 10;
@@ -82,10 +80,7 @@ function syncToCloud() {
 
 async function loadFromCloud() {
     const cloud = await api.getAll();
-    if (!cloud) {
-        updateCloudStatus(false);
-        return false;
-    }
+    if (!cloud) { updateCloudStatus(false); return false; }
     if (cloud.products && cloud.products.length) {
         products = cloud.products;
         localStorage.setItem('luxe_pos_products', JSON.stringify(products));
@@ -252,14 +247,12 @@ function applyBranding() {
     const badge = document.getElementById('version-badge');
     if (badge && CFG.VERSION) badge.textContent = CFG.VERSION;
 
-    // Tax label — handle 0%
     const taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null) ? CFG.TAX_PERCENT : 10;
     const taxLabelEl = document.getElementById('tax-label');
     if (taxLabelEl) taxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
     const modalTaxLabelEl = document.getElementById('modal-tax-label');
     if (modalTaxLabelEl) modalTaxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
 
-    // Nama toko di struk rekap shift
     const srStoreNameEl = document.getElementById('sr-store-name');
     if (srStoreNameEl) srStoreNameEl.textContent = STORE_NAME.toUpperCase();
 
@@ -1399,18 +1392,18 @@ function updateHistoryUIForSelection() {
     const defaultActions = document.getElementById('history-default-actions');
     const selectionActions = document.getElementById('history-selection-actions');
     const selectAllCheckbox = document.getElementById('select-all-history');
-    const confirmBtn = document.querySelector('#history-selection-actions .btn-primary');
+    const confirmBtn = document.getElementById('history-selection-confirm');
     if (isHistorySelectionMode) {
         if (defaultActions) defaultActions.style.display = 'none';
         if (selectionActions) selectionActions.style.display = 'flex';
         if (selectAllCheckbox) selectAllCheckbox.checked = false;
         if (confirmBtn) {
             if (historyActionMode === 'cancel') {
-                confirmBtn.innerText = 'Void Terpilih';
-                confirmBtn.style.background = 'var(--danger, #ef4444)';
+                confirmBtn.innerText = 'Konfirmasi Void';
+                confirmBtn.style.background = '#f59e0b';
             } else {
-                confirmBtn.innerText = 'Hapus Permanen';
-                confirmBtn.style.background = 'var(--danger, #ef4444)';
+                confirmBtn.innerText = 'Konfirmasi Hapus';
+                confirmBtn.style.background = 'var(--danger)';
             }
         }
     } else {
@@ -1427,7 +1420,6 @@ function toggleSelectAllHistory(checkbox) {
     });
 }
 
-/* ✅ NEW: helper styles & state */
 function applyCardSelectionStyle(card, isSelected) {
     if (isSelected) {
         card.style.background = 'var(--accent-light)';
@@ -1456,11 +1448,29 @@ function closeDeleteHistoryModal() { document.getElementById('delete-history-mod
 function openDeleteSelectedHistoryModal() {
     const checkboxes = document.querySelectorAll('.history-checkbox-item:checked');
     if (checkboxes.length === 0) { alert("Pilih minimal satu riwayat!"); return; }
-    const textElem = document.querySelector('#delete-history-modal p');
-    const actionText = historyActionMode === 'cancel' 
-        ? 'dibatalkan (diberi status VOID)' 
-        : 'DIHAPUS PERMANEN dari Spreadsheet';
-    if (textElem) textElem.innerText = checkboxes.length + ' transaksi akan ' + actionText + '.';
+    
+    const titleEl = document.getElementById('history-modal-title');
+    const descEl = document.getElementById('history-modal-desc');
+    const iconEl = document.getElementById('history-modal-icon');
+    const confirmBtn = document.getElementById('history-modal-confirm-btn');
+    
+    if (historyActionMode === 'cancel') {
+        if (titleEl) titleEl.innerText = 'BATALKAN TRANSAKSI?';
+        if (descEl) descEl.innerText = checkboxes.length + ' transaksi akan ditandai sebagai void. Transaksi tidak akan dihitung dalam omset, tapi tetap muncul di riwayat.';
+        if (iconEl) {
+            iconEl.innerHTML = '<i class="ri-close-circle-line" style="font-size: 24px; color: #f59e0b;"></i>';
+            iconEl.style.background = 'rgba(245, 158, 11, 0.15)';
+        }
+        if (confirmBtn) { confirmBtn.innerText = 'YA, BATALKAN'; confirmBtn.style.background = '#f59e0b'; }
+    } else {
+        if (titleEl) titleEl.innerText = 'HAPUS RIWAYAT?';
+        if (descEl) descEl.innerText = checkboxes.length + ' transaksi akan dihapus dari daftar riwayat. Data tidak akan muncul lagi di halaman ini.';
+        if (iconEl) {
+            iconEl.innerHTML = '<i class="ri-delete-bin-line" style="font-size: 24px; color: var(--danger);"></i>';
+            iconEl.style.background = 'var(--danger-light)';
+        }
+        if (confirmBtn) { confirmBtn.innerText = 'YA, HAPUS'; confirmBtn.style.background = 'var(--danger)'; }
+    }
     document.getElementById('delete-history-modal').style.display = 'flex';
 }
 
@@ -1480,7 +1490,7 @@ function confirmClearHistory() {
     } else if (historyActionMode === 'delete') {
         selectedIds.forEach(id => { api.deleteTransaction(id); });
         transactionHistory = transactionHistory.filter(trx => !selectedIds.includes(trx.id));
-        alert(selectedIds.length + ' transaksi DIHAPUS PERMANEN.');
+        alert(selectedIds.length + ' transaksi berhasil dihapus dari riwayat.');
     }
     saveState();
     closeDeleteHistoryModal();
@@ -1521,21 +1531,20 @@ function renderHistory() {
             ` : ''}
             <div style="flex: 1;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <strong style="font-size: 13px; color: #0f172a; font-weight: 800; text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
-                        ${trx.id} ${trx.isVoid ? '<span style="color:#ef4444; font-size:10px;">(VOID)</span>' : ''}
+                    <strong style="font-size: 13px; color: var(--text-main); font-weight: 800; text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
+                        ${trx.id} ${trx.isVoid ? '<span style="color:var(--danger); font-size:10px;">(VOID)</span>' : ''}
                     </strong>
-                    <span style="font-size: 11px; color: #64748b;">${displayDate}</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">${displayDate}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 11px; color: #64748b;">Kasir: <span style="font-size: 10px; background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 6px; font-weight: 700;">${trx.cashier || '-'}</span></span>
-                    <strong style="font-size: 13px; color: ${trx.isVoid ? '#94a3b8' : '#0f172a'}; font-weight: 800; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">Rp ${trx.total ? trx.total.toLocaleString('id-id') : '0'}</strong>
+                    <span style="font-size: 11px; color: var(--text-muted);">Kasir: <span style="font-size: 10px; background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 6px; font-weight: 700;">${trx.cashier || '-'}</span></span>
+                    <strong style="font-size: 13px; color: ${trx.isVoid ? 'var(--text-muted)' : 'var(--accent)'}; font-weight: 800; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">Rp ${trx.total ? trx.total.toLocaleString('id-id') : '0'}</strong>
                 </div>
             </div>
         </div>
         `;
     }).join('');
 
-    // Attach click handler ke seluruh card
     container.querySelectorAll('.history-card').forEach(card => {
         card.addEventListener('click', () => {
             if (isHistorySelectionMode) {
