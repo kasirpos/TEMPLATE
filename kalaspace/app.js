@@ -1,6 +1,7 @@
 /* =========================================================
-   POS KASIR - APP LOGIC
-   Split dari index.html untuk maintainability
+   POS KASIR - APP LOGIC (FIXED)
+   - Fix: Date/time ISO → plain
+   - Fix: Delete transaction = permanent
    ========================================================= */
 
 /* ==========================================
@@ -32,16 +33,17 @@ const api = {
             return null;
         }
     },
-    getAll()           { return this.call('getAll'); },
-    saveProduct(p)     { return this.call('saveProduct', { data: p }); },
-    deleteProduct(id)  { return this.call('deleteProduct', { id }); },
-    saveTransaction(t) { return this.call('saveTransaction', { data: t }); },
-    voidTransaction(id){ return this.call('voidTransaction', { id }); },
-    hideTransaction(id){ return this.call('hideTransaction', { id }); },
-    saveCoupon(c)      { return this.call('saveCoupon', { data: c }); },
-    deleteCoupon(code) { return this.call('deleteCoupon', { code }); },
-    saveCashFlow(c)    { return this.call('saveCashFlow', { data: c }); },
-    bulkSave(data)     { return this.call('bulkSave', { data }); }
+    getAll()             { return this.call('getAll'); },
+    saveProduct(p)       { return this.call('saveProduct', { data: p }); },
+    deleteProduct(id)    { return this.call('deleteProduct', { id }); },
+    saveTransaction(t)   { return this.call('saveTransaction', { data: t }); },
+    voidTransaction(id)  { return this.call('voidTransaction', { id }); },
+    hideTransaction(id)  { return this.call('hideTransaction', { id }); },
+    deleteTransaction(id){ return this.call('deleteTransaction', { id }); },
+    saveCoupon(c)        { return this.call('saveCoupon', { data: c }); },
+    deleteCoupon(code)   { return this.call('deleteCoupon', { code }); },
+    saveCashFlow(c)      { return this.call('saveCashFlow', { data: c }); },
+    bulkSave(data)       { return this.call('bulkSave', { data }); }
 };
 
 let __syncTimer = null;
@@ -146,6 +148,16 @@ function getCurrentYearMonth() {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     return `${year}-${month}`;
+}
+
+/* ===== HELPER: Normalisasi date dari cloud ===== */
+function normalizeTrxDate(val) {
+    if (!val) return '';
+    if (typeof val === 'string') {
+        // Kalau ISO string: "2026-10-02T17:00:00.000Z" → "2026-10-02"
+        return val.substring(0, 10);
+    }
+    return '';
 }
 
 function updateGreeting() {
@@ -296,14 +308,12 @@ function highlightActivePreset(colorHex) {
 }
 
 function syncUIElements(colorHex) {
-    const picker = document.getElementById('accent-color-picker');
     const previewBox = document.getElementById('accent-preview-box');
     const hexLabel = document.getElementById('accent-hex-label');
     const hexInput = document.getElementById('accent-hex-input');
     
     const formattedHex = colorHex.toUpperCase();
     
-    if (picker) picker.value = colorHex;
     if (previewBox) previewBox.style.backgroundColor = colorHex;
     if (hexLabel) hexLabel.textContent = formattedHex;
     if (hexInput && document.activeElement !== hexInput) {
@@ -317,11 +327,6 @@ function updateAppAccent(colorHex) {
     const cleanHex = colorHex.toLowerCase().trim();
     
     if (cleanHex === '#ffffff' || cleanHex === '#fff') {
-        const errorMsg = document.getElementById('accent-error-msg');
-        if (errorMsg) {
-            errorMsg.style.display = 'block';
-            setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
-        }
         const currentSaved = localStorage.getItem('--accent') || DEFAULT_ACCENT;
         syncUIElements(currentSaved);
         return;
@@ -413,7 +418,7 @@ function confirmResetLocalStorageData() {
 
 function exportLocalStorageJSON() {
     if (currentUserRole !== 'admin') {
-        alert("Akses ditolak! Fitur ini hanya dapat diakses oleh admin.");
+        alert("Akses ditolak!");
         return;
     }
 
@@ -437,7 +442,7 @@ function exportLocalStorageJSON() {
 
 function triggerImportJSON() {
     if (currentUserRole !== 'admin') {
-        alert("Akses ditolak! Fitur ini hanya dapat diakses oleh admin.");
+        alert("Akses ditolak!");
         return;
     }
     const input = document.getElementById('json-import-input');
@@ -686,6 +691,7 @@ function renderPopularItems() {
     const itemSales = {};
     transactionHistory.forEach(trx => {
         if (trx.isVoid) return;
+        if (!Array.isArray(trx.items)) return;
         trx.items.forEach(item => {
             itemSales[item.id] = (itemSales[item.id] || 0) + item.qty;
         });
@@ -1441,6 +1447,7 @@ function processPayment() {
     const now = new Date();
     const dateStr = getLocalDateString();
     const timeStr = now.toLocaleTimeString('id-id', { hour: '2-digit', minute: '2-digit' });
+    const timeFormatted = timeStr.replace(':', '.');
     
     if (activeAppliedCoupon) {
         const couponIdx = coupons.findIndex(c => c.code.toLowerCase() === activeAppliedCoupon.code.toLowerCase());
@@ -1452,7 +1459,7 @@ function processPayment() {
     const newTrx = {
         id: 'trx-' + Date.now().toString().slice(-6),
         date: dateStr,
-        time: timeStr,
+        time: timeFormatted,
         cashier: cashierName,
         items: [...cart],
         subtotal: rawSubtotal,
@@ -1493,7 +1500,10 @@ function processPayment() {
 function showReceiptModal(trx) {
     document.getElementById('modal-trx-id').innerText = trx.id || '-';
     document.getElementById('modal-cashier').innerText = trx.cashier || currentUserRole || '-';
-    document.getElementById('modal-time').innerText = trx.date ? `${trx.date} ${trx.time || ''}` : new Date().toLocaleString('id-ID');
+    
+    // Format date & time yang bersih
+    const cleanDate = normalizeTrxDate(trx.date);
+    document.getElementById('modal-time').innerText = cleanDate ? `${cleanDate} ${trx.time || ''}` : new Date().toLocaleString('id-ID');
 
     const itemsListEl = document.getElementById('modal-items-list');
     if (itemsListEl) {
@@ -1581,8 +1591,8 @@ function updateHistoryUIForSelection() {
                 confirmBtn.innerText = 'Void Terpilih';
                 confirmBtn.style.background = 'var(--danger, #ef4444)';
             } else {
-                confirmBtn.innerText = 'Hapus Terpilih';
-                confirmBtn.style.background = 'var(--accent, #00a6ff)';
+                confirmBtn.innerText = 'Hapus Permanen';
+                confirmBtn.style.background = 'var(--danger, #ef4444)';
             }
         }
     } else {
@@ -1614,7 +1624,9 @@ function openDeleteSelectedHistoryModal() {
         return;
     }
     const textElem = document.querySelector('#delete-history-modal p');
-    const actionText = historyActionMode === 'cancel' ? 'dibatalkan (diberi status VOID)' : 'dihapus secara permanen dari sistem';
+    const actionText = historyActionMode === 'cancel' 
+        ? 'dibatalkan (diberi status VOID, tetap tampil dengan strikethrough)' 
+        : 'DIHAPUS PERMANEN dari Spreadsheet (tidak bisa dikembalikan)';
     if (textElem) textElem.innerText = `${checkboxes.length} transaksi yang dipilih akan ${actionText}.`;
     document.getElementById('delete-history-modal').style.display = 'flex';
 }
@@ -1630,6 +1642,7 @@ function confirmClearHistory() {
     }
 
     if (historyActionMode === 'cancel') {
+        // VOID: tandai isVoid = true (tetap tampil)
         transactionHistory = transactionHistory.map(trx => {
             if (selectedIds.includes(trx.id) && !trx.isVoid) {
                 api.voidTransaction(trx.id);
@@ -1637,17 +1650,15 @@ function confirmClearHistory() {
             }
             return trx;
         });
-        alert(`${selectedIds.length} transaksi di-VOID (omset disesuaikan).`);
+        alert(`${selectedIds.length} transaksi di-VOID (omset disesuaikan, tetap tampil dengan strikethrough).`);
 
     } else if (historyActionMode === 'delete') {
-        transactionHistory = transactionHistory.map(trx => {
-            if (selectedIds.includes(trx.id)) {
-                api.hideTransaction(trx.id);
-                return { ...trx, isHidden: true };
-            }
-            return trx;
+        // DELETE PERMANEN: hapus dari cloud & local
+        selectedIds.forEach(id => {
+            api.deleteTransaction(id);
         });
-        alert(`${selectedIds.length} riwayat berhasil dibersihkan dari tampilan.`);
+        transactionHistory = transactionHistory.filter(trx => !selectedIds.includes(trx.id));
+        alert(`${selectedIds.length} transaksi DIHAPUS PERMANEN dari Spreadsheet.`);
     }
 
     saveState();
@@ -1666,6 +1677,7 @@ function renderHistory() {
     const container = document.getElementById('history-list');
     if (!container) return;
 
+    // Tampilkan semua trx yang tidak hidden (isHidden cuma legacy)
     const visibleHistory = transactionHistory.filter(trx => !trx.isHidden);
     
     if (visibleHistory.length === 0) {
@@ -1683,7 +1695,11 @@ function renderHistory() {
         return;
     }
 
-    container.innerHTML = visibleHistory.map(trx => `
+    container.innerHTML = visibleHistory.map(trx => {
+        const cleanDate = normalizeTrxDate(trx.date);
+        const displayDate = cleanDate && trx.time ? `${cleanDate} • ${trx.time}` : cleanDate || trx.time || '';
+        
+        return `
         <div style="display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); ${trx.isVoid ? 'opacity: 0.6;' : ''}">
             ${isHistorySelectionMode ? `
                 <input type="checkbox" class="history-checkbox-item custom-theme-checkbox" value="${trx.id}" style="width: 18px; height: 18px; cursor: pointer; display: block !important;">
@@ -1694,7 +1710,7 @@ function renderHistory() {
                     <strong style="font-size: 13px; color: var(--text-main); text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
                         ${trx.id} ${trx.isVoid ? '<span style="color:var(--danger); font-size:10px;">(VOID)</span>' : ''}
                     </strong>
-                    <span style="font-size: 11px; color: var(--text-muted);">${trx.date || ''} • ${trx.time || ''}</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">${displayDate}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                     <span style="font-size: 11px; color: var(--text-muted);">Kasir: <span style="font-size: 10px; background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 6px;">${trx.cashier || '-'}</span></span>
@@ -1702,7 +1718,8 @@ function renderHistory() {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 
     container.querySelectorAll('[data-trx-id]').forEach(el => {
         el.addEventListener('click', () => {
@@ -1724,9 +1741,10 @@ function exportHistoryCSV() {
 
     transactionHistory.forEach(trx => {
         const itemsStr = trx.items.map(i => `${i.name} (${i.qty}x)`).join(' | ');
+        const cleanDate = normalizeTrxDate(trx.date);
         const row = [
             trx.id,
-            trx.date,
+            cleanDate,
             trx.time,
             `"${trx.cashier}"`,
             trx.subtotal,
@@ -1783,7 +1801,12 @@ function updateDashboardMetrics() {
     const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const monthLabel = monthNames[parseInt(filterMonth, 10) - 1] + " " + filterYear;
 
-    const monthlyTrx = transactionHistory.filter(t => !t.isVoid && t.date && t.date.startsWith(currentSelectedMonth));
+    // Filter bulanan — pakai normalizeTrxDate biar handle ISO string
+    const monthlyTrx = transactionHistory.filter(t => {
+        if (t.isVoid) return false;
+        const cleanDate = normalizeTrxDate(t.date);
+        return cleanDate && cleanDate.startsWith(currentSelectedMonth);
+    });
     const totalOmsetMonth = monthlyTrx.reduce((sum, t) => sum + t.total, 0);
 
     const omsetElem = document.getElementById('dashboard-omset');
@@ -1799,7 +1822,12 @@ function updateDashboardMetrics() {
     const dateDisplay = document.getElementById('current-date-display');
     if (dateDisplay) dateDisplay.innerText = `Tanggal: ${selectedDate}`;
 
-    const dailyTrx = transactionHistory.filter(t => !t.isVoid && t.date === selectedDate);
+    // Filter harian — pakai normalizeTrxDate biar handle ISO string
+    const dailyTrx = transactionHistory.filter(t => {
+        if (t.isVoid) return false;
+        const cleanDate = normalizeTrxDate(t.date);
+        return cleanDate === selectedDate;
+    });
     
     const dailyOmset = dailyTrx.reduce((sum, t) => sum + t.total, 0);
     const dailyTrxCount = dailyTrx.length;
@@ -1812,7 +1840,9 @@ function updateDashboardMetrics() {
     const hoursData = Array(24).fill(0);
     dailyTrx.forEach(t => {
         if (t.time) {
-            const hour = parseInt(t.time.split(':')[0], 10);
+            // Time bisa "19.21" atau "19:21"
+            const hourStr = String(t.time).split(/[.:]/)[0];
+            const hour = parseInt(hourStr, 10);
             if (!isNaN(hour) && hour >= 0 && hour < 24) {
                 hoursData[hour] += t.total;
             }
@@ -1973,11 +2003,13 @@ function renderLaporanData() {
         labelPeriodElem.innerText = periodTextMap[period] || 'Bulan Ini';
     }
     
+    // Filter pakai normalizeTrxDate biar handle ISO string
     const validTrx = transactionHistory.filter(trx => {
         if (trx.isVoid) return false;
-        const trxDateStr = trx.date || (trx.timestamp ? trx.timestamp.split('T')[0] : '');
-        if (period === 'today') return trxDateStr === todayStr;
-        if (period === 'month') return trxDateStr.startsWith(currentMonthStr);
+        const cleanDate = normalizeTrxDate(trx.date);
+        if (!cleanDate) return false;
+        if (period === 'today') return cleanDate === todayStr;
+        if (period === 'month') return cleanDate.startsWith(currentMonthStr);
         return true;
     });
     
@@ -2202,22 +2234,16 @@ document.addEventListener('keydown', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Handle import JSON file
     const jsonInput = document.getElementById('json-import-input');
     if (jsonInput) jsonInput.addEventListener('change', importLocalStorageJSON);
 
-    // 1. Terapkan branding dari config.js
     applyBranding();
-
-    // 2. Init tema & sapaan
     initTheme();
     updateGreeting();
 
-    // 3. Load data dari cloud (override localStorage jika ada)
     const cloudOK = await loadFromCloud();
     console.log(cloudOK ? '✅ Data di-load dari cloud' : '⚠️ Pakai data lokal');
 
-    // 4. Render semua UI
     applyRolePermissions();
     updateCart();
     renderSavedBills();
@@ -2237,7 +2263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const kitchenNotes = document.getElementById('kitchen-order-notes');
     if (kitchenNotes) kitchenNotes.addEventListener('input', updateKitchenPreview);
 
-    // 5. Auto-refresh dari cloud tiap 2 menit
+    // Auto-refresh dari cloud tiap 2 menit
     setInterval(async () => {
         const fresh = await api.getAll();
         if (fresh && fresh.transactions) {
