@@ -10,7 +10,7 @@ window.APP_CONFIG = {
     API_TOKEN: 'TOKEN_UNIK_BUYER_INI',
 
     // ==== BRANDING TOKO ====
-    STORE_NAME:   'Kala Space Cafe',
+    STORE_NAME:   'NAMA TOKO PEMBELI',
     STORE_SLOGAN: 'Selamat Datang! Silahkan masuk ke akun anda.',
     STORE_LOGO:   '',
 
