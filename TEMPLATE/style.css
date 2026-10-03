@@ -186,11 +186,10 @@ width: 0;
 height: 0;
 }
 
-/* Tombol FAB Bulat Icon-Only */
 .btn-fab {
 position: fixed !important;
 bottom: 75px !important;
-right: 16px !important;
+right: calc(16px + max(0px, (100vw - 1024px) / 2)) !important;
 z-index: 10 !important;
 width: 40px !important;
 height: 40px !important;
@@ -202,6 +201,11 @@ display: flex !important;
 align-items: center;
 justify-content: center;
 cursor: pointer;
+box-shadow: 0 4px 12px rgba(0, 166, 255, 0.3);
+transition: transform 0.2s ease;
+}
+.btn-fab:active {
+transform: scale(0.92);
 }
 
 /* Sembunyikan tombol secara default */
@@ -662,3 +666,42 @@ overflow: hidden;
 #cloud-status.show { display: inline-flex; }
 #cloud-status.online { color: var(--success); border-color: var(--success); }
 #cloud-status.offline { color: var(--danger); border-color: var(--danger); }
+
+/* =========================================================
+   EMPTY STATE — Centered Responsive
+   ========================================================= */
+.empty-state-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 300px);
+    min-height: calc(100dvh - 300px);
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.empty-state-centered .empty-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--accent-light);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.empty-state-centered .empty-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.empty-state-centered .empty-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0;
+}
