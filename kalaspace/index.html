@@ -3,6 +3,44 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- ============================================
+         AUTH GUARD — Cek session sebelum load app
+         ============================================ -->
+    <script>
+        (function() {
+            const REQUIRED_TENANT = 'kalaspace';  // ← ganti per buyer
+            const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
+            
+            try {
+                const sessionStr = localStorage.getItem('master_session');
+                if (!sessionStr) {
+                    window.location.replace(ROOT_LOGIN_URL);
+                    return;
+                }
+                const session = JSON.parse(sessionStr);
+                
+                if (!session.tenantId || session.tenantId !== REQUIRED_TENANT) {
+                    window.location.replace(ROOT_LOGIN_URL);
+                    return;
+                }
+                
+                // Cek expiry session (24 jam)
+                const loginAt = new Date(session.loginAt);
+                const now = new Date();
+                const hoursSinceLogin = (now - loginAt) / (1000 * 60 * 60);
+                if (hoursSinceLogin > 24) {
+                    localStorage.removeItem('master_session');
+                    window.location.replace(ROOT_LOGIN_URL);
+                    return;
+                }
+                
+                // Session valid — lanjut load app
+                console.log('✅ Auth OK:', session.storeName);
+            } catch (e) {
+                window.location.replace(ROOT_LOGIN_URL);
+            }
+        })();
+    </script>
     <title>POS Kasir App</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
