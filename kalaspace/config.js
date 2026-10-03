@@ -5,7 +5,7 @@
 window.APP_CONFIG = {
 
     // ==== WAJIB DIISI (dari Apps Script deployment) ====
-    API_URL:   'https://script.google.com/macros/s/AKfycbxAnjpzxMaUhYFmQGjTkiAiRjvToTZukMsZ0yE1Z0iIc0Q0Hp6Ayy5zZSJCFoab4bBm/exec',
+    API_URL:   'https://script.google.com/macros/s/AKfycbyT7UPQfehxjk0n2VJXHGQGv3EUr9p8BiUmhJMwx5ZlJHL-rcRzw52DIw5GKPS0p9oM/exec',
     API_TOKEN: 'KalaSpace2025',
 
     // ==== BRANDING TOKO ====
