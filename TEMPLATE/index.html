@@ -586,23 +586,37 @@
             <i class="ri-file-download-line"></i> <span>Ekspor CSV</span>
             </button>
             
-            <div id="admin-actions-dropdown" style="position: relative; display: none;">
-            <button class="btn-secondary" onclick="toggleHistoryDropdown(event)" style="padding: 6px 10px; font-size: 11px; background: var(--card-bg); border-color: var(--border);">
-            <i class="ri-more-2-fill"></i> Kelola
-            </button>
-            
-            <div id="history-dropdown-menu" style="display: none; position: absolute; right: 0; top: 110%; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-sm); z-index: 100; min-width: 160px; padding: 4px; flex-direction: column; gap: 2px;">
-            
-            <button onclick="selectHistoryAction('cancel')" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; background: none; border: none; font-size: 11px; color: var(--danger); text-align: left; cursor: pointer; border-radius: 6px;">
-            <i class="ri-close-circle-line"></i> Batalkan Transaksi
-            </button>
-            
-            <button onclick="selectHistoryAction('delete')" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; background: none; border: none; font-size: 11px; color: var(--danger); text-align: left; cursor: pointer; border-radius: 6px;">
-            <i class="ri-delete-bin-line"></i> Hapus Transaksi
-            </button>
-            </div>
-            
-            </div>
+           <div id="admin-actions-dropdown" style="position: relative; display: none;">
+<button class="btn-secondary" onclick="toggleHistoryDropdown(event)" style="padding: 6px 12px; font-size: 11px; background: var(--card-bg); border-color: var(--border); display: inline-flex; align-items: center; gap: 6px; height: 32px;">
+<i class="ri-settings-3-line" style="font-size: 14px;"></i> Kelola
+</button>
+
+<div id="history-dropdown-menu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15), 0 5px 15px rgba(15, 23, 42, 0.08); z-index: 100; min-width: 240px; padding: 8px; flex-direction: column; gap: 4px;">
+
+<div style="font-size: 10px; color: #64748b; padding: 6px 10px 6px 10px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; border-bottom: 1px solid var(--border); margin-bottom: 4px;">Pilih Aksi</div>
+
+<button onclick="selectHistoryAction('cancel')" class="history-dropdown-item" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer; border-radius: 10px; transition: all 0.15s ease;">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: rgba(245, 158, 11, 0.15); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+<i class="ri-close-circle-line" style="font-size: 16px; color: #f59e0b;"></i>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px;">
+<span style="font-size: 12px; font-weight: 700; color: #0f172a;">Batalkan Transaksi</span>
+<span style="font-size: 10px; color: #64748b; font-weight: 500;">Void — data tetap tersimpan</span>
+</div>
+</button>
+
+<button onclick="selectHistoryAction('delete')" class="history-dropdown-item" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer; border-radius: 10px; transition: all 0.15s ease;">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: rgba(239, 68, 68, 0.15); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+<i class="ri-delete-bin-2-line" style="font-size: 16px; color: #ef4444;"></i>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px;">
+<span style="font-size: 12px; font-weight: 700; color: #0f172a;">Hapus Permanen</span>
+<span style="font-size: 10px; color: #64748b; font-weight: 500;">Hapus dari Spreadsheet</span>
+</div>
+</button>
+</div>
+
+</div>
             </div>
             
         </div>
