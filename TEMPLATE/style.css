@@ -577,3 +577,23 @@ input, textarea {
     color: var(--text-muted);
     margin: 0;
 }
+/* =========================================================
+   HISTORY DROPDOWN — Hover Effect
+   ========================================================= */
+.history-dropdown-item:hover {
+    background: var(--border-light) !important;
+}
+.history-dropdown-item:active {
+    transform: scale(0.98);
+}
+
+/* Force Black Font di History Section */
+#history .history-card,
+#history .history-card strong,
+#history .history-card span {
+    color: #0f172a !important;
+}
+#history .history-card span[style*="var(--text-muted)"],
+#history .history-card .history-muted {
+    color: #64748b !important;
+}
