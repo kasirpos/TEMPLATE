@@ -13,14 +13,10 @@
     <!-- chart.js cdn -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- ============================================================
-         STYLESHEET
-         ============================================================ -->
+    <!-- stylesheet -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- ============================================================
-         CONFIG BUYER (WAJIB - load sebelum app.js)
-         ============================================================ -->
+    <!-- config + app -->
     <script src="config.js" defer></script>
     <script src="app.js" defer></script>
 </head>
@@ -45,8 +41,8 @@
                 <label>Nama Pengguna</label>
                 <select id="kasir-name">
                     <option value="admin">Admin</option>
-                    <option value="Kasir1">Kasir 1</option>
-                    <option value="Kasir2">Kasir 2</option>
+                    <option value="Sasuke">Sasuke</option>
+                    <option value="Naruto">Naruto</option>
                 </select>
             </div>
             <div class="input-group">
@@ -57,7 +53,7 @@
         </div>
     </div>
 
-    <!-- modal filter omset & total keseluruhan -->
+    <!-- modal filter omset -->
     <div class="modal-overlay" id="omset-filter-modal">
         <div class="modal-card">
             <div class="receipt-header">
@@ -65,17 +61,14 @@
                 <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-top: 4px;">PENGATURAN & FILTER OMSET</h3>
                 <p style="font-size: 11px; color: var(--text-muted);">Lihat ringkasan total dan filter berdasarkan bulan.</p>
             </div>
-
             <div style="background: var(--bg-app); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; text-align: center;">
                 <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">TOTAL SEMUA OMSET</div>
                 <div id="modal-all-time-omset" style="font-size: 18px; font-weight: 800; color: var(--accent); margin-top: 4px;">Rp 0</div>
             </div>
-
             <div class="input-group" style="margin-top: 10px;">
                 <label style="color: var(--text-muted);">FILTER BERDASARKAN BULAN</label>
                 <input type="month" id="modal-month-picker" onchange="applyMonthlyFilter(this.value)" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
             </div>
-
             <div style="display: flex; gap: 8px; margin-top: 16px;">
                 <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="resetToCurrentMonth()">BULAN SEKARANG</button>
                 <button class="btn-primary" style="padding: 10px; flex: 1;" onclick="closeOmsetFilterModal()">TUTUP</button>
@@ -83,7 +76,7 @@
         </div>
     </div>
 
-    <!-- modal confirm logout shift -->
+    <!-- modal confirm logout -->
     <div class="modal-overlay" id="logout-modal">
         <div class="modal-card" style="text-align: center;">
             <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -100,7 +93,7 @@
         </div>
     </div>
 
-    <!-- modal confirm clear bill -->
+    <!-- modal clear bill -->
     <div class="modal-overlay" id="clear-bill-modal">
         <div class="modal-card" style="text-align: center;">
             <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -117,7 +110,7 @@
         </div>
     </div>
 
-    <!-- modal confirm reset data -->
+    <!-- modal reset -->
     <div class="modal-overlay" id="reset-modal">
         <div class="modal-card" style="text-align: center;">
             <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -134,7 +127,7 @@
         </div>
     </div>
 
-    <!-- modal confirm delete menu -->
+    <!-- modal delete menu -->
     <div class="modal-overlay" id="delete-menu-modal">
         <div class="modal-card" style="text-align: center;">
             <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -151,7 +144,7 @@
         </div>
     </div>
 
-    <!-- modal confirm delete history -->
+    <!-- modal delete history -->
     <div class="modal-overlay" id="delete-history-modal">
         <div class="modal-card" style="text-align: center;">
             <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -300,7 +293,7 @@
         </div>
     </div>
     
-    <!-- modal detail bill dapur / kitchen -->
+    <!-- modal kitchen -->
     <div class="modal-overlay" id="kitchen-modal">
     <div class="modal-card">
     <div class="receipt-header">
@@ -367,6 +360,9 @@
                 </div>
             </div>
             <div class="header-actions">
+                <div class="icon-btn" id="sync-btn" onclick="manualSync()" title="Sync data dari cloud">
+                    <i class="ri-refresh-line" id="sync-icon" style="font-size: 18px; color: var(--text-main);"></i>
+                </div>
                 <div class="icon-btn" onclick="switchTab('saved-bills')" title="bill tersimpan">
                     <i class="ri-bookmark-3-line" style="font-size: 18px; color: var(--text-main);"></i>
                     <span class="badge-count" id="saved-bills-count">0</span>
@@ -383,7 +379,7 @@
         </div>
     </div>
 
-    <!-- tab 1: home -->
+    <!-- TAB 1: HOME -->
     <div id="home" class="view active">
     <div id="dashboard-section">
     <div class="stats-grid">
@@ -508,8 +504,8 @@
     <i class="ri-add-line" style="font-size: 16px;"></i>
     </button>
     
-<!-- tab 3: order / cart -->
-<div id="order" class="view">
+    <!-- TAB 3: ORDER -->
+    <div id="order" class="view">
     
     <div class="cart-split-layout">
         
@@ -583,7 +579,7 @@
         <div id="saved-bills-list"></div>
     </div>
 
-    <!-- tab 4: history -->
+    <!-- tab history -->
     <div id="history" class="view">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
             <div>
@@ -631,7 +627,7 @@
         <div id="history-list"></div>
     </div>
 
-    <!-- tab 5: profile -->
+    <!-- tab profile -->
     <div id="profile" class="view">
         <h3 style="margin-bottom: 14px; font-size: 15px; font-weight: 800; color: var(--text-main);">Pengaturan Profil & Sistem</h3>
         
@@ -831,7 +827,7 @@
         </div>
     </div>
     
-    <!-- TAB VIEW: MANAJEMEN HPP & MARGIN -->
+    <!-- TAB: HPP -->
     <div id="hpp-margin" class="view">
     <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app);">
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -856,7 +852,7 @@
     </div>
     </div>   
     
-    <!-- TAB VIEW: SETTING KUPON DISKON -->
+    <!-- TAB: KUPON -->
     <div id="kupon-diskon" class="view">
     <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app);">
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -893,7 +889,7 @@
     </div>
     </div>
     
-    <!-- TAB VIEW: SETTING DISKON PRODUK -->
+    <!-- TAB: DISKON PRODUK -->
     <div id="diskon-produk" class="view">
     <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app);">
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -918,7 +914,7 @@
     </div>    
     </div>
     
-    <!-- TAB 6: LAPORAN -->
+    <!-- TAB: LAPORAN -->
     <div id="laporan" class="view">
     <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app); display: flex; flex-direction: column; gap: 8px;">
     <div style="display: flex; align-items: flex-start; gap: 10px;">
@@ -986,7 +982,7 @@
     
     </div>
 
-    <!-- bottom navbar floating -->
+    <!-- bottom navbar -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('home')">
             <i class="ri-home-5-line"></i>
@@ -1011,69 +1007,70 @@
         </div>
     </div>
 
-<div class="modal-overlay" id="tutup-shift-modal">
-    <div class="modal-card">
-        <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-bottom: 10px;">Penutupan Shift Kasir</h3>
-        <div style="font-size: 11px; background: var(--bg-app); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Modal Awal:</span><span id="shift-modal-awal">Rp 0</span></div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Petty Cash:</span><span id="shift-modal-petty" style="color: var(--danger);">Rp 0</span></div>
-            <div style="display: flex; justify-content: space-between; font-weight: 800; border-top: 1px dashed var(--border); padding-top: 4px;"><span>Ekspektasi Kas Laci:</span><span id="shift-modal-ekspektasi" style="color: var(--accent);">Rp 0</span></div>
-        </div>
-        <div class="input-group">
-            <label style="color: var(--text-muted); font-size: 10px;">Uang Fisik di Laci (Rp)</label>
-            <input type="number" id="shift-input-fisik" placeholder="Hitung uang fisik..." oninput="hitungSelisihShift()" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main); font-size: 13px;">
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 14px;">
-            <span>Selisih:</span>
-            <span id="shift-selisih-val" style="color: var(--text-main);">Rp 0</span>
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" style="padding: 10px; flex: 1;" onclick="prosesCetakLaporanShift()">Cetak Rekap</button>
-            <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="closeTutupShiftModal()">Batal</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal 2: Preview Struk Rekap Shift -->
-<div class="modal-overlay" id="shift-receipt-modal" style="display: none;">
-    <div class="modal-card" style="width: 280px; text-align: center; font-family: monospace;">
-        <h3 style="font-size: 14px; margin-bottom: 2px;">KALA SPACE CAFE</h3>
-        <p style="font-size: 10px; margin-bottom: 10px;">REKAP PENUTUPAN SHIFT</p>
-        <div style="border-bottom: 1px dashed #000; margin-bottom: 8px;"></div>
-        
-        <div style="font-size: 11px; text-align: left; line-height: 1.5;">
-            <div style="display: flex; justify-content: space-between;"><span>Waktu:</span><span id="sr-waktu">-</span></div>
-            <div style="display: flex; justify-content: space-between;"><span>Kasir:</span><span id="sr-kasir">-</span></div>
-            
-            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
-            
-            <div style="display: flex; justify-content: space-between;"><span>Modal Awal:</span><span id="sr-modal">Rp 0</span></div>
-            
-            <div style="margin: 4px 0;">
-                <div style="font-weight: bold; font-size: 10px; text-transform: uppercase;">Rincian Petty Cash:</div>
-                <div id="sr-petty-list" style="padding-left: 6px; font-size: 10px; color: #333;"></div>
+    <!-- modal tutup shift -->
+    <div class="modal-overlay" id="tutup-shift-modal">
+        <div class="modal-card">
+            <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-bottom: 10px;">Penutupan Shift Kasir</h3>
+            <div style="font-size: 11px; background: var(--bg-app); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Modal Awal:</span><span id="shift-modal-awal">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Petty Cash:</span><span id="shift-modal-petty" style="color: var(--danger);">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 800; border-top: 1px dashed var(--border); padding-top: 4px;"><span>Ekspektasi Kas Laci:</span><span id="shift-modal-ekspektasi" style="color: var(--accent);">Rp 0</span></div>
             </div>
-
-            <div style="display: flex; justify-content: space-between;"><span>Total Petty Cash:</span><span id="sr-petty">Rp 0</span></div>
-            
-            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
-            
-            <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Ekspektasi Kas:</span><span id="sr-ekspektasi">Rp 0</span></div>
-            <div style="display: flex; justify-content: space-between;"><span>Kas Fisik:</span><span id="sr-fisik">Rp 0</span></div>
-            <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Selisih:</span><span id="sr-selisih">Rp 0</span></div>
-        </div>
-        
-        <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
-        
-        <div class="no-print" style="display: flex; gap: 6px; margin-top: 10px;">
-            <button class="btn-primary" style="padding: 8px; font-size: 11px; flex: 1;" onclick="eksekusiPrint()">PRINT REKAP</button>
-            <button class="btn-secondary" style="padding: 8px; font-size: 11px; flex: 1;" onclick="closeShiftReceiptModal()">TUTUP</button>
+            <div class="input-group">
+                <label style="color: var(--text-muted); font-size: 10px;">Uang Fisik di Laci (Rp)</label>
+                <input type="number" id="shift-input-fisik" placeholder="Hitung uang fisik..." oninput="hitungSelisihShift()" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main); font-size: 13px;">
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 14px;">
+                <span>Selisih:</span>
+                <span id="shift-selisih-val" style="color: var(--text-main);">Rp 0</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" style="padding: 10px; flex: 1;" onclick="prosesCetakLaporanShift()">Cetak Rekap</button>
+                <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="closeTutupShiftModal()">Batal</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Hidden file input untuk import JSON -->
-<input type="file" id="json-import-input" accept=".json" style="display:none;">
+    <!-- modal shift receipt -->
+    <div class="modal-overlay" id="shift-receipt-modal" style="display: none;">
+        <div class="modal-card" style="width: 280px; text-align: center; font-family: monospace;">
+            <h3 style="font-size: 14px; margin-bottom: 2px;">KALA SPACE CAFE</h3>
+            <p style="font-size: 10px; margin-bottom: 10px;">REKAP PENUTUPAN SHIFT</p>
+            <div style="border-bottom: 1px dashed #000; margin-bottom: 8px;"></div>
+            
+            <div style="font-size: 11px; text-align: left; line-height: 1.5;">
+                <div style="display: flex; justify-content: space-between;"><span>Waktu:</span><span id="sr-waktu">-</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Kasir:</span><span id="sr-kasir">-</span></div>
+                
+                <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+                
+                <div style="display: flex; justify-content: space-between;"><span>Modal Awal:</span><span id="sr-modal">Rp 0</span></div>
+                
+                <div style="margin: 4px 0;">
+                    <div style="font-weight: bold; font-size: 10px; text-transform: uppercase;">Rincian Petty Cash:</div>
+                    <div id="sr-petty-list" style="padding-left: 6px; font-size: 10px; color: #333;"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between;"><span>Total Petty Cash:</span><span id="sr-petty">Rp 0</span></div>
+                
+                <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+                
+                <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Ekspektasi Kas:</span><span id="sr-ekspektasi">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Kas Fisik:</span><span id="sr-fisik">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Selisih:</span><span id="sr-selisih">Rp 0</span></div>
+            </div>
+            
+            <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+            
+            <div class="no-print" style="display: flex; gap: 6px; margin-top: 10px;">
+                <button class="btn-primary" style="padding: 8px; font-size: 11px; flex: 1;" onclick="eksekusiPrint()">PRINT REKAP</button>
+                <button class="btn-secondary" style="padding: 8px; font-size: 11px; flex: 1;" onclick="closeShiftReceiptModal()">TUTUP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- hidden file input -->
+    <input type="file" id="json-import-input" accept=".json" style="display:none;">
 
 </div>
 
