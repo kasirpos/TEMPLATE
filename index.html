@@ -7,8 +7,158 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- ============================================================
+         PROTEKSI — Anti Inspect, Anti Copy, Anti DevTools
+         ============================================================ -->
+    <script>
+        (function() {
+            // 1. Disable klik kanan
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // 2. Disable text selection via drag
+            document.addEventListener('selectstart', function(e) {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // 3. Disable copy & cut
+            document.addEventListener('copy', function(e) {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            document.addEventListener('cut', function(e) {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // 4. Disable keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                const key = e.key.toLowerCase();
+
+                // F12
+                if (e.key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+
+                // Ctrl+Shift+I / J / C (DevTools)
+                if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+
+                // Ctrl+U (View Source)
+                if (e.ctrlKey && key === 'u') {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Ctrl+S (Save Page)
+                if (e.ctrlKey && key === 's') {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Ctrl+P (Print)
+                if (e.ctrlKey && key === 'p') {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Cmd+Option+I / J / C (Mac DevTools)
+                if (e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key)) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Cmd+U (Mac View Source)
+                if (e.metaKey && key === 'u') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // 5. Deteksi DevTools terbuka
+            let devToolsOpen = false;
+            const threshold = 160;
+            const checkDevTools = function() {
+                const widthDiff = window.outerWidth - window.innerWidth;
+                const heightDiff = window.outerHeight - window.innerHeight;
+                if (widthDiff > threshold || heightDiff > threshold) {
+                    if (!devToolsOpen) {
+                        devToolsOpen = true;
+                        console.clear();
+                        console.log('%c⚠️ Developer Tools terdeteksi', 'color: #ef4444; font-size: 20px; font-weight: bold;');
+                        console.log('%cHarap tutup DevTools untuk melanjutkan.', 'color: #f59e0b; font-size: 14px;');
+                    }
+                } else {
+                    devToolsOpen = false;
+                }
+            };
+            setInterval(checkDevTools, 1000);
+
+            // 6. Console warning
+            setTimeout(() => {
+                console.clear();
+                console.log(
+                    '%c⛔ STOP!',
+                    'color: #ef4444; font-size: 40px; font-weight: 900; text-shadow: 2px 2px 0 #000;'
+                );
+                console.log(
+                    '%cHalaman ini dilindungi. Jangan tempel kode apapun di sini.',
+                    'color: #f59e0b; font-size: 16px; font-weight: bold;'
+                );
+                console.log(
+                    '%c© 2026 POS Kasir Multi-Buyer - @Muhasa_Digital',
+                    'color: #64748b; font-size: 12px;'
+                );
+            }, 100);
+        })();
+    </script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        /* ============================================================
+           PROTEKSI — Anti select & anti drag
+           ============================================================ */
+        body, .login-wrapper, .brand, .login-card {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Izinkan input agar user tetap bisa ketik */
+        input, textarea, select {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        /* Disable drag pada gambar */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            pointer-events: none;
+        }
+
         body {
             min-height: 100vh;
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -113,7 +263,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
 
 <div class="login-wrapper">
     <div class="brand">
