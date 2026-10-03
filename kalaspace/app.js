@@ -1,7 +1,6 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FIXED)
-   - Fix: Date/time ISO → plain
-   - Fix: Delete transaction = permanent
+   POS KASIR - APP LOGIC
+   Fix: date/time + delete permanent + empty state + dynamic title
    ========================================================= */
 
 /* ==========================================
@@ -99,6 +98,7 @@ async function loadFromCloud() {
 }
 
 function applyBranding() {
+    // Dynamic title
     document.title = 'POS Kasir App : ' + STORE_NAME;
 
     const loginTitle = document.getElementById('login-store-name');
@@ -140,21 +140,19 @@ function getLocalDateString() {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return year + '-' + month + '-' + day;
 }
 
 function getCurrentYearMonth() {
     const d = new Date();
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
+    return year + '-' + month;
 }
 
-/* ===== HELPER: Normalisasi date dari cloud ===== */
 function normalizeTrxDate(val) {
     if (!val) return '';
     if (typeof val === 'string') {
-        // Kalau ISO string: "2026-10-02T17:00:00.000Z" → "2026-10-02"
         return val.substring(0, 10);
     }
     return '';
@@ -283,13 +281,13 @@ function saveState() {
 const DEFAULT_ACCENT = '#00A6FF';
 
 function hexToRgba(hex, alpha = 0.15) {
-    if (!hex) return `rgba(0, 166, 255, ${alpha})`;
+    if (!hex) return 'rgba(0, 166, 255, ' + alpha + ')';
     let c = hex.replace('#', '').trim();
     if (c.length === 3) c = c.split('').map(x => x + x).join('');
     const num = parseInt(c, 16);
     return isNaN(num) || c.length !== 6 
-        ? `rgba(0, 166, 255, ${alpha})` 
-        : `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+        ? 'rgba(0, 166, 255, ' + alpha + ')' 
+        : 'rgba(' + ((num >> 16) & 255) + ', ' + ((num >> 8) & 255) + ', ' + (num & 255) + ', ' + alpha + ')';
 }
 
 function highlightActivePreset(colorHex) {
@@ -434,7 +432,7 @@ function exportLocalStorageJSON() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `pos_backup_${getLocalDateString()}.json`);
+    downloadAnchor.setAttribute("download", "pos_backup_" + getLocalDateString() + ".json");
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -493,7 +491,7 @@ function handleLogin() {
         document.getElementById('profile-name').innerText = 'admin';
     } else {
         currentUserRole = 'kasir';
-        document.getElementById('profile-name').innerText = `${selectedUser}`;
+        document.getElementById('profile-name').innerText = selectedUser;
     }
 
     applyRolePermissions();
@@ -647,7 +645,7 @@ function renderProducts(items, targetId) {
     if (!container) return;
     
     if (items.length === 0) {
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 12px; margin: 20px 0;">Menu tidak ditemukan.</p>`;
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 12px; margin: 20px 0;">Menu tidak ditemukan.</p>';
         return;
     }
     container.innerHTML = items.map(p => {
@@ -819,7 +817,7 @@ function openDeleteMenuModal(productId) {
     if (!product) return;
 
     productToDeleteId = productId;
-    document.getElementById('delete-menu-text').innerText = `Apakah Anda yakin ingin menghapus menu "${product.name}"?`;
+    document.getElementById('delete-menu-text').innerText = 'Apakah Anda yakin ingin menghapus menu "' + product.name + '"?';
     document.getElementById('delete-menu-modal').style.display = 'flex';
 }
 
@@ -845,7 +843,7 @@ function renderHPPManagement() {
     if (!container) return;
 
     if (products.length === 0) {
-        container.innerHTML = `<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada produk.</p>`;
+        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada produk.</p>';
         return;
     }
 
@@ -906,7 +904,7 @@ function renderCouponManagement() {
     if (!container) return;
 
     if (coupons.length === 0) {
-        container.innerHTML = `<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada kupon.</p>`;
+        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada kupon.</p>';
         return;
     }
 
@@ -973,7 +971,7 @@ function renderProductDiscountManagement() {
     if (!container) return;
 
     if (products.length === 0) {
-        container.innerHTML = `<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada produk.</p>`;
+        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada produk.</p>';
         return;
     }
 
@@ -1051,7 +1049,7 @@ function applyCouponInOrder() {
     }
 
     activeAppliedCoupon = foundCoupon;
-    alert(`Kupon "${foundCoupon.code}" berhasil dipasang!`);
+    alert('Kupon "' + foundCoupon.code + '" berhasil dipasang!');
     updateCart();
 }
 
@@ -1074,8 +1072,8 @@ function animateFlyToCart(event) {
     const startX = btnRect.left + (btnRect.width / 2) - 11;
     const startY = btnRect.top + (btnRect.height / 2) - 11;
     
-    flyer.style.left = `${startX}px`;
-    flyer.style.top = `${startY}px`;
+    flyer.style.left = startX + 'px';
+    flyer.style.top = startY + 'px';
     
     document.body.appendChild(flyer);
     
@@ -1083,8 +1081,8 @@ function animateFlyToCart(event) {
     const targetY = cartRect.top + (cartRect.height / 2) - 11;
     
     requestAnimationFrame(() => {
-        flyer.style.left = `${targetX}px`;
-        flyer.style.top = `${targetY}px`;
+        flyer.style.left = targetX + 'px';
+        flyer.style.top = targetY + 'px';
         flyer.style.transform = 'scale(0.3)';
         flyer.style.opacity = '0.7';
     });
@@ -1233,16 +1231,16 @@ function updateCart() {
     grandTotal = netSubtotal + tax;
     
     const subtotalElem = document.getElementById('subtotal-val');
-    if (subtotalElem) subtotalElem.innerText = `Rp ${rawSubtotal.toLocaleString('id-id')}`;
+    if (subtotalElem) subtotalElem.innerText = 'Rp ' + rawSubtotal.toLocaleString('id-id');
     
     const couponElem = document.getElementById('coupon-val');
-    if (couponElem) couponElem.innerText = `- Rp ${totalAllDiscount.toLocaleString('id-id')}`;
+    if (couponElem) couponElem.innerText = '- Rp ' + totalAllDiscount.toLocaleString('id-id');
     
     const taxElem = document.getElementById('tax-val');
-    if (taxElem) taxElem.innerText = `Rp ${tax.toLocaleString('id-id')}`;
+    if (taxElem) taxElem.innerText = 'Rp ' + tax.toLocaleString('id-id');
     
     const totalElem = document.getElementById('total-val');
-    if (totalElem) totalElem.innerText = `Rp ${grandTotal.toLocaleString('id-id')}`;
+    if (totalElem) totalElem.innerText = 'Rp ' + grandTotal.toLocaleString('id-id');
     
     calculateChange();
 }
@@ -1346,7 +1344,7 @@ function renderSavedBills() {
     if (!container) return;
     
     if (savedBills.length === 0) {
-                container.innerHTML = `
+        container.innerHTML = `
             <div class="empty-state-centered">
                 <div class="empty-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent, #00a6ff)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1373,7 +1371,7 @@ function renderSavedBills() {
                 <span style="font-weight: 800; color: var(--accent);">Rp ${b.total.toLocaleString('id-id')}</span>
             </div>
             <div style="font-size: 11px; color: var(--text-muted); border-top: 1px dashed var(--border); padding-top: 6px; width: 100%;">
-                ${b.items.map(i => `${i.name} (x${i.qty})`).join(', ')}
+                ${b.items.map(i => i.name + ' (x' + i.qty + ')').join(', ')}
             </div>
             <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
                 <button class="btn-secondary" style="flex: 1; padding: 6px; font-size: 11px;" onclick="loadBillToCart(${index})">
@@ -1501,9 +1499,8 @@ function showReceiptModal(trx) {
     document.getElementById('modal-trx-id').innerText = trx.id || '-';
     document.getElementById('modal-cashier').innerText = trx.cashier || currentUserRole || '-';
     
-    // Format date & time yang bersih
     const cleanDate = normalizeTrxDate(trx.date);
-    document.getElementById('modal-time').innerText = cleanDate ? `${cleanDate} ${trx.time || ''}` : new Date().toLocaleString('id-ID');
+    document.getElementById('modal-time').innerText = cleanDate ? cleanDate + ' ' + (trx.time || '') : new Date().toLocaleString('id-ID');
 
     const itemsListEl = document.getElementById('modal-items-list');
     if (itemsListEl) {
@@ -1532,12 +1529,12 @@ function showReceiptModal(trx) {
     const grandTotalVal = trx.total || 0;
     const changeVal = trx.change !== undefined ? trx.change : (paidVal - grandTotalVal);
 
-    document.getElementById('modal-subtotal').innerText = `Rp ${rawSubtotal.toLocaleString('id-ID')}`;
-    document.getElementById('modal-discount').innerText = `- Rp ${totalDiscount.toLocaleString('id-ID')}`;
-    document.getElementById('modal-tax').innerText = `Rp ${(trx.tax || 0).toLocaleString('id-ID')}`;
-    document.getElementById('modal-total').innerText = `Rp ${grandTotalVal.toLocaleString('id-ID')}`;
-    document.getElementById('modal-paid').innerText = `Rp ${paidVal.toLocaleString('id-ID')}`;
-    document.getElementById('modal-change').innerText = `Rp ${Math.max(0, changeVal).toLocaleString('id-ID')}`;
+    document.getElementById('modal-subtotal').innerText = 'Rp ' + rawSubtotal.toLocaleString('id-ID');
+    document.getElementById('modal-discount').innerText = '- Rp ' + totalDiscount.toLocaleString('id-ID');
+    document.getElementById('modal-tax').innerText = 'Rp ' + (trx.tax || 0).toLocaleString('id-ID');
+    document.getElementById('modal-total').innerText = 'Rp ' + grandTotalVal.toLocaleString('id-ID');
+    document.getElementById('modal-paid').innerText = 'Rp ' + paidVal.toLocaleString('id-ID');
+    document.getElementById('modal-change').innerText = 'Rp ' + Math.max(0, changeVal).toLocaleString('id-ID');
 
     openModal();
 }
@@ -1627,7 +1624,7 @@ function openDeleteSelectedHistoryModal() {
     const actionText = historyActionMode === 'cancel' 
         ? 'dibatalkan (diberi status VOID, tetap tampil dengan strikethrough)' 
         : 'DIHAPUS PERMANEN dari Spreadsheet (tidak bisa dikembalikan)';
-    if (textElem) textElem.innerText = `${checkboxes.length} transaksi yang dipilih akan ${actionText}.`;
+    if (textElem) textElem.innerText = checkboxes.length + ' transaksi yang dipilih akan ' + actionText + '.';
     document.getElementById('delete-history-modal').style.display = 'flex';
 }
 
@@ -1642,7 +1639,6 @@ function confirmClearHistory() {
     }
 
     if (historyActionMode === 'cancel') {
-        // VOID: tandai isVoid = true (tetap tampil)
         transactionHistory = transactionHistory.map(trx => {
             if (selectedIds.includes(trx.id) && !trx.isVoid) {
                 api.voidTransaction(trx.id);
@@ -1650,15 +1646,14 @@ function confirmClearHistory() {
             }
             return trx;
         });
-        alert(`${selectedIds.length} transaksi di-VOID (omset disesuaikan, tetap tampil dengan strikethrough).`);
+        alert(selectedIds.length + ' transaksi di-VOID (omset disesuaikan, tetap tampil dengan strikethrough).');
 
     } else if (historyActionMode === 'delete') {
-        // DELETE PERMANEN: hapus dari cloud & local
         selectedIds.forEach(id => {
             api.deleteTransaction(id);
         });
         transactionHistory = transactionHistory.filter(trx => !selectedIds.includes(trx.id));
-        alert(`${selectedIds.length} transaksi DIHAPUS PERMANEN dari Spreadsheet.`);
+        alert(selectedIds.length + ' transaksi DIHAPUS PERMANEN dari Spreadsheet.');
     }
 
     saveState();
@@ -1674,7 +1669,13 @@ function confirmClearHistory() {
 }
 
 function renderHistory() {
-                            container.innerHTML = `
+    const container = document.getElementById('history-list');
+    if (!container) return;
+
+    const visibleHistory = transactionHistory.filter(trx => !trx.isHidden);
+    
+    if (visibleHistory.length === 0) {
+        container.innerHTML = `
         <div class="empty-state-centered">
             <div class="empty-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1691,7 +1692,7 @@ function renderHistory() {
 
     container.innerHTML = visibleHistory.map(trx => {
         const cleanDate = normalizeTrxDate(trx.date);
-        const displayDate = cleanDate && trx.time ? `${cleanDate} • ${trx.time}` : cleanDate || trx.time || '';
+        const displayDate = cleanDate && trx.time ? cleanDate + ' • ' + trx.time : cleanDate || trx.time || '';
         
         return `
         <div style="display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); ${trx.isVoid ? 'opacity: 0.6;' : ''}">
@@ -1734,13 +1735,13 @@ function exportHistoryCSV() {
     let csvContent = "data:text/csv;charset=utf-8,ID Transaksi,Tanggal,Waktu,Kasir,Total Subtotal,Diskon Kupon,Pajak,Total Pembayaran,Tunai,Kembalian,Status Void,Detail Items\n";
 
     transactionHistory.forEach(trx => {
-        const itemsStr = trx.items.map(i => `${i.name} (${i.qty}x)`).join(' | ');
+        const itemsStr = trx.items.map(i => i.name + ' (' + i.qty + 'x)').join(' | ');
         const cleanDate = normalizeTrxDate(trx.date);
         const row = [
             trx.id,
             cleanDate,
             trx.time,
-            `"${trx.cashier}"`,
+            '"' + trx.cashier + '"',
             trx.subtotal,
             trx.couponDiscount || 0,
             trx.tax,
@@ -1748,7 +1749,7 @@ function exportHistoryCSV() {
             trx.paid,
             trx.change,
             trx.isVoid ? 'YA' : 'TIDAK',
-            `"${itemsStr}"`
+            '"' + itemsStr + '"'
         ].join(",");
         csvContent += row + "\n";
     });
@@ -1756,7 +1757,7 @@ function exportHistoryCSV() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `pos_history_${getLocalDateString()}.csv`);
+    link.setAttribute("download", "pos_history_" + getLocalDateString() + ".csv");
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1768,7 +1769,7 @@ function exportHistoryCSV() {
 function openOmsetFilterModal() {
     if (currentUserRole !== 'admin') return;
     const totalAllTime = transactionHistory.filter(t => !t.isVoid).reduce((sum, t) => sum + t.total, 0);
-    document.getElementById('modal-all-time-omset').innerText = `Rp ${totalAllTime.toLocaleString('id-id')}`;
+    document.getElementById('modal-all-time-omset').innerText = 'Rp ' + totalAllTime.toLocaleString('id-id');
     document.getElementById('modal-month-picker').value = currentSelectedMonth;
     document.getElementById('omset-filter-modal').style.display = 'flex';
 }
@@ -1791,11 +1792,12 @@ function resetToCurrentMonth() {
 }
 
 function updateDashboardMetrics() {
-    const [filterYear, filterMonth] = currentSelectedMonth.split('-');
+    const parts = currentSelectedMonth.split('-');
+    const filterYear = parts[0];
+    const filterMonth = parts[1];
     const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const monthLabel = monthNames[parseInt(filterMonth, 10) - 1] + " " + filterYear;
 
-    // Filter bulanan — pakai normalizeTrxDate biar handle ISO string
     const monthlyTrx = transactionHistory.filter(t => {
         if (t.isVoid) return false;
         const cleanDate = normalizeTrxDate(t.date);
@@ -1804,19 +1806,18 @@ function updateDashboardMetrics() {
     const totalOmsetMonth = monthlyTrx.reduce((sum, t) => sum + t.total, 0);
 
     const omsetElem = document.getElementById('dashboard-omset');
-    if (omsetElem) omsetElem.innerText = `Rp ${totalOmsetMonth.toLocaleString('id-id')}`;
+    if (omsetElem) omsetElem.innerText = 'Rp ' + totalOmsetMonth.toLocaleString('id-id');
     
     const titleElem = document.getElementById('dashboard-omset-title');
-    if (titleElem) titleElem.innerText = `Omset ${monthLabel}`;
+    if (titleElem) titleElem.innerText = 'Omset ' + monthLabel;
 
     const filterDateInput = document.getElementById('filter-date');
     let selectedDate = filterDateInput ? filterDateInput.value : getLocalDateString();
     if (!selectedDate) selectedDate = getLocalDateString();
 
     const dateDisplay = document.getElementById('current-date-display');
-    if (dateDisplay) dateDisplay.innerText = `Tanggal: ${selectedDate}`;
+    if (dateDisplay) dateDisplay.innerText = 'Tanggal: ' + selectedDate;
 
-    // Filter harian — pakai normalizeTrxDate biar handle ISO string
     const dailyTrx = transactionHistory.filter(t => {
         if (t.isVoid) return false;
         const cleanDate = normalizeTrxDate(t.date);
@@ -1828,13 +1829,12 @@ function updateDashboardMetrics() {
 
     const homeDailyOmsetElem = document.getElementById('home-daily-omset');
     const homeDailyTrxCountElem = document.getElementById('home-daily-trx-count');
-    if (homeDailyOmsetElem) homeDailyOmsetElem.innerText = `Rp ${dailyOmset.toLocaleString('id-id')}`;
+    if (homeDailyOmsetElem) homeDailyOmsetElem.innerText = 'Rp ' + dailyOmset.toLocaleString('id-id');
     if (homeDailyTrxCountElem) homeDailyTrxCountElem.innerText = dailyTrxCount;
 
     const hoursData = Array(24).fill(0);
     dailyTrx.forEach(t => {
         if (t.time) {
-            // Time bisa "19.21" atau "19:21"
             const hourStr = String(t.time).split(/[.:]/)[0];
             const hour = parseInt(hourStr, 10);
             if (!isNaN(hour) && hour >= 0 && hour < 24) {
@@ -1850,7 +1850,7 @@ function renderChart(dataPoints) {
     const ctx = document.getElementById('salesChart');
     if (!ctx) return;
 
-    const labels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+    const labels = Array.from({ length: 24 }, (_, i) => (i < 10 ? '0' : '') + i + ':00');
 
     const isDark = document.getElementById('app-wrapper')?.getAttribute('data-theme') === 'dark';
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
@@ -1885,7 +1885,7 @@ function renderChart(dataPoints) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return ` Rp ${context.parsed.y.toLocaleString('id-id')}`;
+                            return ' Rp ' + context.parsed.y.toLocaleString('id-id');
                         }
                     }
                 }
@@ -1935,10 +1935,7 @@ function billDapur() {
     cart.forEach(item => {
         const row = document.createElement('div');
         row.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 700; font-size: 13px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;';
-        row.innerHTML = `
-            <span>${item.name}</span>
-            <span>x${item.qty}</span>
-        `;
+        row.innerHTML = '<span>' + item.name + '</span><span>x' + item.qty + '</span>';
         itemsList.appendChild(row);
     });
     
@@ -1997,7 +1994,6 @@ function renderLaporanData() {
         labelPeriodElem.innerText = periodTextMap[period] || 'Bulan Ini';
     }
     
-    // Filter pakai normalizeTrxDate biar handle ISO string
     const validTrx = transactionHistory.filter(trx => {
         if (trx.isVoid) return false;
         const cleanDate = normalizeTrxDate(trx.date);
@@ -2037,11 +2033,11 @@ function renderLaporanData() {
     const labaKotor = totalOmset - totalHPP;
     const marginPersen = totalOmset > 0 ? ((labaKotor / totalOmset) * 100).toFixed(1) : 0;
     
-    if (document.getElementById('lap-total-omset')) document.getElementById('lap-total-omset').innerText = `Rp ${totalOmset.toLocaleString('id-ID')}`;
-    if (document.getElementById('lap-total-hpp')) document.getElementById('lap-total-hpp').innerText = `Rp ${totalHPP.toLocaleString('id-ID')}`;
-    if (document.getElementById('lap-laba-kotor')) document.getElementById('lap-laba-kotor').innerText = `Rp ${labaKotor.toLocaleString('id-ID')}`;
-    if (document.getElementById('lap-margin-persen')) document.getElementById('lap-margin-persen').innerText = `${marginPersen}%`;
-    if (document.getElementById('lap-total-trx-info')) document.getElementById('lap-total-trx-info').innerText = `${validTrx.length} Transaksi Selesai`;
+    if (document.getElementById('lap-total-omset')) document.getElementById('lap-total-omset').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
+    if (document.getElementById('lap-total-hpp')) document.getElementById('lap-total-hpp').innerText = 'Rp ' + totalHPP.toLocaleString('id-ID');
+    if (document.getElementById('lap-laba-kotor')) document.getElementById('lap-laba-kotor').innerText = 'Rp ' + labaKotor.toLocaleString('id-ID');
+    if (document.getElementById('lap-margin-persen')) document.getElementById('lap-margin-persen').innerText = marginPersen + '%';
+    if (document.getElementById('lap-total-trx-info')) document.getElementById('lap-total-trx-info').innerText = validTrx.length + ' Transaksi Selesai';
     
     const sortedProducts = Object.values(productSalesMap).sort((a, b) => b.qty - a.qty);
     const productsContainer = document.getElementById('lap-products-list');
@@ -2257,7 +2253,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const kitchenNotes = document.getElementById('kitchen-order-notes');
     if (kitchenNotes) kitchenNotes.addEventListener('input', updateKitchenPreview);
 
-    // Auto-refresh dari cloud tiap 2 menit
     setInterval(async () => {
         const fresh = await api.getAll();
         if (fresh && fresh.transactions) {
