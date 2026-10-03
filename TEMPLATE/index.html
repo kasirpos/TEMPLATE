@@ -4,19 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS Kasir App</title>
-    <!-- google fonts: poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- remix icon via unpkg -->
     <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <!-- chart.js cdn -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- stylesheet -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- config + app -->
     <script src="config.js" defer></script>
     <script src="app.js" defer></script>
 </head>
@@ -24,7 +19,6 @@
 
 <div class="app-container" id="app-wrapper">
 
-    <!-- Cloud status indicator -->
     <div id="cloud-status"><i class="ri-cloud-line"></i> <span id="cloud-status-text">Offline</span></div>
 
     <!-- login screen -->
@@ -76,7 +70,7 @@
         </div>
     </div>
 
-    <!-- modal confirm logout -->
+    <!-- modal logout -->
     <div class="modal-overlay" id="logout-modal">
         <div class="modal-card" style="text-align: center;">
             <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -257,7 +251,7 @@
         </div>
     </div>
 
-    <!-- modal detail transaksi / struk -->
+    <!-- modal receipt -->
     <div class="modal-overlay" id="receipt-modal">
         <div class="modal-card">
             <div class="receipt-header">
@@ -277,7 +271,7 @@
             <div>
                 <div class="receipt-row"><span>Subtotal</span><span id="modal-subtotal">Rp 0</span></div>
                 <div class="receipt-row"><span>Discount</span><span id="modal-discount" style="color: var(--danger);">Rp 0</span></div>
-                <div class="receipt-row"><span>Pajak (10%)</span><span id="modal-tax">Rp 0</span></div>
+                <div class="receipt-row"><span id="modal-tax-label">Pajak (10%)</span><span id="modal-tax">Rp 0</span></div>
                 <div class="receipt-total"><span>Total Tagihan</span><span id="modal-total" style="color: var(--accent);">Rp 0</span></div>
                 <div class="receipt-row" style="margin-top: 8px;"><span>Tunai dibayar</span><span id="modal-paid">Rp 0</span></div>
                 <div class="receipt-row"><span>Kembalian</span><span id="modal-change" style="font-weight: 700; color: var(--success);">Rp 0</span></div>
@@ -347,7 +341,7 @@
     </div>
     </div>
     
-    <!-- header system -->
+    <!-- header -->
     <div class="app-header">
         <div class="header">
             <div class="brand-info">
@@ -379,7 +373,7 @@
         </div>
     </div>
 
-    <!-- TAB 1: HOME -->
+    <!-- TAB: HOME -->
     <div id="home" class="view active">
     <div id="dashboard-section">
     <div class="stats-grid">
@@ -483,7 +477,7 @@
     
     </div>
     
-    <!-- TAB 2: MENU -->
+    <!-- TAB: MENU -->
     <div id="menu" class="view">
     
     <div class="category-scroll">
@@ -504,7 +498,7 @@
     <i class="ri-add-line" style="font-size: 16px;"></i>
     </button>
     
-    <!-- TAB 3: ORDER -->
+    <!-- TAB: ORDER -->
     <div id="order" class="view">
     
     <div class="cart-split-layout">
@@ -533,7 +527,7 @@
         <div class="summary-card">        
             <div class="summary-row"><span>Subtotal</span><span id="subtotal-val">Rp 0</span></div>
             <div class="summary-row"><span>Discount</span><span id="coupon-val" style="color: var(--danger);">Rp 0</span></div>
-            <div class="summary-row"><span>Pajak (10%)</span><span id="tax-val">Rp 0</span></div>
+            <div class="summary-row"><span id="tax-label">Pajak (10%)</span><span id="tax-val">Rp 0</span></div>
             <div class="summary-row total"><span>Total Tagihan</span><span id="total-val" style="color: var(--accent);">Rp 0</span></div>
             
             <div class="input-group" style="margin-top: 10px; margin-bottom: 4px;">
@@ -1034,7 +1028,7 @@
     <!-- modal shift receipt -->
     <div class="modal-overlay" id="shift-receipt-modal" style="display: none;">
         <div class="modal-card" style="width: 280px; text-align: center; font-family: monospace;">
-            <h3 style="font-size: 14px; margin-bottom: 2px;">KALA SPACE CAFE</h3>
+            <h3 id="sr-store-name" style="font-size: 14px; margin-bottom: 2px;">KALA SPACE CAFE</h3>
             <p style="font-size: 10px; margin-bottom: 10px;">REKAP PENUTUPAN SHIFT</p>
             <div style="border-bottom: 1px dashed #000; margin-bottom: 8px;"></div>
             
@@ -1069,7 +1063,6 @@
         </div>
     </div>
 
-    <!-- hidden file input -->
     <input type="file" id="json-import-input" accept=".json" style="display:none;">
 
 </div>
