@@ -3,70 +3,243 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Kasir - Multi Buyer</title>
-    <meta http-equiv="refresh" content="0; url=./TEMPLATE/">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>POS Kasir - Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            color: #fff;
-            text-align: center;
             padding: 20px;
+            color: #fff;
         }
-        .box { max-width: 400px; width: 100%; }
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: rgba(0, 166, 255, 0.15);
-            border: 2px solid #00A6FF;
+        .login-wrapper { width: 100%; max-width: 400px; }
+        .brand { text-align: center; margin-bottom: 24px; }
+        .brand-logo { display: flex; justify-content: center; margin-bottom: 14px; }
+        .brand-logo svg { width: 60px; height: 60px; fill: #f59e0b; }
+        .brand h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .brand p { color: #94a3b8; font-size: 12px; }
+        .login-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 24px;
             border-radius: 24px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
-        .loader {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0, 166, 255, 0.2);
-            border-radius: 50%;
-            border-top-color: #00A6FF;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .redirect-text { color: #64748b; font-size: 12px; margin-bottom: 20px; }
-        a {
-            color: #00A6FF;
-            text-decoration: none;
+        .input-group { margin-bottom: 16px; }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #94a3b8;
             font-weight: 700;
-            font-size: 13px;
-            padding: 12px 24px;
-            border: 1px solid #00A6FF;
-            border-radius: 12px;
-            display: inline-block;
-            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
-        a:hover { background: #00A6FF; color: #fff; }
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            outline: none;
+            font-size: 14px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .input-group input:focus {
+            background: rgba(255,255,255,0.12);
+            border-color: #00A6FF;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: #00A6FF;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .btn-login:active { transform: scale(0.98); }
+        .btn-login:disabled { background: #475569; cursor: not-allowed; }
+        .msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            display: none;
+            line-height: 1.4;
+        }
+        .msg.show { display: block; }
+        .msg.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+        .msg.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+        }
+        .msg.info {
+            background: rgba(0, 166, 255, 0.15);
+            border: 1px solid rgba(0, 166, 255, 0.3);
+            color: #60a5fa;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 14px;
+        }
+        .loading.show { display: block; }
+        .loading i { display: inline-block; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            color: #475569;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <div class="logo">🧾</div>
+
+<div class="login-wrapper">
+    <div class="brand">
+        <div class="brand-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+            </svg>
+        </div>
         <h1>POS Kasir</h1>
-        <p class="subtitle">Multi Buyer Edition</p>
-        <div class="loader"></div>
-        <p class="redirect-text">Redirecting ke aplikasi...</p>
-        <a href="./TEMPLATE/">Buka Aplikasi →</a>
+        <p>Masuk ke akun toko Anda</p>
     </div>
+
+    <div class="login-card">
+        <div class="msg" id="msg"></div>
+        
+        <div class="input-group">
+            <label>Email Toko</label>
+            <input type="text" id="login-email" placeholder="admin@toko.com" autocomplete="username">
+        </div>
+        
+        <div class="input-group">
+            <label>PIN Akses</label>
+            <input type="password" id="login-pin" placeholder="••••" autocomplete="current-password">
+        </div>
+        
+        <button class="btn-login" id="btn-login" onclick="handleLogin()">MASUK</button>
+        
+        <div class="loading" id="loading">
+            <i class="ri-loader-4-line"></i> Memverifikasi akun...
+        </div>
+    </div>
+
+    <div class="footer-note">© 2026 POS Kasir Multi-Buyer · v1.1.5</div>
+</div>
+
+<script>
+    /* ============================================================
+       KONFIGURASI MASTER AUTH
+       ============================================================ */
+    const MASTER_AUTH_URL = 'PASTE_URL_MASTER_AUTH_DARI_LANGKAH_2.5';
+    const MASTER_AUTH_TOKEN = 'MasterAuth2026SecretKey';
+
+    /* ============================================================
+       LOGIN HANDLER
+       ============================================================ */
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const pin = document.getElementById('login-pin').value.trim();
+        const btn = document.getElementById('btn-login');
+        const msg = document.getElementById('msg');
+        const loading = document.getElementById('loading');
+        
+        // Reset state
+        msg.className = 'msg';
+        msg.classList.remove('show');
+        
+        if (!email || !pin) {
+            showMsg('error', '❌ Mohon isi email dan PIN.');
+            return;
+        }
+        
+        // Loading state
+        btn.disabled = true;
+        btn.innerText = 'MEMPROSES...';
+        loading.classList.add('show');
+        
+        try {
+            const response = await fetch(MASTER_AUTH_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'login',
+                    token: MASTER_AUTH_TOKEN,
+                    email: email,
+                    pin: pin
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Login gagal');
+            }
+            
+            if (!result.data || !result.data.redirectUrl) {
+                throw new Error('Akun belum terhubung ke toko manapun.');
+            }
+            
+            // Simpan session (untuk display saja, bukan keamanan)
+            localStorage.setItem('master_session', JSON.stringify({
+                email: email,
+                tenantId: result.data.tenantId,
+                storeName: result.data.storeName,
+                loginAt: new Date().toISOString()
+            }));
+            
+            showMsg('success', '✅ Login berhasil! Mengalihkan ke ' + result.data.storeName + '...');
+            
+            // Redirect
+            setTimeout(() => {
+                window.location.href = result.data.redirectUrl;
+            }, 800);
+            
+        } catch (err) {
+            console.error('Login error:', err);
+            showMsg('error', '❌ ' + (err.message || 'Gagal login. Periksa koneksi.'));
+            btn.disabled = false;
+            btn.innerText = 'MASUK';
+            loading.classList.remove('show');
+        }
+    }
+
+    function showMsg(type, text) {
+        const msg = document.getElementById('msg');
+        msg.className = 'msg show ' + type;
+        msg.innerText = text;
+    }
+
+    /* Enter key handler */
+    document.getElementById('login-pin').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('login-email').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('login-pin').focus();
+    });
+</script>
+
 </body>
 </html>
