@@ -99,7 +99,7 @@ async function loadFromCloud() {
 }
 
 function applyBranding() {
-    document.title = 'POS - ' + STORE_NAME;
+    document.title = 'POS Kasir App : ' + STORE_NAME;
 
     const loginTitle = document.getElementById('login-store-name');
     if (loginTitle) loginTitle.textContent = STORE_NAME;
@@ -1346,9 +1346,9 @@ function renderSavedBills() {
     if (!container) return;
     
     if (savedBills.length === 0) {
-        container.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center;">
-                <div style="width: 60px; height: 60px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                container.innerHTML = `
+            <div class="empty-state-centered">
+                <div class="empty-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent, #00a6ff)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 3 2 3-2 3 2 3-2 3 2V4a2 2 0 0 0-2-2z"></path>
                         <line x1="8" y1="6" x2="16" y2="6"></line>
@@ -1356,8 +1356,8 @@ function renderSavedBills() {
                         <line x1="8" y1="14" x2="12" y2="14"></line>
                     </svg>
                 </div>
-                <span style="font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">Belum Ada Bill</span>
-                <p style="font-size: 11px; color: var(--text-muted); margin: 0;">Tidak ada bill yang tersimpan saat ini.</p>
+                <div class="empty-title">Belum Ada Bill</div>
+                <p class="empty-desc">Tidak ada bill yang tersimpan saat ini.</p>
             </div>
         `;
         return;
@@ -1674,23 +1674,17 @@ function confirmClearHistory() {
 }
 
 function renderHistory() {
-    const container = document.getElementById('history-list');
-    if (!container) return;
-
-    // Tampilkan semua trx yang tidak hidden (isHidden cuma legacy)
-    const visibleHistory = transactionHistory.filter(trx => !trx.isHidden);
-    
-    if (visibleHistory.length === 0) {
-        container.innerHTML = `
-        <div style="text-align: center; color: var(--text-muted); padding: 40px 0;">
-            <div style="width: 55px; height: 55px; background: var(--accent-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                            container.innerHTML = `
+        <div class="empty-state-centered">
+            <div class="empty-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                     <path d="M3 3v5h5"/>
                     <path d="M12 7v5l4 2"/>
                 </svg>
             </div>
-            <p style="font-size: 13px; margin: 0; font-weight: 500;">Belum ada riwayat transaksi.</p>
+            <div class="empty-title">Belum ada riwayat transaksi</div>
+            <p class="empty-desc">Transaksi akan muncul di sini setelah ada pembayaran.</p>
         </div>`;
         return;
     }
