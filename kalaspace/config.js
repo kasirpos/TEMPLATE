@@ -9,7 +9,7 @@ window.APP_CONFIG = {
     API_TOKEN: 'KalaSpace2025',
 
     // ==== BRANDING TOKO ====
-    STORE_NAME:   'Sate Maringgi Pak Fazar',
+    STORE_NAME:   'Kala Space Cafe',
     STORE_SLOGAN: 'Selamat Datang! Silahkan masuk ke akun anda.',
     STORE_LOGO:   '',
 
