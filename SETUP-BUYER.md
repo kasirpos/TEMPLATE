@@ -43,3 +43,56 @@ Buka tab **`Tenants`** (paling kiri), edit **baris ke-2**:
 ### 1.4 Copy ID Spreadsheet
 
 Lihat URL browser Anda:
+https://docs.google.com/spreadsheets/d/[COPY_BAGIAN_INI]/edit
+
+
+**Contoh:** `1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890`
+
+> 💾 Simpan ID ini di notepad.
+
+---
+
+## Bagian 2: Deploy Apps Script (7 menit)
+
+### 2.1 Buka Apps Script
+
+1. Kunjungi [script.google.com](https://script.google.com)
+2. Login dengan **akun Google yang sama**
+3. Klik **+ New Project**
+
+### 2.2 Rename Project
+
+Klik **"Untitled project"** → ganti jadi: `POS Backend - [Nama Toko]` → **Rename**.
+
+### 2.3 Paste Kode
+
+1. Hapus semua isi file `Code.gs` (default)
+2. Copy kode **`Code.gs`** yang dikirim admin
+3. Paste ke editor
+
+### 2.4 Ganti 2 Baris
+
+Cari di paling atas:
+
+```javascript
+const SPREADSHEET_ID = 'PASTE_ID_SPREADSHEET_DI_SINI';
+const SECRET_TOKEN   = 'TOKEN_UNIK_BUYER_INI';
+
+Ganti jadi:
+
+javascript
+const SPREADSHEET_ID = 'ID_DARI_BAGIAN_1.4';
+const SECRET_TOKEN   = 'TOKEN_YANG_ANDA_ISI_DI_BAGIAN_1.3';
+Contoh:
+
+javascript
+const SPREADSHEET_ID = '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890';
+const SECRET_TOKEN   = 'KalaSpace2025';
+2.5 Save & Test
+Klik 💾 Save (Ctrl+S)
+
+Pilih fungsi testSetup dari dropdown → klik ▶️ Run
+
+Klik Review Permissions → pilih akun Anda → Advanced → Go to ... (unsafe) → Allow
+
+Cek log (View → Logs):
