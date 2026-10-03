@@ -13,87 +13,29 @@
          ============================================================ -->
     <script>
         (function() {
-            // 1. Disable klik kanan
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            });
-
-            // 2. Disable text selection via drag
+            document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
             document.addEventListener('selectstart', function(e) {
-                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                    e.preventDefault();
-                    return false;
-                }
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return false; }
             });
-
-            // 3. Disable copy & cut
             document.addEventListener('copy', function(e) {
-                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                    e.preventDefault();
-                    return false;
-                }
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return false; }
             });
             document.addEventListener('cut', function(e) {
-                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                    e.preventDefault();
-                    return false;
-                }
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return false; }
             });
-
-            // 4. Disable keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 const key = e.key.toLowerCase();
-
-                // F12
-                if (e.key === 'F12' || e.keyCode === 123) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
-
-                // Ctrl+Shift+I / J / C (DevTools)
-                if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
-
-                // Ctrl+U (View Source)
-                if (e.ctrlKey && key === 'u') {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Ctrl+S (Save Page)
-                if (e.ctrlKey && key === 's') {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Ctrl+P (Print)
-                if (e.ctrlKey && key === 'p') {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Cmd+Option+I / J / C (Mac DevTools)
-                if (e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key)) {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Cmd+U (Mac View Source)
-                if (e.metaKey && key === 'u') {
-                    e.preventDefault();
-                    return false;
-                }
+                if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); e.stopPropagation(); return false; }
+                if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) { e.preventDefault(); e.stopPropagation(); return false; }
+                if (e.ctrlKey && key === 'u') { e.preventDefault(); return false; }
+                if (e.ctrlKey && key === 's') { e.preventDefault(); return false; }
+                if (e.ctrlKey && key === 'p') { e.preventDefault(); return false; }
+                if (e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key)) { e.preventDefault(); return false; }
+                if (e.metaKey && key === 'u') { e.preventDefault(); return false; }
             });
-
-            // 5. Deteksi DevTools terbuka
             let devToolsOpen = false;
             const threshold = 160;
-            const checkDevTools = function() {
+            setInterval(function() {
                 const widthDiff = window.outerWidth - window.innerWidth;
                 const heightDiff = window.outerHeight - window.innerHeight;
                 if (widthDiff > threshold || heightDiff > threshold) {
@@ -101,29 +43,14 @@
                         devToolsOpen = true;
                         console.clear();
                         console.log('%c⚠️ Developer Tools terdeteksi', 'color: #ef4444; font-size: 20px; font-weight: bold;');
-                        console.log('%cHarap tutup DevTools untuk melanjutkan.', 'color: #f59e0b; font-size: 14px;');
                     }
-                } else {
-                    devToolsOpen = false;
-                }
-            };
-            setInterval(checkDevTools, 1000);
-
-            // 6. Console warning
+                } else { devToolsOpen = false; }
+            }, 1000);
             setTimeout(() => {
                 console.clear();
-                console.log(
-                    '%c⛔ STOP!',
-                    'color: #ef4444; font-size: 40px; font-weight: 900; text-shadow: 2px 2px 0 #000;'
-                );
-                console.log(
-                    '%cHalaman ini dilindungi. Jangan tempel kode apapun di sini.',
-                    'color: #f59e0b; font-size: 16px; font-weight: bold;'
-                );
-                console.log(
-                    '%c© 2026 POS Kasir Multi-Buyer - @Muhasa_Digital',
-                    'color: #64748b; font-size: 12px;'
-                );
+                console.log('%c⛔ STOP!', 'color: #ef4444; font-size: 40px; font-weight: 900;');
+                console.log('%cHalaman ini dilindungi. Jangan tempel kode apapun di sini.', 'color: #f59e0b; font-size: 16px; font-weight: bold;');
+                console.log('%c© 2026 POS Kasir Multi-Buyer - @Muhasa_Digital', 'color: #64748b; font-size: 12px;');
             }, 100);
         })();
     </script>
@@ -131,18 +58,13 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-        /* ============================================================
-           PROTEKSI — Anti select & anti drag
-           ============================================================ */
-        body, .login-wrapper, .brand, .login-card {
+        body, .container, .left-panel, .right-panel {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-
-        /* Izinkan input agar user tetap bisa ketik */
         input, textarea, select {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
@@ -150,165 +72,468 @@
             user-select: text !important;
         }
 
-        /* Disable drag pada gambar */
-        img {
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-            pointer-events: none;
-        }
-
         body {
             min-height: 100vh;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            background: #f1f5f9;
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+
+        /* ============================================================
+           LAYOUT — Split Screen
+           ============================================================ */
+        .container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ------------------------------------------------------------
+           LEFT PANEL — Brand Showcase (Dark)
+           ------------------------------------------------------------ */
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
             color: #fff;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
         }
-        .login-wrapper { width: 100%; max-width: 400px; }
-        .brand { text-align: center; margin-bottom: 24px; }
-        .brand-logo { display: flex; justify-content: center; margin-bottom: 14px; }
-        .brand-logo svg { width: 60px; height: 60px; fill: #f59e0b; }
-        .brand h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-        .brand p { color: #94a3b8; font-size: 12px; }
+
+        /* Decorative circles */
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 166, 255, 0.18) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -150px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        .brand-top-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-top-icon svg { width: 22px; height: 22px; fill: #f59e0b; }
+        .brand-top-text h3 { font-size: 15px; font-weight: 800; }
+        .brand-top-text p { font-size: 11px; color: #94a3b8; }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 480px;
+        }
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 166, 255, 0.15);
+            border: 1px solid rgba(0, 166, 255, 0.3);
+            color: #60a5fa;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .hero-tag i { font-size: 13px; }
+
+        .hero-content h1 {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+        .hero-content h1 .accent {
+            background: linear-gradient(135deg, #00A6FF 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-content p {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .feature-item .check {
+            width: 24px;
+            height: 24px;
+            background: rgba(16, 185, 129, 0.15);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .feature-item .check i {
+            font-size: 14px;
+            color: #34d399;
+        }
+
+        .left-footer {
+            position: relative;
+            z-index: 2;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        /* ------------------------------------------------------------
+           RIGHT PANEL — Login Form (Light)
+           ------------------------------------------------------------ */
+        .right-panel {
+            flex: 1;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            position: relative;
+        }
+
         .login-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 32px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+            border: 1px solid #e2e8f0;
         }
-        .input-group { margin-bottom: 16px; }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .login-header-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #00A6FF 0%, #0088d1 100%);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(0, 166, 255, 0.3);
+        }
+        .login-header-icon svg { width: 28px; height: 28px; fill: #fff; }
+        .login-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+        .login-header p {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .msg {
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 18px;
+            display: none;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        .msg.show { display: block; }
+        .msg.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+        .msg.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+        }
+
+        .input-group { margin-bottom: 18px; }
         .input-group label {
             display: block;
             margin-bottom: 8px;
             font-size: 11px;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 700;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
-        .input-group input {
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+        .input-wrapper input {
             width: 100%;
-            padding: 14px;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 14px 14px 14px 42px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
             border-radius: 14px;
             outline: none;
             font-size: 14px;
-            color: #fff;
+            color: #0f172a;
             font-weight: 500;
+            transition: all 0.2s;
         }
-        .input-group input:focus {
-            background: rgba(255,255,255,0.12);
+        .input-wrapper input:focus {
+            background: #ffffff;
             border-color: #00A6FF;
+            box-shadow: 0 0 0 4px rgba(0, 166, 255, 0.1);
         }
+        .input-wrapper input::placeholder {
+            color: #94a3b8;
+        }
+
         .btn-login {
             width: 100%;
-            padding: 15px;
-            background: #00A6FF;
+            padding: 16px;
+            background: linear-gradient(135deg, #00A6FF 0%, #0088d1 100%);
             color: white;
             border: none;
-            border-radius: 16px;
+            border-radius: 14px;
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 20px rgba(0, 166, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
         }
-        .btn-login:active { transform: scale(0.98); }
-        .btn-login:disabled { background: #475569; cursor: not-allowed; }
-        .msg {
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 12px;
-            margin-bottom: 14px;
-            display: none;
-            line-height: 1.4;
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(0, 166, 255, 0.4); }
+        .btn-login:active { transform: translateY(0); }
+        .btn-login:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
         }
-        .msg.show { display: block; }
-        .msg.error {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-        }
-        .msg.success {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #34d399;
-        }
-        .msg.info {
-            background: rgba(0, 166, 255, 0.15);
-            border: 1px solid rgba(0, 166, 255, 0.3);
-            color: #60a5fa;
-        }
+
         .loading {
             display: none;
             text-align: center;
-            color: #94a3b8;
+            color: #64748b;
             font-size: 12px;
-            margin-top: 14px;
+            margin-top: 16px;
         }
         .loading.show { display: block; }
         .loading i { display: inline-block; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .footer-note {
+
+        .login-footer {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px dashed #e2e8f0;
             text-align: center;
-            margin-top: 20px;
-            color: #475569;
             font-size: 11px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        .login-footer strong { color: #00A6FF; font-weight: 700; }
+
+        /* ============================================================
+           RESPONSIVE — Mobile
+           ============================================================ */
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            
+            .left-panel {
+                padding: 32px 24px;
+                min-height: auto;
+                flex: 0 0 auto;
+            }
+            .hero-content h1 { font-size: 26px; }
+            .hero-content p { font-size: 12px; margin-bottom: 20px; }
+            .features { display: none; }
+            .left-footer { display: none; }
+            .hero-tag { margin-bottom: 12px; }
+            .brand-top-text h3 { font-size: 14px; }
+            .brand-top-text p { font-size: 10px; }
+            .brand-top-icon { width: 38px; height: 38px; }
+            .brand-top-icon svg { width: 18px; height: 18px; }
+
+            .right-panel {
+                padding: 24px 20px 40px 20px;
+                flex: 1;
+                align-items: flex-start;
+            }
+            .login-card {
+                padding: 28px 24px;
+                border-radius: 20px;
+            }
+            .login-header { margin-bottom: 24px; }
+            .login-header-icon { width: 48px; height: 48px; border-radius: 14px; }
+            .login-header-icon svg { width: 24px; height: 24px; }
+            .login-header h2 { font-size: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .left-panel { padding: 24px 20px; }
+            .hero-content h1 { font-size: 22px; }
+            .right-panel { padding: 16px 16px 32px 16px; }
+            .login-card { padding: 24px 20px; }
         }
     </style>
 </head>
 <body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
 
-<div class="login-wrapper">
-    <div class="brand">
-        <div class="brand-logo">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
-            </svg>
+<div class="container">
+    
+    <!-- ============================================================
+         LEFT PANEL — Brand Showcase
+         ============================================================ -->
+    <div class="left-panel">
+        <div class="brand-top">
+            <div class="brand-top-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+                </svg>
+            </div>
+            <div class="brand-top-text">
+                <h3>POS Kasir</h3>
+                <p>Multi Buyer Edition</p>
+            </div>
         </div>
-        <h1>POS Kasir</h1>
-        <p>Masuk ke akun toko Anda</p>
+
+        <div class="hero-content">
+            <div class="hero-tag">
+                <i class="ri-shield-check-line"></i> Sistem Terintegrasi
+            </div>
+            <h1>Kelola Bisnis <span class="accent">Lebih Cerdas</span> dengan Satu Aplikasi</h1>
+            <p>Platform POS modern untuk cafe, restoran, dan toko. Terintegrasi dengan Google Spreadsheet — cepat, aman, dan mudah.</p>
+            
+            <div class="features">
+                <div class="feature-item">
+                    <span class="check"><i class="ri-check-line"></i></span>
+                    <span>Transaksi cepat & akurat</span>
+                </div>
+                <div class="feature-item">
+                    <span class="check"><i class="ri-check-line"></i></span>
+                    <span>Laporan omset & margin otomatis</span>
+                </div>
+                <div class="feature-item">
+                    <span class="check"><i class="ri-check-line"></i></span>
+                    <span>Multi-toko dalam satu akun</span>
+                </div>
+                <div class="feature-item">
+                    <span class="check"><i class="ri-check-line"></i></span>
+                    <span>Cloud sync real-time</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="left-footer">
+            © 2026 POS Kasir Multi-Buyer · v1.1.5
+        </div>
     </div>
 
-    <div class="login-card">
-        <div class="msg" id="msg"></div>
-        
-        <div class="input-group">
-            <label>Email Toko</label>
-            <input type="text" id="login-email" placeholder="admin@toko.com" autocomplete="username">
-        </div>
-        
-        <div class="input-group">
-            <label>PIN Akses</label>
-            <input type="password" id="login-pin" placeholder="••••" autocomplete="current-password">
-        </div>
-        
-        <button class="btn-login" id="btn-login" onclick="handleLogin()">MASUK</button>
-        
-        <div class="loading" id="loading">
-            <i class="ri-loader-4-line"></i> Memverifikasi akun...
+    <!-- ============================================================
+         RIGHT PANEL — Login Form
+         ============================================================ -->
+    <div class="right-panel">
+        <div class="login-card">
+            
+            <div class="login-header">
+                <div class="login-header-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                        <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+                    </svg>
+                </div>
+                <h2>Masuk Akun</h2>
+                <p>Silakan login dengan akun toko Anda</p>
+            </div>
+
+            <div class="msg" id="msg"></div>
+            
+            <div class="input-group">
+                <label>Email Toko</label>
+                <div class="input-wrapper">
+                    <i class="ri-mail-line input-icon"></i>
+                    <input type="text" id="login-email" placeholder="admin@toko.com" autocomplete="username">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>PIN Akses</label>
+                <div class="input-wrapper">
+                    <i class="ri-lock-2-line input-icon"></i>
+                    <input type="password" id="login-pin" placeholder="••••" autocomplete="current-password">
+                </div>
+            </div>
+            
+            <button class="btn-login" id="btn-login" onclick="handleLogin()">
+                <i class="ri-login-circle-line"></i> MASUK
+            </button>
+            
+            <div class="loading" id="loading">
+                <i class="ri-loader-4-line"></i> Memverifikasi akun...
+            </div>
+
+            <div class="login-footer">
+                Butuh bantuan? Hubungi admin di <strong>@Muhasa_Digital</strong>
+            </div>
         </div>
     </div>
 
-    <div class="footer-note">© 2026 POS Kasir - @Muhasa_Digital · v1.1.5</div>
 </div>
 
 <script>
-    /* ============================================================
-       KONFIGURASI MASTER AUTH
-       ============================================================ */
     const MASTER_AUTH_URL = 'https://script.google.com/macros/s/AKfycbzEGjvtBAD0sMCXOiM5Q8TN0g-rcZuipoTDblrSasicGXhgSNntWv-d1AdDVW3gH3OApg/exec';
     const MASTER_AUTH_TOKEN = 'MasterAuth2026SecretKey';
 
-    /* ============================================================
-       LOGIN HANDLER
-       ============================================================ */
     async function handleLogin() {
         const email = document.getElementById('login-email').value.trim().toLowerCase();
         const pin = document.getElementById('login-pin').value.trim();
@@ -316,7 +541,6 @@
         const msg = document.getElementById('msg');
         const loading = document.getElementById('loading');
         
-        // Reset state
         msg.className = 'msg';
         msg.classList.remove('show');
         
@@ -325,9 +549,8 @@
             return;
         }
         
-        // Loading state
         btn.disabled = true;
-        btn.innerText = 'MEMPROSES...';
+        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> MEMPROSES...';
         loading.classList.add('show');
         
         try {
@@ -344,15 +567,9 @@
             
             const result = await response.json();
             
-            if (!result.success) {
-                throw new Error(result.error || 'Login gagal');
-            }
+            if (!result.success) throw new Error(result.error || 'Login gagal');
+            if (!result.data || !result.data.redirectUrl) throw new Error('Akun belum terhubung ke toko manapun.');
             
-            if (!result.data || !result.data.redirectUrl) {
-                throw new Error('Akun belum terhubung ke toko manapun.');
-            }
-            
-            // Simpan session (untuk display saja, bukan keamanan)
             localStorage.setItem('master_session', JSON.stringify({
                 email: email,
                 tenantId: result.data.tenantId,
@@ -362,7 +579,6 @@
             
             showMsg('success', '✅ Login berhasil! Mengalihkan ke ' + result.data.storeName + '...');
             
-            // Redirect
             setTimeout(() => {
                 window.location.href = result.data.redirectUrl;
             }, 800);
@@ -371,7 +587,7 @@
             console.error('Login error:', err);
             showMsg('error', '❌ ' + (err.message || 'Gagal login. Periksa koneksi.'));
             btn.disabled = false;
-            btn.innerText = 'MASUK';
+            btn.innerHTML = '<i class="ri-login-circle-line"></i> MASUK';
             loading.classList.remove('show');
         }
     }
@@ -382,7 +598,6 @@
         msg.innerText = text;
     }
 
-    /* Enter key handler */
     document.getElementById('login-pin').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
