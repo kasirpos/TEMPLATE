@@ -1,7 +1,7 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FINAL v2)
-   Fix: tax 0%, bills sync, date/time, delete permanent,
-        empty state, dynamic title, auto sync
+   POS KASIR - APP LOGIC (FINAL v3)
+   Fix: tax 0%, bills sync, click card to toggle checkbox,
+        date/time, delete permanent, empty state, auto sync
    ========================================================= */
 
 /* ==========================================
@@ -70,12 +70,7 @@ function updateCloudStatus(online) {
 function syncToCloud() {
     clearTimeout(__syncTimer);
     __syncTimer = setTimeout(async () => {
-        // ✅ FIX: sertakan bills
-        const res = await api.bulkSave({ 
-            products, 
-            coupons, 
-            bills: savedBills 
-        });
+        const res = await api.bulkSave({ products, coupons, bills: savedBills });
         if (res) {
             updateCloudStatus(true);
             console.log('☁️ Sync to cloud OK');
@@ -103,7 +98,6 @@ async function loadFromCloud() {
         coupons = cloud.coupons;
         localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
     }
-    // ✅ FIX: muat bills
     if (cloud.bills && cloud.bills.length) {
         savedBills = cloud.bills;
         localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(savedBills));
@@ -146,7 +140,6 @@ async function silentRefresh() {
             localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
             hasChange = true;
         }
-        // ✅ FIX: cek bills juga
         if (fresh.bills && hashData(fresh.bills) !== hashData(savedBills)) {
             savedBills = fresh.bills;
             localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(savedBills));
@@ -195,7 +188,6 @@ async function manualSync() {
             coupons = fresh.coupons;
             localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
         }
-        // ✅ FIX: muat bills
         if (fresh.bills) {
             savedBills = fresh.bills;
             localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(savedBills));
@@ -260,14 +252,14 @@ function applyBranding() {
     const badge = document.getElementById('version-badge');
     if (badge && CFG.VERSION) badge.textContent = CFG.VERSION;
 
-    // ✅ FIX: Tax label — handle 0%
+    // Tax label — handle 0%
     const taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null) ? CFG.TAX_PERCENT : 10;
     const taxLabelEl = document.getElementById('tax-label');
     if (taxLabelEl) taxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
     const modalTaxLabelEl = document.getElementById('modal-tax-label');
     if (modalTaxLabelEl) modalTaxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
 
-    // Update nama toko di struk rekap shift
+    // Nama toko di struk rekap shift
     const srStoreNameEl = document.getElementById('sr-store-name');
     if (srStoreNameEl) srStoreNameEl.textContent = STORE_NAME.toUpperCase();
 
@@ -1119,7 +1111,6 @@ function updateCart() {
     }
     const totalAllDiscount = productDiscount + couponDiscountAmount;
     const netSubtotal = Math.max(0, rawSubtotal - totalAllDiscount);
-    // ✅ FIX: pakai TAX_RATE_CONST yang sudah handle 0%
     const tax = Math.round(netSubtotal * TAX_RATE_CONST);
     grandTotal = netSubtotal + tax;
     const subtotalElem = document.getElementById('subtotal-val');
@@ -1206,7 +1197,6 @@ function confirmSaveBill() {
         });
     }
     saveState();
-    // ✅ FIX: langsung sync bills ke cloud
     api.bulkSave({ products, coupons, bills: savedBills });
     clearCurrentCartState();
     closeSaveBillModal();
@@ -1298,7 +1288,6 @@ function processPayment() {
     }, 0);
     const totalDiscount = productDiscount + (couponDiscountAmount || 0);
     const subtotalAfterAllDiscount = Math.max(0, rawSubtotal - totalDiscount);
-    // ✅ FIX: pakai TAX_RATE_CONST
     const tax = Math.round(subtotalAfterAllDiscount * TAX_RATE_CONST);
     const change = paidAmount - grandTotal;
     const now = new Date();
@@ -1329,7 +1318,6 @@ function processPayment() {
     transactionHistory.unshift(newTrx);
     if (currentEditingBillId) savedBills = savedBills.filter(b => b.id !== currentEditingBillId);
     saveState();
-    // ✅ Sync transaksi + bills (karena bill mungkin sudah dihapus)
     api.saveTransaction(newTrx).then(res => {
         if (res) { updateCloudStatus(true); console.log('☁️ Trx tersimpan:', newTrx.id); }
         else updateCloudStatus(false);
@@ -1432,8 +1420,33 @@ function updateHistoryUIForSelection() {
 }
 
 function toggleSelectAllHistory(checkbox) {
-    document.querySelectorAll('.history-checkbox-item').forEach(cb => { cb.checked = checkbox.checked; });
+    document.querySelectorAll('.history-checkbox-item').forEach(cb => {
+        cb.checked = checkbox.checked;
+        const card = cb.closest('.history-card');
+        if (card) applyCardSelectionStyle(card, checkbox.checked);
+    });
 }
+
+/* ✅ NEW: helper styles & state */
+function applyCardSelectionStyle(card, isSelected) {
+    if (isSelected) {
+        card.style.background = 'var(--accent-light)';
+        card.style.borderColor = 'var(--accent)';
+    } else {
+        card.style.background = 'var(--card-bg)';
+        card.style.borderColor = 'var(--border)';
+    }
+}
+
+function updateSelectAllState() {
+    const allCb = document.querySelectorAll('.history-checkbox-item');
+    const checkedCb = document.querySelectorAll('.history-checkbox-item:checked');
+    const selectAll = document.getElementById('select-all-history');
+    if (selectAll) {
+        selectAll.checked = (allCb.length > 0 && allCb.length === checkedCb.length);
+    }
+}
+
 function openDeleteHistoryModal() {
     if (currentUserRole !== 'admin') return;
     document.getElementById('delete-history-modal').style.display = 'flex';
@@ -1502,9 +1515,11 @@ function renderHistory() {
         const cleanDate = normalizeTrxDate(trx.date);
         const displayDate = cleanDate && trx.time ? cleanDate + ' • ' + trx.time : cleanDate || trx.time || '';
         return `
-        <div style="display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); ${trx.isVoid ? 'opacity: 0.6;' : ''}">
-            ${isHistorySelectionMode ? `<input type="checkbox" class="history-checkbox-item custom-theme-checkbox" value="${trx.id}" style="width: 18px; height: 18px; cursor: pointer; display: block !important;">` : ''}
-            <div style="flex: 1; cursor: ${isHistorySelectionMode ? 'default' : 'pointer'};" data-trx-id="${trx.id}">
+        <div class="history-card" data-trx-id="${trx.id}" style="display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease; ${trx.isVoid ? 'opacity: 0.6;' : ''}">
+            ${isHistorySelectionMode ? `
+                <input type="checkbox" class="history-checkbox-item custom-theme-checkbox" value="${trx.id}" style="width: 18px; height: 18px; cursor: pointer; display: block !important; pointer-events: none; flex-shrink: 0;">
+            ` : ''}
+            <div style="flex: 1;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <strong style="font-size: 13px; color: var(--text-main); text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
                         ${trx.id} ${trx.isVoid ? '<span style="color:var(--danger); font-size:10px;">(VOID)</span>' : ''}
@@ -1519,10 +1534,20 @@ function renderHistory() {
         </div>
         `;
     }).join('');
-    container.querySelectorAll('[data-trx-id]').forEach(el => {
-        el.addEventListener('click', () => {
-            if (isHistorySelectionMode) return;
-            const trxId = el.getAttribute('data-trx-id');
+
+    // Attach click handler ke seluruh card
+    container.querySelectorAll('.history-card').forEach(card => {
+        card.addEventListener('click', () => {
+            if (isHistorySelectionMode) {
+                const checkbox = card.querySelector('.history-checkbox-item');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    applyCardSelectionStyle(card, checkbox.checked);
+                    updateSelectAllState();
+                }
+                return;
+            }
+            const trxId = card.getAttribute('data-trx-id');
             const trx = transactionHistory.find(t => t.id === trxId);
             if (trx) showReceiptModal(trx);
         });
