@@ -9,13 +9,13 @@ window.APP_CONFIG = {
     API_TOKEN: 'KalaSpace2025',
 
     // ==== BRANDING TOKO ====
-    STORE_NAME:   'Kala Space Cafe',
+    STORE_NAME:   'Sate Maringgi Pak Fazar',
     STORE_SLOGAN: 'Selamat Datang! Silahkan masuk ke akun anda.',
     STORE_LOGO:   '',
 
     // ==== PAJAK & MATA UANG ====
     CURRENCY:     'Rp',
-    TAX_PERCENT:  10,
+    TAX_PERCENT:  0,
 
     // ==== FITUR TOGGLE ====
     ENABLE_KITCHEN_PRINT:  true,
