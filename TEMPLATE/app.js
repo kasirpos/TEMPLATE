@@ -1,14 +1,11 @@
 /* =========================================================
    POS KASIR - APP LOGIC (FINAL)
-   - Date/time fixed
-   - Delete permanent
-   - Empty state centered (cart, bill, history)
-   - Dynamic title
-   - Auto sync 30s + manual sync button
+   Fix: tax configurable, shift receipt branding, date/time,
+   delete permanent, empty state, dynamic title, auto sync
    ========================================================= */
 
 /* ==========================================
-   0. API CLIENT - GOOGLE APPS SCRIPT
+   0. API CLIENT
    ========================================== */
 const CFG = window.APP_CONFIG || {};
 const API_URL   = CFG.API_URL   || '';
@@ -84,7 +81,6 @@ async function loadFromCloud() {
         updateCloudStatus(false);
         return false;
     }
-
     if (cloud.products && cloud.products.length) {
         products = cloud.products;
         localStorage.setItem('luxe_pos_products', JSON.stringify(products));
@@ -110,29 +106,16 @@ function hashData(obj) {
 }
 
 async function silentRefresh() {
-    // Skip kalau user sedang input
     const activeTag = document.activeElement?.tagName;
-    if (activeTag && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) {
-        return;
-    }
-    
-    // Skip kalau manual sync sedang jalan
+    if (activeTag && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) return;
     const syncBtn = document.getElementById('sync-btn');
     if (syncBtn && syncBtn.classList.contains('syncing')) return;
-    
-    // Skip kalau sedang ada request lain
     if (__refreshLock) return;
     __refreshLock = true;
-    
     try {
         const fresh = await api.getAll();
-        if (!fresh) {
-            updateCloudStatus(false);
-            return;
-        }
-        
+        if (!fresh) { updateCloudStatus(false); return; }
         let hasChange = false;
-        
         if (fresh.products && hashData(fresh.products) !== hashData(products)) {
             products = fresh.products;
             localStorage.setItem('luxe_pos_products', JSON.stringify(products));
@@ -148,7 +131,6 @@ async function silentRefresh() {
             localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
             hasChange = true;
         }
-        
         if (hasChange) {
             console.log('🔄 Data berubah dari cloud — render ulang');
             renderProducts(products, 'menu-items');
@@ -156,14 +138,9 @@ async function silentRefresh() {
             renderHistory();
             renderSavedBills();
             updateDashboardMetrics();
-            if (typeof renderCouponManagement === 'function' && currentUserRole === 'admin') {
-                renderCouponManagement();
-            }
-            if (document.getElementById('laporan')?.classList.contains('active')) {
-                renderLaporanData();
-            }
+            if (typeof renderCouponManagement === 'function' && currentUserRole === 'admin') renderCouponManagement();
+            if (document.getElementById('laporan')?.classList.contains('active')) renderLaporanData();
         }
-        
         updateCloudStatus(true);
     } catch (err) {
         console.error('❌ Silent refresh error:', err);
@@ -175,20 +152,16 @@ async function silentRefresh() {
 async function manualSync() {
     const btn = document.getElementById('sync-btn');
     if (!btn || btn.classList.contains('syncing')) return;
-    
     btn.classList.remove('success', 'error');
     btn.classList.add('syncing');
-    
     try {
         const fresh = await api.getAll();
-        
         if (!fresh) {
             updateCloudStatus(false);
             btn.classList.add('error');
             setTimeout(() => btn.classList.remove('error'), 2000);
             return;
         }
-        
         if (fresh.products) {
             products = fresh.products;
             localStorage.setItem('luxe_pos_products', JSON.stringify(products));
@@ -201,62 +174,39 @@ async function manualSync() {
             coupons = fresh.coupons;
             localStorage.setItem('luxe_pos_coupons', JSON.stringify(coupons));
         }
-        
-        // Render ulang semua UI
         renderProducts(products, 'menu-items');
         renderPopularItems();
         renderHistory();
         renderSavedBills();
         updateDashboardMetrics();
-        
-        if (typeof renderCouponManagement === 'function' && currentUserRole === 'admin') {
-            renderCouponManagement();
-        }
-        if (document.getElementById('laporan')?.classList.contains('active')) {
-            renderLaporanData();
-        }
-        
+        if (typeof renderCouponManagement === 'function' && currentUserRole === 'admin') renderCouponManagement();
+        if (document.getElementById('laporan')?.classList.contains('active')) renderLaporanData();
         updateCloudStatus(true);
-        
-        // Feedback visual
         btn.classList.add('success');
         setTimeout(() => btn.classList.remove('success'), 1200);
-        
         console.log('✅ Manual sync OK');
     } catch (err) {
         console.error('❌ Manual sync error:', err);
         btn.classList.add('error');
         setTimeout(() => btn.classList.remove('error'), 2000);
     } finally {
-        setTimeout(() => {
-            btn.classList.remove('syncing');
-        }, 400);
+        setTimeout(() => btn.classList.remove('syncing'), 400);
     }
 }
 
 function setupAutoSync() {
-    // 1. Saat tab kembali aktif (dari app lain)
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             console.log('👁️ Tab aktif — sync dari cloud');
             silentRefresh();
         }
     });
-    
-    // 2. Saat window dapat focus
-    window.addEventListener('focus', () => {
-        silentRefresh();
-    });
-    
-    // 3. Saat koneksi kembali online
+    window.addEventListener('focus', () => silentRefresh());
     window.addEventListener('online', () => {
         console.log('🌐 Kembali online — sync dari cloud');
         silentRefresh();
     });
-    
-    // 4. Polling tiap 30 detik
     setInterval(silentRefresh, 30000);
-    
     console.log('✅ Auto sync aktif (30s polling + focus + visibility + online)');
 }
 
@@ -284,6 +234,17 @@ function applyBranding() {
     const badge = document.getElementById('version-badge');
     if (badge && CFG.VERSION) badge.textContent = CFG.VERSION;
 
+    // ✨ Update label pajak di UI
+    const taxPercent = CFG.TAX_PERCENT || 10;
+    const taxLabelEl = document.getElementById('tax-label');
+    if (taxLabelEl) taxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
+    const modalTaxLabelEl = document.getElementById('modal-tax-label');
+    if (modalTaxLabelEl) modalTaxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
+
+    // ✨ Update nama toko di struk rekap shift
+    const srStoreNameEl = document.getElementById('sr-store-name');
+    if (srStoreNameEl) srStoreNameEl.textContent = STORE_NAME.toUpperCase();
+
     const waEl = document.getElementById('contact-wa');
     if (waEl && CFG.SUPPORT_WA) {
         waEl.innerHTML = '<i class="ri-whatsapp-line" style="color: var(--success);"></i> +' + CFG.SUPPORT_WA;
@@ -295,7 +256,7 @@ function applyBranding() {
 }
 
 /* ==========================================
-   1. UTILS & HELPER FUNCTIONS
+   1. UTILS
    ========================================== */
 function getLocalDateString() {
     const d = new Date();
@@ -314,28 +275,18 @@ function getCurrentYearMonth() {
 
 function normalizeTrxDate(val) {
     if (!val) return '';
-    if (typeof val === 'string') {
-        return val.substring(0, 10);
-    }
+    if (typeof val === 'string') return val.substring(0, 10);
     return '';
 }
 
 function updateGreeting() {
     const currentHour = new Date().getHours();
     let greeting = "Selamat Pagi";
-    
-    if (currentHour >= 12 && currentHour < 15) {
-        greeting = "Selamat Siang";
-    } else if (currentHour >= 15 && currentHour < 18) {
-        greeting = "Selamat Sore";
-    } else if (currentHour >= 18) {
-        greeting = "Selamat Malam";
-    }
-    
+    if (currentHour >= 12 && currentHour < 15) greeting = "Selamat Siang";
+    else if (currentHour >= 15 && currentHour < 18) greeting = "Selamat Sore";
+    else if (currentHour >= 18) greeting = "Selamat Malam";
     const shiftElement = document.getElementById('current-cashier-shift');
-    if (shiftElement) {
-        shiftElement.innerText = greeting;
-    }
+    if (shiftElement) shiftElement.innerText = greeting;
 }
 
 /* ==========================================
@@ -343,54 +294,31 @@ function updateGreeting() {
    ========================================== */
 function openModal() {
     const modal = document.getElementById('receipt-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('active');
-    }
+    if (modal) { modal.style.display = 'flex'; modal.classList.add('active'); }
 }
-
 function closeModal() {
     const modal = document.getElementById('receipt-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('active');
-    }
+    if (modal) { modal.style.display = 'none'; modal.classList.remove('active'); }
 }
-
 function openKitchenModal() {
     const modal = document.getElementById('kitchen-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('active');
-    }
+    if (modal) { modal.style.display = 'flex'; modal.classList.add('active'); }
 }
-
 function closeKitchenModal() {
     const modal = document.getElementById('kitchen-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('active');
-    }
+    if (modal) { modal.style.display = 'none'; modal.classList.remove('active'); }
 }
-
 function openShiftReceiptModal() {
     const modal = document.getElementById('shift-receipt-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('active');
-    }
+    if (modal) { modal.style.display = 'flex'; modal.classList.add('active'); }
 }
-
 function closeShiftReceiptModal() {
     const modal = document.getElementById('shift-receipt-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        modal.classList.remove('active');
-    }
+    if (modal) { modal.style.display = 'none'; modal.classList.remove('active'); }
 }
 
 /* ==========================================
-   3. STATE & GLOBAL VARIABLES
+   3. STATE
    ========================================== */
 const defaultProducts = [
     { id: 1, name: "espresso single", category: "Drink", price: 18000, hpp: 5000, discountType: "percent", discountValue: 0, icon: "ri-cup-line", image: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=300&q=80" },
@@ -406,13 +334,11 @@ let transactionHistory = JSON.parse(localStorage.getItem('luxe_pos_history')) ||
 let savedBills = JSON.parse(localStorage.getItem('luxe_pos_saved_bills')) || [];
 let currentPinCode = localStorage.getItem('luxe_pos_pin') || (CFG.DEFAULT_PIN || "1234");
 
-const defaultCoupons = [
-    { code: "JumatBerkah", type: "percent", value: 10, limit: 100, used: 0, active: true }
-];
+const defaultCoupons = [{ code: "JumatBerkah", type: "percent", value: 10, limit: 100, used: 0, active: true }];
 let coupons = JSON.parse(localStorage.getItem('luxe_pos_coupons')) || defaultCoupons;
 let activeAppliedCoupon = null;
 
-let currentUserRole = "kasir"; 
+let currentUserRole = "kasir";
 let cart = [];
 let grandTotal = 0;
 let couponDiscountAmount = 0;
@@ -429,7 +355,7 @@ const payAudio = new Audio('https://res.cloudinary.com/zjaiuouq/video/upload/v17
 payAudio.preload = 'auto';
 
 /* ==========================================
-   4. STORAGE & THEME MANAGEMENT
+   4. STORAGE & THEME
    ========================================== */
 function saveState() {
     localStorage.setItem('luxe_pos_products', JSON.stringify(products));
@@ -471,41 +397,30 @@ function syncUIElements(colorHex) {
     const previewBox = document.getElementById('accent-preview-box');
     const hexLabel = document.getElementById('accent-hex-label');
     const hexInput = document.getElementById('accent-hex-input');
-    
     const formattedHex = colorHex.toUpperCase();
-    
     if (previewBox) previewBox.style.backgroundColor = colorHex;
     if (hexLabel) hexLabel.textContent = formattedHex;
-    if (hexInput && document.activeElement !== hexInput) {
-        hexInput.value = formattedHex;
-    }
+    if (hexInput && document.activeElement !== hexInput) hexInput.value = formattedHex;
 }
 
 function updateAppAccent(colorHex) {
     if (!colorHex || !colorHex.startsWith('#')) return;
-    
     const cleanHex = colorHex.toLowerCase().trim();
-    
     if (cleanHex === '#ffffff' || cleanHex === '#fff') {
         const currentSaved = localStorage.getItem('--accent') || DEFAULT_ACCENT;
         syncUIElements(currentSaved);
         return;
     }
-    
     const accentLight = hexToRgba(colorHex, 0.15);
-    
     document.documentElement.style.setProperty('--accent', colorHex);
     document.documentElement.style.setProperty('--accent-light', accentLight);
-    
     const appWrapper = document.getElementById('app-wrapper');
     if (appWrapper) {
         appWrapper.style.setProperty('--accent', colorHex);
         appWrapper.style.setProperty('--accent-light', accentLight);
     }
-    
     localStorage.setItem('--accent', colorHex);
     localStorage.setItem('--accent-light', accentLight);
-    
     syncUIElements(colorHex);
     highlightActivePreset(colorHex);
 }
@@ -513,22 +428,17 @@ function updateAppAccent(colorHex) {
 function handleHexInput(val) {
     let cleanHex = val.trim();
     if (!cleanHex.startsWith('#')) cleanHex = '#' + cleanHex;
-    
-    if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(cleanHex)) {
-        updateAppAccent(cleanHex);
-    }
+    if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(cleanHex)) updateAppAccent(cleanHex);
 }
 
 function initTheme() {
     const savedTheme = localStorage.getItem('luxe_pos_theme');
     const wrapper = document.getElementById('app-wrapper');
     const themeIcon = document.getElementById('theme-icon');
-    
     if (savedTheme === 'dark' && wrapper) {
         wrapper.setAttribute('data-theme', 'dark');
         if (themeIcon) themeIcon.className = "ri-sun-line";
     }
-    
     const savedAccent = localStorage.getItem('--accent') || DEFAULT_ACCENT;
     updateAppAccent(savedAccent);
 }
@@ -537,9 +447,7 @@ function toggleTheme() {
     const wrapper = document.getElementById('app-wrapper');
     const themeIcon = document.getElementById('theme-icon');
     if (!wrapper) return;
-    
     const currentTheme = wrapper.getAttribute('data-theme');
-    
     if (currentTheme === 'dark') {
         wrapper.removeAttribute('data-theme');
         if (themeIcon) themeIcon.className = "ri-moon-line";
@@ -549,48 +457,21 @@ function toggleTheme() {
         if (themeIcon) themeIcon.className = "ri-sun-line";
         localStorage.setItem('luxe_pos_theme', 'dark');
     }
-    
     const savedAccent = localStorage.getItem('--accent') || DEFAULT_ACCENT;
     updateAppAccent(savedAccent);
-    
-    if (typeof updateDashboardMetrics === 'function') {
-        updateDashboardMetrics();
-    }
+    if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
 }
 
 function resetLocalStorageData() {
-    if (currentUserRole !== 'admin') {
-        alert("Akses ditolak! Fitur ini hanya dapat diakses oleh admin.");
-        return;
-    }
+    if (currentUserRole !== 'admin') { alert("Akses ditolak!"); return; }
     document.getElementById('reset-modal').style.display = 'flex';
 }
-
-function closeResetModal() {
-    document.getElementById('reset-modal').style.display = 'none';
-}
-
-function confirmResetLocalStorageData() {
-    closeResetModal();
-    localStorage.clear();
-    location.reload();
-}
+function closeResetModal() { document.getElementById('reset-modal').style.display = 'none'; }
+function confirmResetLocalStorageData() { closeResetModal(); localStorage.clear(); location.reload(); }
 
 function exportLocalStorageJSON() {
-    if (currentUserRole !== 'admin') {
-        alert("Akses ditolak!");
-        return;
-    }
-
-    const allData = {
-        products: products,
-        history: transactionHistory,
-        savedBills: savedBills,
-        coupons: coupons,
-        pin: currentPinCode,
-        theme: localStorage.getItem('luxe_pos_theme') || 'light'
-    };
-
+    if (currentUserRole !== 'admin') { alert("Akses ditolak!"); return; }
+    const allData = { products, history: transactionHistory, savedBills, coupons, pin: currentPinCode, theme: localStorage.getItem('luxe_pos_theme') || 'light' };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
@@ -601,22 +482,15 @@ function exportLocalStorageJSON() {
 }
 
 function triggerImportJSON() {
-    if (currentUserRole !== 'admin') {
-        alert("Akses ditolak!");
-        return;
-    }
+    if (currentUserRole !== 'admin') { alert("Akses ditolak!"); return; }
     const input = document.getElementById('json-import-input');
     if (input) input.click();
 }
 
 function importLocalStorageJSON(event) {
-    if (currentUserRole !== 'admin') {
-        alert("Akses ditolak!");
-        return;
-    }
+    if (currentUserRole !== 'admin') { alert("Akses ditolak!"); return; }
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
@@ -626,28 +500,21 @@ function importLocalStorageJSON(event) {
             if (data.savedBills) localStorage.setItem('luxe_pos_saved_bills', JSON.stringify(data.savedBills));
             if (data.coupons) localStorage.setItem('luxe_pos_coupons', JSON.stringify(data.coupons));
             if (data.pin) localStorage.setItem('luxe_pos_pin', data.pin);
-            
             alert("Data berhasil di-import!");
             location.reload();
-        } catch (err) {
-            alert("Format file JSON tidak valid!");
-        }
+        } catch (err) { alert("Format file JSON tidak valid!"); }
     };
     reader.readAsText(file);
     event.target.value = '';
 }
 
 /* ==========================================
-   5. AUTHENTICATION & NAVIGATION
+   5. AUTH
    ========================================== */
 function handleLogin() {
     const pin = document.getElementById('kasir-pin').value;
-    if (pin !== currentPinCode) {
-        alert("PIN salah!");
-        return;
-    }
+    if (pin !== currentPinCode) { alert("PIN salah!"); return; }
     const selectedUser = document.getElementById('kasir-name').value;
-    
     if (selectedUser === 'admin') {
         currentUserRole = 'admin';
         document.getElementById('profile-name').innerText = 'admin';
@@ -655,27 +522,16 @@ function handleLogin() {
         currentUserRole = 'kasir';
         document.getElementById('profile-name').innerText = selectedUser;
     }
-
     applyRolePermissions();
     updateGreeting();
-    
     const filterDateInput = document.getElementById('filter-date');
-    if (filterDateInput && !filterDateInput.value) {
-        filterDateInput.value = getLocalDateString();
-    }
-
+    if (filterDateInput && !filterDateInput.value) filterDateInput.value = getLocalDateString();
     updateDashboardMetrics();
     document.getElementById('login-view').style.display = 'none';
 }
 
-function handleLogout() {
-    document.getElementById('logout-modal').style.display = 'flex';
-}
-
-function closeLogoutModal() {
-    document.getElementById('logout-modal').style.display = 'none';
-}
-
+function handleLogout() { document.getElementById('logout-modal').style.display = 'flex'; }
+function closeLogoutModal() { document.getElementById('logout-modal').style.display = 'none'; }
 function confirmLogout() {
     closeLogoutModal();
     switchTab('home');
@@ -690,7 +546,6 @@ function applyRolePermissions() {
     const adminStatsContainer = document.getElementById('admin-stats-container');
     const filterDateInput = document.getElementById('filter-date');
     const laporanShortcutContainer = document.getElementById('laporan-shortcut-container');
-    
     const homeTitle = document.getElementById('home-section-title');
     const popularItems = document.getElementById('popular-items');
     const managementContainer = document.getElementById('admin-management-container');
@@ -701,8 +556,7 @@ function applyRolePermissions() {
         if (storageMenu) storageMenu.style.display = 'block';
         if (adminStatsContainer) adminStatsContainer.style.display = 'block';
         if (filterDateInput) filterDateInput.style.display = 'inline-block';
-        if (laporanShortcutContainer) laporanShortcutContainer.style.display = 'grid'; 
-        
+        if (laporanShortcutContainer) laporanShortcutContainer.style.display = 'grid';
         if (homeTitle) homeTitle.textContent = 'Management Toko';
         if (popularItems) popularItems.style.display = 'none';
         if (managementContainer) managementContainer.style.display = 'grid';
@@ -713,12 +567,10 @@ function applyRolePermissions() {
         if (adminStatsContainer) adminStatsContainer.style.display = 'none';
         if (filterDateInput) filterDateInput.style.display = 'none';
         if (laporanShortcutContainer) laporanShortcutContainer.style.display = 'none';
-        
         if (homeTitle) homeTitle.textContent = 'Populer Hari Ini';
         if (popularItems) popularItems.style.display = 'grid';
         if (managementContainer) managementContainer.style.display = 'none';
     }
-    
     renderProducts(products, 'menu-items');
     renderPopularItems();
 }
@@ -726,33 +578,21 @@ function applyRolePermissions() {
 function switchTab(tabId) {
     document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    
     const targetView = document.getElementById(tabId);
     if (targetView) targetView.classList.add('active');
-    
     const tabs = ['home', 'menu', 'order', 'history', 'profile', 'laporan'];
     const activeNavIndex = tabs.indexOf(tabId);
     if (activeNavIndex !== -1) {
         const navItems = document.querySelectorAll('.nav-item');
         if (navItems[activeNavIndex]) navItems[activeNavIndex].classList.add('active');
     }
-    
-    if (tabId === 'home') {
-        updateDashboardMetrics();
-        renderPopularItems();
-    } else if (tabId === 'saved-bills') {
-        renderSavedBills();
-    } else if (tabId === 'history') {
-        renderHistory();
-    } else if (tabId === 'laporan') {
-        renderLaporanData();
-    } else if (tabId === 'hpp-margin') {
-        if (currentUserRole === 'admin') renderHPPManagement();
-    } else if (tabId === 'kupon-diskon') {
-        if (currentUserRole === 'admin') renderCouponManagement();
-    } else if (tabId === 'diskon-produk') {
-        if (currentUserRole === 'admin') renderProductDiscountManagement();
-    }
+    if (tabId === 'home') { updateDashboardMetrics(); renderPopularItems(); }
+    else if (tabId === 'saved-bills') renderSavedBills();
+    else if (tabId === 'history') renderHistory();
+    else if (tabId === 'laporan') renderLaporanData();
+    else if (tabId === 'hpp-margin') { if (currentUserRole === 'admin') renderHPPManagement(); }
+    else if (tabId === 'kupon-diskon') { if (currentUserRole === 'admin') renderCouponManagement(); }
+    else if (tabId === 'diskon-produk') { if (currentUserRole === 'admin') renderProductDiscountManagement(); }
 }
 
 function toggleProfileAccordion(itemId) {
@@ -766,16 +606,8 @@ function toggleProfileAccordion(itemId) {
 function updatePassword() {
     const oldPinInput = document.getElementById('old-pin').value;
     const newPinInput = document.getElementById('new-pin').value.trim();
-
-    if (oldPinInput !== currentPinCode) {
-        alert("PIN lama salah!");
-        return;
-    }
-    if (!newPinInput || newPinInput.length < 4) {
-        alert("PIN baru minimal harus 4 karakter/angka!");
-        return;
-    }
-
+    if (oldPinInput !== currentPinCode) { alert("PIN lama salah!"); return; }
+    if (!newPinInput || newPinInput.length < 4) { alert("PIN baru minimal 4 karakter!"); return; }
     currentPinCode = newPinInput;
     saveState();
     alert("PIN / Password berhasil diperbarui!");
@@ -791,9 +623,7 @@ function calculateFinalPrice(p) {
     const originalPrice = p.price || 0;
     const discType = p.discountType || 'percent';
     const discVal = p.discountValue || 0;
-
     if (discVal <= 0) return originalPrice;
-
     if (discType === 'percent') {
         const cut = (originalPrice * discVal) / 100;
         return Math.max(0, originalPrice - cut);
@@ -805,7 +635,6 @@ function calculateFinalPrice(p) {
 function renderProducts(items, targetId) {
     const container = document.getElementById(targetId);
     if (!container) return;
-    
     if (items.length === 0) {
         container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 12px; margin: 20px 0;">Menu tidak ditemukan.</p>';
         return;
@@ -813,7 +642,6 @@ function renderProducts(items, targetId) {
     container.innerHTML = items.map(p => {
         const finalPrice = calculateFinalPrice(p);
         const hasDiscount = finalPrice < p.price;
-
         return `
         <div class="product-card">
             ${currentUserRole === 'admin' ? `
@@ -831,9 +659,7 @@ function renderProducts(items, targetId) {
                     ${hasDiscount ? `
                         <span style="text-decoration: line-through; font-size: 10px; color: var(--text-muted); display: block;">Rp ${p.price.toLocaleString('id-id')}</span>
                         <span style="color: var(--accent);">Rp ${finalPrice.toLocaleString('id-id')}</span>
-                    ` : `
-                        <span>Rp ${p.price.toLocaleString('id-id')}</span>
-                    `}
+                    ` : `<span>Rp ${p.price.toLocaleString('id-id')}</span>`}
                 </div>
                 <button class="add-btn" onclick="addToCart(${p.id}, event)"><i class="ri-add-line"></i></button>
             </div>
@@ -847,22 +673,13 @@ function renderPopularItems() {
         renderProducts(products.slice(0, 4), 'popular-items');
         return;
     }
-
     const itemSales = {};
     transactionHistory.forEach(trx => {
         if (trx.isVoid) return;
         if (!Array.isArray(trx.items)) return;
-        trx.items.forEach(item => {
-            itemSales[item.id] = (itemSales[item.id] || 0) + item.qty;
-        });
+        trx.items.forEach(item => { itemSales[item.id] = (itemSales[item.id] || 0) + item.qty; });
     });
-
-    const sortedProducts = [...products].sort((a, b) => {
-        const salesA = itemSales[a.id] || 0;
-        const salesB = itemSales[b.id] || 0;
-        return salesB - salesA;
-    });
-
+    const sortedProducts = [...products].sort((a, b) => (itemSales[b.id] || 0) - (itemSales[a.id] || 0));
     renderProducts(sortedProducts.slice(0, 4), 'popular-items');
 }
 
@@ -877,18 +694,13 @@ function handleSearch(query) {
     const trimmedQuery = query.trim().toLowerCase();
     if (trimmedQuery !== '') {
         const activeTab = document.querySelector('.view.active').id;
-        if (activeTab !== 'menu') {
-            switchTab('menu');
-        }
+        if (activeTab !== 'menu') switchTab('menu');
     }
     const filtered = products.filter(p => p.name.toLowerCase().includes(trimmedQuery));
     renderProducts(filtered, 'menu-items');
 }
 
-function openAddMenuModal() { 
-    document.getElementById('add-menu-modal').style.display = 'flex'; 
-}
-
+function openAddMenuModal() { document.getElementById('add-menu-modal').style.display = 'flex'; }
 function closeAddMenuModal() {
     document.getElementById('add-menu-modal').style.display = 'none';
     document.getElementById('new-menu-name').value = '';
@@ -903,24 +715,16 @@ function addNewProduct() {
     const price = parseFloat(document.getElementById('new-menu-price').value);
     const imageUrl = document.getElementById('new-menu-image').value.trim();
     const hpp = parseFloat(document.getElementById('new-menu-hpp').value) || 0;
-
-    if (!name || isNaN(price) || price <= 0) {
-        alert('Silakan isi nama dan harga menu dengan benar!');
-        return;
-    }
-
+    if (!name || isNaN(price) || price <= 0) { alert('Isi nama dan harga dengan benar!'); return; }
     let icon = "ri-cup-line";
     if (category === "Food") icon = "ri-restaurant-line";
     if (category === "Snack") icon = "ri-goblet-line";
     if (category === "Dessert") icon = "ri-cake-3-line";
-
     const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
     const newProduct = { id: newId, name, category, price, hpp, discountType: "percent", discountValue: 0, icon, image: imageUrl };
     products.push(newProduct);
-
     saveState();
     api.saveProduct(newProduct);
-
     closeAddMenuModal();
     renderProducts(products, 'menu-items');
     renderPopularItems();
@@ -929,20 +733,16 @@ function addNewProduct() {
 function openEditMenuModal(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
-
     document.getElementById('edit-menu-id').value = product.id;
     document.getElementById('edit-menu-hpp').value = product.hpp || 0;
     document.getElementById('edit-menu-name').value = product.name;
     document.getElementById('edit-menu-category').value = product.category;
     document.getElementById('edit-menu-price').value = product.price;
     document.getElementById('edit-menu-image').value = product.image || '';
-
     document.getElementById('edit-menu-modal').style.display = 'flex';
 }
 
-function closeEditMenuModal() {
-    document.getElementById('edit-menu-modal').style.display = 'none';
-}
+function closeEditMenuModal() { document.getElementById('edit-menu-modal').style.display = 'none'; }
 
 function saveEditProduct() {
     const id = parseInt(document.getElementById('edit-menu-id').value);
@@ -951,21 +751,14 @@ function saveEditProduct() {
     const price = parseFloat(document.getElementById('edit-menu-price').value);
     const imageUrl = document.getElementById('edit-menu-image').value.trim();
     const hpp = parseFloat(document.getElementById('edit-menu-hpp').value) || 0;
-    
-    if (!name || isNaN(price) || price <= 0) {
-        alert('Silakan isi nama dan harga menu dengan benar!');
-        return;
-    }
-    
+    if (!name || isNaN(price) || price <= 0) { alert('Isi nama dan harga dengan benar!'); return; }
     const productIndex = products.findIndex(p => p.id === id);
     if (productIndex !== -1) {
         let icon = "ri-cup-line";
         if (category === "Food") icon = "ri-restaurant-line";
         if (category === "Snack") icon = "ri-goblet-line";
         if (category === "Dessert") icon = "ri-cake-3-line";
-        
         products[productIndex] = { ...products[productIndex], name, category, price, hpp, icon, image: imageUrl };
-        
         saveState();
         api.saveProduct(products[productIndex]);
         closeEditMenuModal();
@@ -977,17 +770,14 @@ function saveEditProduct() {
 function openDeleteMenuModal(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
-
     productToDeleteId = productId;
-    document.getElementById('delete-menu-text').innerText = 'Apakah Anda yakin ingin menghapus menu "' + product.name + '"?';
+    document.getElementById('delete-menu-text').innerText = 'Yakin hapus menu "' + product.name + '"?';
     document.getElementById('delete-menu-modal').style.display = 'flex';
 }
-
 function closeDeleteMenuModal() {
     productToDeleteId = null;
     document.getElementById('delete-menu-modal').style.display = 'none';
 }
-
 function confirmDeleteProduct() {
     if (productToDeleteId !== null) {
         const deletedId = productToDeleteId;
@@ -1003,18 +793,15 @@ function confirmDeleteProduct() {
 function renderHPPManagement() {
     const container = document.getElementById('hpp-product-list');
     if (!container) return;
-
     if (products.length === 0) {
         container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada produk.</p>';
         return;
     }
-
     container.innerHTML = products.map(p => {
         const hppVal = p.hpp || 0;
         const priceVal = calculateFinalPrice(p);
         const profit = priceVal - hppVal;
         const marginPct = priceVal > 0 ? ((profit / priceVal) * 100).toFixed(1) : 0;
-
         return `
             <div style="background: var(--card-bg); padding: 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1048,28 +835,23 @@ function saveHPPChanges() {
         const id = parseInt(input.getAttribute('data-id'));
         const newHpp = parseFloat(input.value) || 0;
         const prodIndex = products.findIndex(p => p.id === id);
-        if (prodIndex !== -1) {
-            products[prodIndex].hpp = newHpp;
-        }
+        if (prodIndex !== -1) products[prodIndex].hpp = newHpp;
     });
-
     saveState();
     renderHPPManagement();
-    alert("Data HPP dan Margin Produk berhasil diperbarui!");
+    alert("Data HPP berhasil diperbarui!");
 }
 
 /* ==========================================
-   6B. KUPON & DISKON PRODUK
+   6B. KUPON & DISKON
    ========================================== */
 function renderCouponManagement() {
     const container = document.getElementById('coupon-list');
     if (!container) return;
-
     if (coupons.length === 0) {
         container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada kupon.</p>';
         return;
     }
-
     container.innerHTML = coupons.map((c, index) => `
         <div style="background: var(--card-bg); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -1090,28 +872,15 @@ function addOrUpdateCoupon() {
     const typeInput = document.getElementById('new-coupon-type').value;
     const valInput = parseFloat(document.getElementById('new-coupon-val').value) || 0;
     const limitInput = parseInt(document.getElementById('new-coupon-limit').value) || 0;
-
-    if (!codeInput || valInput <= 0) {
-        alert('Silakan masukan kode kupon dan nilai diskon yang valid!');
-        return;
-    }
-
+    if (!codeInput || valInput <= 0) { alert('Isi kode kupon & nilai valid!'); return; }
     const existingIndex = coupons.findIndex(c => c.code.toLowerCase() === codeInput.toLowerCase());
     if (existingIndex !== -1) {
         coupons[existingIndex].type = typeInput;
         coupons[existingIndex].value = valInput;
         coupons[existingIndex].limit = limitInput;
     } else {
-        coupons.push({
-            code: codeInput,
-            type: typeInput,
-            value: valInput,
-            limit: limitInput,
-            used: 0,
-            active: true
-        });
+        coupons.push({ code: codeInput, type: typeInput, value: valInput, limit: limitInput, used: 0, active: true });
     }
-
     saveState();
     renderCouponManagement();
     document.getElementById('new-coupon-code').value = '';
@@ -1131,12 +900,10 @@ function deleteCoupon(index) {
 function renderProductDiscountManagement() {
     const container = document.getElementById('product-discount-list');
     if (!container) return;
-
     if (products.length === 0) {
         container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-muted);">Belum ada produk.</p>';
         return;
     }
-
     container.innerHTML = products.map(p => `
         <div style="background: var(--card-bg); padding: 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; width: 100%; box-sizing: border-box;">
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
@@ -1155,27 +922,18 @@ function renderProductDiscountManagement() {
 }
 
 function saveProductDiscountChanges() {
-    const typeInputs = document.querySelectorAll('.disc-type-input');
-    const valInputs = document.querySelectorAll('.disc-val-input');
-
-    typeInputs.forEach(input => {
+    document.querySelectorAll('.disc-type-input').forEach(input => {
         const id = parseInt(input.getAttribute('data-id'));
         const type = input.value;
         const prodIndex = products.findIndex(p => p.id === id);
-        if (prodIndex !== -1) {
-            products[prodIndex].discountType = type;
-        }
+        if (prodIndex !== -1) products[prodIndex].discountType = type;
     });
-
-    valInputs.forEach(input => {
+    document.querySelectorAll('.disc-val-input').forEach(input => {
         const id = parseInt(input.getAttribute('data-id'));
         const val = parseFloat(input.value) || 0;
         const prodIndex = products.findIndex(p => p.id === id);
-        if (prodIndex !== -1) {
-            products[prodIndex].discountValue = val;
-        }
+        if (prodIndex !== -1) products[prodIndex].discountValue = val;
     });
-
     saveState();
     renderProducts(products, 'menu-items');
     renderPopularItems();
@@ -1186,69 +944,42 @@ function saveProductDiscountChanges() {
 function applyCouponInOrder() {
     const codeInput = document.getElementById('coupon-code-input');
     if (!codeInput) return;
-
     const code = codeInput.value.trim();
-    if (!code) {
-        activeAppliedCoupon = null;
-        updateCart();
-        return;
-    }
-
+    if (!code) { activeAppliedCoupon = null; updateCart(); return; }
     const foundCoupon = coupons.find(c => c.code.toLowerCase() === code.toLowerCase() && c.active);
-    
-    if (!foundCoupon) {
-        alert("Kode Kupon tidak ditemukan / tidak aktif!");
-        activeAppliedCoupon = null;
-        updateCart();
-        return;
-    }
-
-    if (foundCoupon.limit > 0 && foundCoupon.used >= foundCoupon.limit) {
-        alert("Batas penggunaan kupon ini telah habis!");
-        activeAppliedCoupon = null;
-        updateCart();
-        return;
-    }
-
+    if (!foundCoupon) { alert("Kode Kupon tidak ditemukan!"); activeAppliedCoupon = null; updateCart(); return; }
+    if (foundCoupon.limit > 0 && foundCoupon.used >= foundCoupon.limit) { alert("Batas kupon habis!"); activeAppliedCoupon = null; updateCart(); return; }
     activeAppliedCoupon = foundCoupon;
     alert('Kupon "' + foundCoupon.code + '" berhasil dipasang!');
     updateCart();
 }
 
 /* ==========================================
-   7. CART & ORDER SYSTEM
+   7. CART
    ========================================== */
 function animateFlyToCart(event) {
     if (!event) return;
     const btn = event.currentTarget || event.target;
     const btnRect = btn.getBoundingClientRect();
-    
     const cartNav = document.getElementById('order-tab-target');
     if (!cartNav) return;
     const cartRect = cartNav.getBoundingClientRect();
-    
     const flyer = document.createElement('div');
     flyer.className = 'flying-dot';
     flyer.innerHTML = '<i class="ri-add-line"></i>';
-    
     const startX = btnRect.left + (btnRect.width / 2) - 11;
     const startY = btnRect.top + (btnRect.height / 2) - 11;
-    
     flyer.style.left = startX + 'px';
     flyer.style.top = startY + 'px';
-    
     document.body.appendChild(flyer);
-    
     const targetX = cartRect.left + (cartRect.width / 2) - 11;
     const targetY = cartRect.top + (cartRect.height / 2) - 11;
-    
     requestAnimationFrame(() => {
         flyer.style.left = targetX + 'px';
         flyer.style.top = targetY + 'px';
         flyer.style.transform = 'scale(0.3)';
         flyer.style.opacity = '0.7';
     });
-    
     setTimeout(() => {
         flyer.remove();
         cartNav.classList.remove('cart-bounce');
@@ -1261,13 +992,9 @@ function addToCart(productId, event) {
     if (event) animateFlyToCart(event);
     const product = products.find(p => p.id === productId);
     const finalPrice = calculateFinalPrice(product);
-
     const existing = cart.find(item => item.id === productId);
-    if (existing) {
-        existing.qty++;
-    } else {
-        cart.push({ ...product, price: finalPrice, originalPrice: product.price, qty: 1 });
-    }
+    if (existing) existing.qty++;
+    else cart.push({ ...product, price: finalPrice, originalPrice: product.price, qty: 1 });
     updateCart();
 }
 
@@ -1275,9 +1002,7 @@ function updateQty(id, change) {
     const item = cart.find(i => i.id === id);
     if (item) {
         item.qty += change;
-        if (item.qty <= 0) {
-            cart = cart.filter(i => i.id !== id);
-        }
+        if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
     }
     updateCart();
 }
@@ -1286,34 +1011,22 @@ function clearCart() {
     if (cart.length === 0) return;
     document.getElementById('clear-bill-modal').style.display = 'flex';
 }
-
-function closeClearBillModal() {
-    document.getElementById('clear-bill-modal').style.display = 'none';
-}
-
-function confirmClearCart() {
-    closeClearBillModal();
-    clearCurrentCartState();
-}
+function closeClearBillModal() { document.getElementById('clear-bill-modal').style.display = 'none'; }
+function confirmClearCart() { closeClearBillModal(); clearCurrentCartState(); }
 
 function clearCurrentCartState() {
     cart = [];
     activeAppliedCoupon = null;
     couponDiscountAmount = 0;
     currentEditingBillId = null;
-    
     const activeBillInd = document.getElementById('active-bill-indicator');
     if (activeBillInd) activeBillInd.style.display = 'none';
-    
     const custNameInput = document.getElementById('bill-customer-name');
     if (custNameInput) custNameInput.value = '';
-    
     const cashInput = document.getElementById('cash-paid');
     if (cashInput) cashInput.value = '';
-    
     const couponInput = document.getElementById('coupon-code-input');
     if (couponInput) couponInput.value = '';
-
     updateCart();
 }
 
@@ -1324,13 +1037,10 @@ function updateCart() {
         navCartBadge.innerText = totalItems;
         navCartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
     }
-    
     const btnSave = document.getElementById('btn-save-bill');
     if (btnSave) btnSave.disabled = cart.length === 0;
-    
     const btnClear = document.getElementById('btn-clear-bill');
     if (btnClear) btnClear.disabled = cart.length === 0;
-    
     const cartList = document.getElementById('cart-list');
     if (cartList) {
         if (cart.length === 0) {
@@ -1363,19 +1073,15 @@ function updateCart() {
             `).join('');
         }
     }
-
     const rawSubtotal = cart.reduce((sum, item) => {
         const original = item.originalPrice || item.price;
         return sum + (original * item.qty);
     }, 0);
-    
     const productDiscount = cart.reduce((sum, item) => {
         const original = item.originalPrice || item.price;
         return sum + ((original - item.price) * item.qty);
     }, 0);
-    
     const subtotalAfterProduct = rawSubtotal - productDiscount;
-    
     couponDiscountAmount = 0;
     if (activeAppliedCoupon && subtotalAfterProduct > 0) {
         if (activeAppliedCoupon.type === 'percent') {
@@ -1383,28 +1089,20 @@ function updateCart() {
         } else {
             couponDiscountAmount = activeAppliedCoupon.value;
         }
-        if (couponDiscountAmount > subtotalAfterProduct) {
-            couponDiscountAmount = subtotalAfterProduct;
-        }
+        if (couponDiscountAmount > subtotalAfterProduct) couponDiscountAmount = subtotalAfterProduct;
     }
-    
     const totalAllDiscount = productDiscount + couponDiscountAmount;
     const netSubtotal = Math.max(0, rawSubtotal - totalAllDiscount);
-    const tax = Math.round(netSubtotal * 0.1);
+    const tax = Math.round(netSubtotal * TAX_RATE_CONST);
     grandTotal = netSubtotal + tax;
-    
     const subtotalElem = document.getElementById('subtotal-val');
     if (subtotalElem) subtotalElem.innerText = 'Rp ' + rawSubtotal.toLocaleString('id-id');
-    
     const couponElem = document.getElementById('coupon-val');
     if (couponElem) couponElem.innerText = '- Rp ' + totalAllDiscount.toLocaleString('id-id');
-    
     const taxElem = document.getElementById('tax-val');
     if (taxElem) taxElem.innerText = 'Rp ' + tax.toLocaleString('id-id');
-    
     const totalElem = document.getElementById('total-val');
     if (totalElem) totalElem.innerText = 'Rp ' + grandTotal.toLocaleString('id-id');
-    
     calculateChange();
 }
 
@@ -1413,27 +1111,21 @@ function calculateChange() {
     const changeRow = document.getElementById('change-row');
     const changeVal = document.getElementById('change-val');
     const payBtn = document.getElementById('btn-pay');
-    
     if (!cashInput || !changeVal || !payBtn) return;
-    
     const paidAmount = parseFloat(cashInput.value) || 0;
-    
     if (cart.length === 0) {
         payBtn.disabled = true;
         changeVal.innerText = 'Rp 0';
         if (changeRow) changeRow.classList.remove('deficit');
         return;
     }
-    
     if (grandTotal === 0) {
         changeVal.innerText = 'Rp 0';
         if (changeRow) changeRow.classList.remove('deficit');
         payBtn.disabled = false;
         return;
     }
-    
     const change = paidAmount - grandTotal;
-    
     if (paidAmount < grandTotal) {
         changeVal.innerText = 'Kurang Rp ' + Math.abs(change).toLocaleString('id-ID');
         if (changeRow) changeRow.classList.add('deficit');
@@ -1450,7 +1142,6 @@ function setCash(amount) {
     if (cashInput) cashInput.value = amount;
     calculateChange();
 }
-
 function setCashExact() {
     const cashInput = document.getElementById('cash-paid');
     if (cashInput) cashInput.value = Math.ceil(grandTotal);
@@ -1464,15 +1155,11 @@ function openSaveBillModal() {
     if (cart.length === 0) return;
     document.getElementById('save-bill-modal').style.display = 'flex';
 }
-
-function closeSaveBillModal() {
-    document.getElementById('save-bill-modal').style.display = 'none';
-}
+function closeSaveBillModal() { document.getElementById('save-bill-modal').style.display = 'none'; }
 
 function confirmSaveBill() {
     const nameInput = document.getElementById('bill-customer-name').value.trim();
     const billName = nameInput !== '' ? nameInput : 'Meja / Pelanggan ' + (savedBills.length + 1);
-
     if (currentEditingBillId) {
         const index = savedBills.findIndex(b => b.id === currentEditingBillId);
         if (index !== -1) {
@@ -1491,7 +1178,6 @@ function confirmSaveBill() {
             time: new Date().toLocaleTimeString('id-id', { hour: '2-digit', minute: '2-digit' })
         });
     }
-
     saveState();
     clearCurrentCartState();
     closeSaveBillModal();
@@ -1502,10 +1188,8 @@ function confirmSaveBill() {
 function renderSavedBills() {
     const countElem = document.getElementById('saved-bills-count');
     if (countElem) countElem.innerText = savedBills.length;
-    
     const container = document.getElementById('saved-bills-list');
     if (!container) return;
-    
     if (savedBills.length === 0) {
         container.innerHTML = `
             <div class="empty-state-centered">
@@ -1523,7 +1207,6 @@ function renderSavedBills() {
         `;
         return;
     }
-
     container.innerHTML = savedBills.map((b, index) => `
         <div class="cart-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
             <div style="display: flex; justify-content: space-between; width: 100%;">
@@ -1553,70 +1236,49 @@ function loadBillToCart(index) {
     cart = [...selectedBill.items];
     currentEditingBillId = selectedBill.id;
     activeAppliedCoupon = selectedBill.appliedCoupon || null;
-
     const activeBillInd = document.getElementById('active-bill-indicator');
     if (activeBillInd) activeBillInd.style.display = 'flex';
-    
     const activeBillName = document.getElementById('active-bill-name');
     if (activeBillName) activeBillName.innerText = selectedBill.customer;
-    
     const custNameInput = document.getElementById('bill-customer-name');
     if (custNameInput) custNameInput.value = selectedBill.customer;
-
     const couponInput = document.getElementById('coupon-code-input');
-    if (couponInput && activeAppliedCoupon) {
-        couponInput.value = activeAppliedCoupon.code;
-    }
-
+    if (couponInput && activeAppliedCoupon) couponInput.value = activeAppliedCoupon.code;
     updateCart();
     switchTab('order');
 }
-
 function cancelActiveBill() { clearCurrentCartState(); }
 function checkoutSavedBill(index) { loadBillToCart(index); }
 
 /* ==========================================
-   9. PAYMENT & RECEIPT
+   9. PAYMENT
    ========================================== */
 function processPayment() {
     payAudio.play().catch(err => console.log('Audio error:', err));
     if (cart.length === 0) return;
-    
     const paidAmount = parseFloat(document.getElementById('cash-paid').value) || 0;
-    if (paidAmount < grandTotal) {
-        alert("Jumlah nominal pembayaran tunai belum mencukupi!");
-        return;
-    }
-    
+    if (paidAmount < grandTotal) { alert("Nominal pembayaran belum mencukupi!"); return; }
     const cashierName = document.getElementById('profile-name').innerText;
-    
     const rawSubtotal = cart.reduce((sum, item) => {
         const originalPrice = item.originalPrice || item.price;
         return sum + (originalPrice * item.qty);
     }, 0);
-    
     const productDiscount = cart.reduce((sum, item) => {
         const originalPrice = item.originalPrice || item.price;
         return sum + ((originalPrice - item.price) * item.qty);
     }, 0);
-    
     const totalDiscount = productDiscount + (couponDiscountAmount || 0);
     const subtotalAfterAllDiscount = Math.max(0, rawSubtotal - totalDiscount);
-    const tax = Math.round(subtotalAfterAllDiscount * 0.1);
+    const tax = Math.round(subtotalAfterAllDiscount * TAX_RATE_CONST);
     const change = paidAmount - grandTotal;
-    
     const now = new Date();
     const dateStr = getLocalDateString();
     const timeStr = now.toLocaleTimeString('id-id', { hour: '2-digit', minute: '2-digit' });
     const timeFormatted = timeStr.replace(':', '.');
-    
     if (activeAppliedCoupon) {
         const couponIdx = coupons.findIndex(c => c.code.toLowerCase() === activeAppliedCoupon.code.toLowerCase());
-        if (couponIdx !== -1) {
-            coupons[couponIdx].used += 1;
-        }
+        if (couponIdx !== -1) coupons[couponIdx].used += 1;
     }
-    
     const newTrx = {
         id: 'trx-' + Date.now().toString().slice(-6),
         date: dateStr,
@@ -1634,24 +1296,13 @@ function processPayment() {
         isVoid: false,
         isHidden: false
     };
-    
     transactionHistory.unshift(newTrx);
-    
-    if (currentEditingBillId) {
-        savedBills = savedBills.filter(b => b.id !== currentEditingBillId);
-    }
-    
+    if (currentEditingBillId) savedBills = savedBills.filter(b => b.id !== currentEditingBillId);
     saveState();
-
     api.saveTransaction(newTrx).then(res => {
-        if (res) {
-            updateCloudStatus(true);
-            console.log('☁️ Transaksi tersimpan di cloud:', newTrx.id);
-        } else {
-            updateCloudStatus(false);
-        }
+        if (res) { updateCloudStatus(true); console.log('☁️ Trx tersimpan:', newTrx.id); }
+        else updateCloudStatus(false);
     });
-
     showReceiptModal(newTrx);
     clearCurrentCartState();
     renderSavedBills();
@@ -1661,10 +1312,8 @@ function processPayment() {
 function showReceiptModal(trx) {
     document.getElementById('modal-trx-id').innerText = trx.id || '-';
     document.getElementById('modal-cashier').innerText = trx.cashier || currentUserRole || '-';
-    
     const cleanDate = normalizeTrxDate(trx.date);
     document.getElementById('modal-time').innerText = cleanDate ? cleanDate + ' ' + (trx.time || '') : new Date().toLocaleString('id-ID');
-
     const itemsListEl = document.getElementById('modal-items-list');
     if (itemsListEl) {
         itemsListEl.innerHTML = trx.items.map(item => {
@@ -1678,7 +1327,6 @@ function showReceiptModal(trx) {
             `;
         }).join('');
     }
-
     let rawSubtotal = trx.subtotal || 0;
     if (!rawSubtotal) {
         trx.items.forEach(item => {
@@ -1686,43 +1334,35 @@ function showReceiptModal(trx) {
             rawSubtotal += originalPrice * item.qty;
         });
     }
-
     let totalDiscount = trx.discountAmount !== undefined ? trx.discountAmount : 0;
     const paidVal = trx.paid || 0;
     const grandTotalVal = trx.total || 0;
     const changeVal = trx.change !== undefined ? trx.change : (paidVal - grandTotalVal);
-
     document.getElementById('modal-subtotal').innerText = 'Rp ' + rawSubtotal.toLocaleString('id-ID');
     document.getElementById('modal-discount').innerText = '- Rp ' + totalDiscount.toLocaleString('id-ID');
     document.getElementById('modal-tax').innerText = 'Rp ' + (trx.tax || 0).toLocaleString('id-ID');
     document.getElementById('modal-total').innerText = 'Rp ' + grandTotalVal.toLocaleString('id-ID');
     document.getElementById('modal-paid').innerText = 'Rp ' + paidVal.toLocaleString('id-ID');
     document.getElementById('modal-change').innerText = 'Rp ' + Math.max(0, changeVal).toLocaleString('id-ID');
-
     openModal();
 }
 
-function printReceipt() {
-    window.print();
-}
+function printReceipt() { window.print(); }
 
 /* ==========================================
-   10. HISTORY & EXPORT
+   10. HISTORY
    ========================================== */
 let historyActionMode = 'delete';
 
 function toggleHistoryDropdown(e) {
     if (e) e.stopPropagation();
     const menu = document.getElementById('history-dropdown-menu');
-    if (menu) {
-        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
+    if (menu) menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
 }
 
 function selectHistoryAction(mode) {
     historyActionMode = mode;
     toggleHistoryDropdown();
-    
     isHistorySelectionMode = true;
     updateHistoryUIForSelection();
     renderHistory();
@@ -1740,12 +1380,10 @@ function updateHistoryUIForSelection() {
     const selectionActions = document.getElementById('history-selection-actions');
     const selectAllCheckbox = document.getElementById('select-all-history');
     const confirmBtn = document.querySelector('#history-selection-actions .btn-primary');
-
     if (isHistorySelectionMode) {
         if (defaultActions) defaultActions.style.display = 'none';
         if (selectionActions) selectionActions.style.display = 'flex';
         if (selectAllCheckbox) selectAllCheckbox.checked = false;
-        
         if (confirmBtn) {
             if (historyActionMode === 'cancel') {
                 confirmBtn.innerText = 'Void Terpilih';
@@ -1762,45 +1400,29 @@ function updateHistoryUIForSelection() {
 }
 
 function toggleSelectAllHistory(checkbox) {
-    const checkboxes = document.querySelectorAll('.history-checkbox-item');
-    checkboxes.forEach(cb => {
-        cb.checked = checkbox.checked;
-    });
+    document.querySelectorAll('.history-checkbox-item').forEach(cb => { cb.checked = checkbox.checked; });
 }
-
 function openDeleteHistoryModal() {
     if (currentUserRole !== 'admin') return;
     document.getElementById('delete-history-modal').style.display = 'flex';
 }
-
-function closeDeleteHistoryModal() {
-    document.getElementById('delete-history-modal').style.display = 'none';
-}
+function closeDeleteHistoryModal() { document.getElementById('delete-history-modal').style.display = 'none'; }
 
 function openDeleteSelectedHistoryModal() {
     const checkboxes = document.querySelectorAll('.history-checkbox-item:checked');
-    if (checkboxes.length === 0) {
-        alert("Pilih minimal satu riwayat terlebih dahulu!");
-        return;
-    }
+    if (checkboxes.length === 0) { alert("Pilih minimal satu riwayat!"); return; }
     const textElem = document.querySelector('#delete-history-modal p');
     const actionText = historyActionMode === 'cancel' 
-        ? 'dibatalkan (diberi status VOID, tetap tampil dengan strikethrough)' 
-        : 'DIHAPUS PERMANEN dari Spreadsheet (tidak bisa dikembalikan)';
-    if (textElem) textElem.innerText = checkboxes.length + ' transaksi yang dipilih akan ' + actionText + '.';
+        ? 'dibatalkan (diberi status VOID)' 
+        : 'DIHAPUS PERMANEN dari Spreadsheet';
+    if (textElem) textElem.innerText = checkboxes.length + ' transaksi akan ' + actionText + '.';
     document.getElementById('delete-history-modal').style.display = 'flex';
 }
 
 function confirmClearHistory() {
     const selectedCheckboxes = document.querySelectorAll('.history-checkbox-item:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-
-    if (selectedIds.length === 0) {
-        alert("Pilih transaksi terlebih dahulu!");
-        closeDeleteHistoryModal();
-        return;
-    }
-
+    if (selectedIds.length === 0) { alert("Pilih transaksi!"); closeDeleteHistoryModal(); return; }
     if (historyActionMode === 'cancel') {
         transactionHistory = transactionHistory.map(trx => {
             if (selectedIds.includes(trx.id) && !trx.isVoid) {
@@ -1809,22 +1431,16 @@ function confirmClearHistory() {
             }
             return trx;
         });
-        alert(selectedIds.length + ' transaksi di-VOID (omset disesuaikan, tetap tampil dengan strikethrough).');
-
+        alert(selectedIds.length + ' transaksi di-VOID.');
     } else if (historyActionMode === 'delete') {
-        selectedIds.forEach(id => {
-            api.deleteTransaction(id);
-        });
+        selectedIds.forEach(id => { api.deleteTransaction(id); });
         transactionHistory = transactionHistory.filter(trx => !selectedIds.includes(trx.id));
-        alert(selectedIds.length + ' transaksi DIHAPUS PERMANEN dari Spreadsheet.');
+        alert(selectedIds.length + ' transaksi DIHAPUS PERMANEN.');
     }
-
     saveState();
     closeDeleteHistoryModal();
-    
     isHistorySelectionMode = false;
     updateHistoryUIForSelection();
-
     renderHistory();
     updateDashboardMetrics();
     if (typeof renderProducts === 'function') renderProducts(products, 'menu-items');
@@ -1834,9 +1450,7 @@ function confirmClearHistory() {
 function renderHistory() {
     const container = document.getElementById('history-list');
     if (!container) return;
-
     const visibleHistory = transactionHistory.filter(trx => !trx.isHidden);
-    
     if (visibleHistory.length === 0) {
         container.innerHTML = `
         <div class="empty-state-centered">
@@ -1852,17 +1466,12 @@ function renderHistory() {
         </div>`;
         return;
     }
-
     container.innerHTML = visibleHistory.map(trx => {
         const cleanDate = normalizeTrxDate(trx.date);
         const displayDate = cleanDate && trx.time ? cleanDate + ' • ' + trx.time : cleanDate || trx.time || '';
-        
         return `
         <div style="display: flex; align-items: center; gap: 12px; background: var(--card-bg); padding: 12px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); ${trx.isVoid ? 'opacity: 0.6;' : ''}">
-            ${isHistorySelectionMode ? `
-                <input type="checkbox" class="history-checkbox-item custom-theme-checkbox" value="${trx.id}" style="width: 18px; height: 18px; cursor: pointer; display: block !important;">
-            ` : ''}
-
+            ${isHistorySelectionMode ? `<input type="checkbox" class="history-checkbox-item custom-theme-checkbox" value="${trx.id}" style="width: 18px; height: 18px; cursor: pointer; display: block !important;">` : ''}
             <div style="flex: 1; cursor: ${isHistorySelectionMode ? 'default' : 'pointer'};" data-trx-id="${trx.id}">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <strong style="font-size: 13px; color: var(--text-main); text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
@@ -1878,7 +1487,6 @@ function renderHistory() {
         </div>
         `;
     }).join('');
-
     container.querySelectorAll('[data-trx-id]').forEach(el => {
         el.addEventListener('click', () => {
             if (isHistorySelectionMode) return;
@@ -1890,33 +1498,18 @@ function renderHistory() {
 }
 
 function exportHistoryCSV() {
-    if (transactionHistory.length === 0) {
-        alert("Tidak ada data riwayat untuk diekspor!");
-        return;
-    }
-
+    if (transactionHistory.length === 0) { alert("Tidak ada data!"); return; }
     let csvContent = "data:text/csv;charset=utf-8,ID Transaksi,Tanggal,Waktu,Kasir,Total Subtotal,Diskon Kupon,Pajak,Total Pembayaran,Tunai,Kembalian,Status Void,Detail Items\n";
-
     transactionHistory.forEach(trx => {
         const itemsStr = trx.items.map(i => i.name + ' (' + i.qty + 'x)').join(' | ');
         const cleanDate = normalizeTrxDate(trx.date);
         const row = [
-            trx.id,
-            cleanDate,
-            trx.time,
-            '"' + trx.cashier + '"',
-            trx.subtotal,
-            trx.couponDiscount || 0,
-            trx.tax,
-            trx.total,
-            trx.paid,
-            trx.change,
-            trx.isVoid ? 'YA' : 'TIDAK',
-            '"' + itemsStr + '"'
+            trx.id, cleanDate, trx.time, '"' + trx.cashier + '"', trx.subtotal,
+            trx.couponDiscount || 0, trx.tax, trx.total, trx.paid, trx.change,
+            trx.isVoid ? 'YA' : 'TIDAK', '"' + itemsStr + '"'
         ].join(",");
         csvContent += row + "\n";
     });
-
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -1927,7 +1520,7 @@ function exportHistoryCSV() {
 }
 
 /* ==========================================
-   11. DASHBOARD & ANALYTICS
+   11. DASHBOARD
    ========================================== */
 function openOmsetFilterModal() {
     if (currentUserRole !== 'admin') return;
@@ -1936,17 +1529,8 @@ function openOmsetFilterModal() {
     document.getElementById('modal-month-picker').value = currentSelectedMonth;
     document.getElementById('omset-filter-modal').style.display = 'flex';
 }
-
-function closeOmsetFilterModal() {
-    document.getElementById('omset-filter-modal').style.display = 'none';
-}
-
-function applyMonthlyFilter(yearMonth) {
-    if (!yearMonth) return;
-    currentSelectedMonth = yearMonth;
-    updateDashboardMetrics();
-}
-
+function closeOmsetFilterModal() { document.getElementById('omset-filter-modal').style.display = 'none'; }
+function applyMonthlyFilter(yearMonth) { if (!yearMonth) return; currentSelectedMonth = yearMonth; updateDashboardMetrics(); }
 function resetToCurrentMonth() {
     currentSelectedMonth = getCurrentYearMonth();
     const monthPicker = document.getElementById('modal-month-picker');
@@ -1960,69 +1544,51 @@ function updateDashboardMetrics() {
     const filterMonth = parts[1];
     const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const monthLabel = monthNames[parseInt(filterMonth, 10) - 1] + " " + filterYear;
-
     const monthlyTrx = transactionHistory.filter(t => {
         if (t.isVoid) return false;
         const cleanDate = normalizeTrxDate(t.date);
         return cleanDate && cleanDate.startsWith(currentSelectedMonth);
     });
     const totalOmsetMonth = monthlyTrx.reduce((sum, t) => sum + t.total, 0);
-
     const omsetElem = document.getElementById('dashboard-omset');
     if (omsetElem) omsetElem.innerText = 'Rp ' + totalOmsetMonth.toLocaleString('id-id');
-    
     const titleElem = document.getElementById('dashboard-omset-title');
     if (titleElem) titleElem.innerText = 'Omset ' + monthLabel;
-
     const filterDateInput = document.getElementById('filter-date');
     let selectedDate = filterDateInput ? filterDateInput.value : getLocalDateString();
     if (!selectedDate) selectedDate = getLocalDateString();
-
     const dateDisplay = document.getElementById('current-date-display');
     if (dateDisplay) dateDisplay.innerText = 'Tanggal: ' + selectedDate;
-
     const dailyTrx = transactionHistory.filter(t => {
         if (t.isVoid) return false;
         const cleanDate = normalizeTrxDate(t.date);
         return cleanDate === selectedDate;
     });
-    
     const dailyOmset = dailyTrx.reduce((sum, t) => sum + t.total, 0);
     const dailyTrxCount = dailyTrx.length;
-
     const homeDailyOmsetElem = document.getElementById('home-daily-omset');
     const homeDailyTrxCountElem = document.getElementById('home-daily-trx-count');
     if (homeDailyOmsetElem) homeDailyOmsetElem.innerText = 'Rp ' + dailyOmset.toLocaleString('id-id');
     if (homeDailyTrxCountElem) homeDailyTrxCountElem.innerText = dailyTrxCount;
-
     const hoursData = Array(24).fill(0);
     dailyTrx.forEach(t => {
         if (t.time) {
             const hourStr = String(t.time).split(/[.:]/)[0];
             const hour = parseInt(hourStr, 10);
-            if (!isNaN(hour) && hour >= 0 && hour < 24) {
-                hoursData[hour] += t.total;
-            }
+            if (!isNaN(hour) && hour >= 0 && hour < 24) hoursData[hour] += t.total;
         }
     });
-
     renderChart(hoursData);
 }
 
 function renderChart(dataPoints) {
     const ctx = document.getElementById('salesChart');
     if (!ctx) return;
-
     const labels = Array.from({ length: 24 }, (_, i) => (i < 10 ? '0' : '') + i + ':00');
-
     const isDark = document.getElementById('app-wrapper')?.getAttribute('data-theme') === 'dark';
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
     const textColor = isDark ? '#94a3b8' : '#64748b';
-
-    if (salesChartInstance) {
-        salesChartInstance.destroy();
-    }
-
+    if (salesChartInstance) salesChartInstance.destroy();
     salesChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -2045,63 +1611,38 @@ function renderChart(dataPoints) {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return ' Rp ' + context.parsed.y.toLocaleString('id-id');
-                        }
-                    }
-                }
+                tooltip: { callbacks: { label: function(context) { return ' Rp ' + context.parsed.y.toLocaleString('id-id'); } } }
             },
             scales: {
-                x: {
-                    grid: { color: gridColor },
-                    ticks: { color: textColor, font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }
-                },
-                y: {
-                    grid: { color: gridColor },
-                    ticks: {
-                        color: textColor,
-                        font: { size: 9 },
-                        callback: function(value) {
-                            if (value >= 1000000) return (value / 1000000) + 'jt';
-                            if (value >= 1000) return (value / 1000) + 'rb';
-                            return value;
-                        }
-                    }
-                }
+                x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } },
+                y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 9 }, callback: function(value) {
+                    if (value >= 1000000) return (value / 1000000) + 'jt';
+                    if (value >= 1000) return (value / 1000) + 'rb';
+                    return value;
+                } } }
             }
         }
     });
 }
 
 /* ==========================================
-   12. KITCHEN PRINT & LAPORAN
+   12. KITCHEN & LAPORAN
    ========================================== */
 function billDapur() {
-    if (!cart || cart.length === 0) {
-        alert("Keranjang pesanan masih kosong!");
-        return;
-    }
-    
+    if (!cart || cart.length === 0) { alert("Keranjang kosong!"); return; }
     const now = new Date();
     const timeStr = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    
     document.getElementById('kitchen-modal-time').innerText = timeStr;
-    
     const currentCashier = document.getElementById('kasir-name') ? document.getElementById('kasir-name').value : 'Kasir';
     document.getElementById('kitchen-cashier-name').innerText = currentCashier;
-    
     const itemsList = document.getElementById('kitchen-items-list');
     itemsList.innerHTML = '';
-    
     cart.forEach(item => {
         const row = document.createElement('div');
         row.style.cssText = 'display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 700; font-size: 13px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;';
         row.innerHTML = '<span>' + item.name + '</span><span>x' + item.qty + '</span>';
         itemsList.appendChild(row);
     });
-    
     updateKitchenPreview();
     openKitchenModal();
 }
@@ -2109,7 +1650,6 @@ function billDapur() {
 function toggleTableInput(val) {
     const tableBox = document.getElementById('table-number-box');
     const tableRow = document.getElementById('print-table-row');
-    
     if (val === 'Takeaway') {
         if (tableBox) tableBox.style.display = 'none';
         if (tableRow) tableRow.style.display = 'none';
@@ -2124,10 +1664,8 @@ function updateKitchenPreview() {
     const orderType = document.getElementById('kitchen-order-type')?.value || 'Dine In';
     const tableNo = document.getElementById('kitchen-table-no')?.value || '-';
     const notes = document.getElementById('kitchen-order-notes')?.value || '';
-    
     if (document.getElementById('print-order-type')) document.getElementById('print-order-type').innerText = orderType;
     if (document.getElementById('print-table-no')) document.getElementById('print-table-no').innerText = tableNo;
-    
     const notesRow = document.getElementById('print-notes-row');
     if (notes.trim() !== '') {
         if (document.getElementById('print-order-notes')) document.getElementById('print-order-notes').innerText = notes;
@@ -2137,26 +1675,15 @@ function updateKitchenPreview() {
     }
 }
 
-function triggerPrintKitchen() {
-    window.print();
-}
+function triggerPrintKitchen() { window.print(); }
 
 function renderLaporanData() {
     const period = document.getElementById('laporan-filter-period')?.value || 'month';
     const todayStr = getLocalDateString();
     const currentMonthStr = getCurrentYearMonth();
-    
-    const periodTextMap = {
-        'today': 'Hari Ini',
-        'month': 'Bulan Ini',
-        'all': 'Semua Waktu'
-    };
-    
+    const periodTextMap = { 'today': 'Hari Ini', 'month': 'Bulan Ini', 'all': 'Semua Waktu' };
     const labelPeriodElem = document.getElementById('lap-product-period-label');
-    if (labelPeriodElem) {
-        labelPeriodElem.innerText = periodTextMap[period] || 'Bulan Ini';
-    }
-    
+    if (labelPeriodElem) labelPeriodElem.innerText = periodTextMap[period] || 'Bulan Ini';
     const validTrx = transactionHistory.filter(trx => {
         if (trx.isVoid) return false;
         const cleanDate = normalizeTrxDate(trx.date);
@@ -2165,11 +1692,9 @@ function renderLaporanData() {
         if (period === 'month') return cleanDate.startsWith(currentMonthStr);
         return true;
     });
-    
     let totalOmset = 0;
     let totalHPP = 0;
     const productSalesMap = {};
-    
     validTrx.forEach(trx => {
         totalOmset += (trx.total || trx.grandTotal || 0);
         if (Array.isArray(trx.items)) {
@@ -2177,46 +1702,31 @@ function renderLaporanData() {
                 const qty = item.qty || 1;
                 const masterProd = products.find(p => p.id === item.id);
                 const itemHpp = item.hpp !== undefined ? item.hpp : (masterProd ? (masterProd.hpp || 0) : 0);
-                
                 totalHPP += (itemHpp * qty);
-                
-                if (!productSalesMap[item.id]) {
-                    productSalesMap[item.id] = {
-                        name: item.name,
-                        qty: 0,
-                        revenue: 0
-                    };
-                }
+                if (!productSalesMap[item.id]) productSalesMap[item.id] = { name: item.name, qty: 0, revenue: 0 };
                 productSalesMap[item.id].qty += qty;
                 productSalesMap[item.id].revenue += ((item.price || 0) * qty);
             });
         }
     });
-    
     const labaKotor = totalOmset - totalHPP;
     const marginPersen = totalOmset > 0 ? ((labaKotor / totalOmset) * 100).toFixed(1) : 0;
-    
     if (document.getElementById('lap-total-omset')) document.getElementById('lap-total-omset').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
     if (document.getElementById('lap-total-hpp')) document.getElementById('lap-total-hpp').innerText = 'Rp ' + totalHPP.toLocaleString('id-ID');
     if (document.getElementById('lap-laba-kotor')) document.getElementById('lap-laba-kotor').innerText = 'Rp ' + labaKotor.toLocaleString('id-ID');
     if (document.getElementById('lap-margin-persen')) document.getElementById('lap-margin-persen').innerText = marginPersen + '%';
     if (document.getElementById('lap-total-trx-info')) document.getElementById('lap-total-trx-info').innerText = validTrx.length + ' Transaksi Selesai';
-    
     const sortedProducts = Object.values(productSalesMap).sort((a, b) => b.qty - a.qty);
     const productsContainer = document.getElementById('lap-products-list');
-    
     if (!productsContainer) return;
-    
     if (sortedProducts.length === 0) {
         productsContainer.innerHTML = `
         <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 16px 0;">
-            Tidak ada data penjualan produk pada periode <b>${periodTextMap[period]}</b>.
+            Tidak ada data penjualan pada periode <b>${periodTextMap[period]}</b>.
         </div>`;
         return;
     }
-    
-    productsContainer.innerHTML = sortedProducts.map((p, index) => {
-        return `
+    productsContainer.innerHTML = sortedProducts.map((p, index) => `
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--bg-app); border-radius: 10px; border: 1px solid var(--border);">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); width: 20px; text-align: center;">${index + 1}.</span>
@@ -2228,16 +1738,14 @@ function renderLaporanData() {
             <div style="text-align: right;">
                 <div style="font-size: 11px; font-weight: 800; color: var(--accent);">Rp ${p.revenue.toLocaleString('id-ID')}</div>
             </div>
-        </div>`;
-    }).join('');
+        </div>
+    `).join('');
 }
 
 /* ==========================================
    13. KAS & PETTY CASH
    ========================================== */
-function formatRupiah(num) {
-    return 'Rp ' + Number(num).toLocaleString('id-ID');
-}
+function formatRupiah(num) { return 'Rp ' + Number(num).toLocaleString('id-ID'); }
 
 function renderKasOverview() {
     const totalPetty = pettyCashList.reduce((sum, item) => sum + item.nominal, 0);
@@ -2254,14 +1762,13 @@ function simpanModalAwal() {
     document.getElementById('input-modal-awal').value = '';
     renderKasOverview();
     api.saveCashFlow({ type: 'modal_awal', keterangan: 'Modal buka toko', nominal: val, date: getLocalDateString() });
-    alert('Modal awal berhasil disimpan!');
+    alert('Modal awal tersimpan!');
 }
 
 function tambahPettyCash() {
     const ket = document.getElementById('input-petty-ket').value.trim();
     const nominal = parseFloat(document.getElementById('input-petty-nominal').value);
-    if (!ket || isNaN(nominal) || nominal <= 0) return alert('Mohon lengkapi data petty cash.');
-    
+    if (!ket || isNaN(nominal) || nominal <= 0) return alert('Lengkapi data petty cash.');
     pettyCashList.push({ id: Date.now(), keterangan: ket, nominal: nominal });
     localStorage.setItem('pos_petty_cash', JSON.stringify(pettyCashList));
     document.getElementById('input-petty-ket').value = '';
@@ -2274,20 +1781,15 @@ function tambahPettyCash() {
 function openTutupShiftModal() {
     const totalPetty = pettyCashList.reduce((sum, item) => sum + item.nominal, 0);
     const namaKasir = document.getElementById('profile-name') ? document.getElementById('profile-name').innerText : 'Kasir';
-    const tunaiPenjualan = 0; 
+    const tunaiPenjualan = 0;
     const ekspektasiKas = modalAwal + tunaiPenjualan - totalPetty;
-
-    if (document.getElementById('shift-modal-kasir')) {
-        document.getElementById('shift-modal-kasir').innerText = namaKasir;
-    }
+    if (document.getElementById('shift-modal-kasir')) document.getElementById('shift-modal-kasir').innerText = namaKasir;
     if (document.getElementById('shift-modal-awal')) document.getElementById('shift-modal-awal').innerText = formatRupiah(modalAwal);
     if (document.getElementById('shift-modal-tunai')) document.getElementById('shift-modal-tunai').innerText = formatRupiah(tunaiPenjualan);
     if (document.getElementById('shift-modal-petty')) document.getElementById('shift-modal-petty').innerText = formatRupiah(totalPetty);
     if (document.getElementById('shift-modal-ekspektasi')) document.getElementById('shift-modal-ekspektasi').innerText = formatRupiah(ekspektasiKas);
-    
     if (document.getElementById('shift-input-fisik')) document.getElementById('shift-input-fisik').value = '';
     if (document.getElementById('shift-selisih-val')) document.getElementById('shift-selisih-val').innerText = 'Rp 0';
-    
     const tutupShiftModal = document.getElementById('tutup-shift-modal');
     if (tutupShiftModal) tutupShiftModal.style.display = 'flex';
 }
@@ -2302,7 +1804,6 @@ function hitungSelisihShift() {
     const ekspektasi = modalAwal - totalPetty;
     const fisik = parseFloat(document.getElementById('shift-input-fisik').value) || 0;
     const selisih = fisik - ekspektasi;
-    
     const el = document.getElementById('shift-selisih-val');
     if (el) {
         el.innerText = formatRupiah(selisih);
@@ -2317,7 +1818,6 @@ function prosesCetakLaporanShift() {
     const fisik = parseFloat(document.getElementById('shift-input-fisik').value) || 0;
     const selisih = fisik - ekspektasiKas;
     const namaKasir = document.getElementById('profile-name') ? document.getElementById('profile-name').innerText : 'Kasir';
-
     if (document.getElementById('sr-waktu')) document.getElementById('sr-waktu').innerText = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     if (document.getElementById('sr-kasir')) document.getElementById('sr-kasir').innerText = namaKasir;
     if (document.getElementById('sr-modal')) document.getElementById('sr-modal').innerText = formatRupiah(modalAwal);
@@ -2325,7 +1825,6 @@ function prosesCetakLaporanShift() {
     if (document.getElementById('sr-ekspektasi')) document.getElementById('sr-ekspektasi').innerText = formatRupiah(ekspektasiKas);
     if (document.getElementById('sr-fisik')) document.getElementById('sr-fisik').innerText = formatRupiah(fisik);
     if (document.getElementById('sr-selisih')) document.getElementById('sr-selisih').innerText = formatRupiah(selisih);
-
     const pettyContainer = document.getElementById('sr-petty-list');
     if (pettyContainer) {
         if (pettyCashList.length === 0) {
@@ -2339,7 +1838,6 @@ function prosesCetakLaporanShift() {
             `).join('');
         }
     }
-
     resetShiftData();
     closeTutupShiftModal();
     openShiftReceiptModal();
@@ -2348,19 +1846,15 @@ function prosesCetakLaporanShift() {
 function resetShiftData() {
     modalAwal = 0;
     pettyCashList = [];
-
     localStorage.removeItem('pos_modal_awal');
     localStorage.removeItem('pos_petty_cash');
-
     renderKasOverview();
 }
 
-function eksekusiPrint() {
-    window.print();
-}
+function eksekusiPrint() { window.print(); }
 
 /* ==========================================
-   14. PROTEKSI & INITIALIZATION
+   14. PROTEKSI
    ========================================== */
 document.addEventListener('copy', function(e) { e.preventDefault(); });
 document.addEventListener('cut', function(e) { e.preventDefault(); });
@@ -2368,54 +1862,36 @@ document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
 document.addEventListener('keydown', function(e) {
     const key = e.key.toLowerCase();
-    
-    if (e.key === 'F12') {
-        e.preventDefault();
-        return false;
-    }
-    
-    if (
-        (e.ctrlKey && ['c', 'x', 'u', 's'].includes(key)) ||
-        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key))
-    ) {
-        if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
-            return true;
-        }
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+    if ((e.ctrlKey && ['c', 'x', 'u', 's'].includes(key)) ||
+        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key))) {
+        if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return true;
         e.preventDefault();
         return false;
     }
 });
 
+/* ==========================================
+   15. INIT
+   ========================================== */
 document.addEventListener('DOMContentLoaded', async () => {
     const jsonInput = document.getElementById('json-import-input');
     if (jsonInput) jsonInput.addEventListener('change', importLocalStorageJSON);
-
     applyBranding();
     initTheme();
     updateGreeting();
-
     const cloudOK = await loadFromCloud();
     console.log(cloudOK ? '✅ Data di-load dari cloud' : '⚠️ Pakai data lokal');
-
     applyRolePermissions();
     updateCart();
     renderSavedBills();
     updateDashboardMetrics();
     renderKasOverview();
-
     const filterDateInput = document.getElementById('filter-date');
-    if (filterDateInput) {
-        filterDateInput.addEventListener('change', () => {
-            updateDashboardMetrics();
-        });
-    }
-
+    if (filterDateInput) filterDateInput.addEventListener('change', () => updateDashboardMetrics());
     const kitchenTableNo = document.getElementById('kitchen-table-no');
     if (kitchenTableNo) kitchenTableNo.addEventListener('input', updateKitchenPreview);
-    
     const kitchenNotes = document.getElementById('kitchen-order-notes');
     if (kitchenNotes) kitchenNotes.addEventListener('input', updateKitchenPreview);
-
-    // 🔥 Aktifkan auto sync 30 detik + tombol manual
     setupAutoSync();
 });
