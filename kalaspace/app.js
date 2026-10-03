@@ -1521,14 +1521,14 @@ function renderHistory() {
             ` : ''}
             <div style="flex: 1;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <strong style="font-size: 13px; color: var(--text-main); text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
-                        ${trx.id} ${trx.isVoid ? '<span style="color:var(--danger); font-size:10px;">(VOID)</span>' : ''}
+                    <strong style="font-size: 13px; color: #0f172a; font-weight: 800; text-transform:uppercase; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">
+                        ${trx.id} ${trx.isVoid ? '<span style="color:#ef4444; font-size:10px;">(VOID)</span>' : ''}
                     </strong>
-                    <span style="font-size: 11px; color: var(--text-muted);">${displayDate}</span>
+                    <span style="font-size: 11px; color: #64748b;">${displayDate}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 11px; color: var(--text-muted);">Kasir: <span style="font-size: 10px; background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 6px;">${trx.cashier || '-'}</span></span>
-                    <strong style="font-size: 13px; color: ${trx.isVoid ? 'var(--text-muted)' : 'var(--accent)'}; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">Rp ${trx.total ? trx.total.toLocaleString('id-id') : '0'}</strong>
+                    <span style="font-size: 11px; color: #64748b;">Kasir: <span style="font-size: 10px; background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 6px; font-weight: 700;">${trx.cashier || '-'}</span></span>
+                    <strong style="font-size: 13px; color: ${trx.isVoid ? '#94a3b8' : '#0f172a'}; font-weight: 800; ${trx.isVoid ? 'text-decoration: line-through;' : ''}">Rp ${trx.total ? trx.total.toLocaleString('id-id') : '0'}</strong>
                 </div>
             </div>
         </div>
