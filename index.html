@@ -3,62 +3,45 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Kasir - Login</title>
+    <title>POS Kasir - Platform Bisnis Modern</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
-    <!-- ============================================================
-         PROTEKSI — Anti Inspect, Anti Copy, Anti DevTools
-         ============================================================ -->
+    <!-- Proteksi -->
     <script>
         (function() {
-            document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
-            document.addEventListener('selectstart', function(e) {
+            document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
+            document.addEventListener('selectstart', e => {
                 if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return false; }
             });
-            document.addEventListener('copy', function(e) {
+            document.addEventListener('copy', e => {
                 if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return false; }
             });
-            document.addEventListener('cut', function(e) {
+            document.addEventListener('cut', e => {
                 if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return false; }
             });
             document.addEventListener('keydown', function(e) {
                 const key = e.key.toLowerCase();
-                if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); e.stopPropagation(); return false; }
-                if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) { e.preventDefault(); e.stopPropagation(); return false; }
+                if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+                if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(key)) { e.preventDefault(); return false; }
                 if (e.ctrlKey && key === 'u') { e.preventDefault(); return false; }
                 if (e.ctrlKey && key === 's') { e.preventDefault(); return false; }
                 if (e.ctrlKey && key === 'p') { e.preventDefault(); return false; }
-                if (e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key)) { e.preventDefault(); return false; }
-                if (e.metaKey && key === 'u') { e.preventDefault(); return false; }
             });
-            let devToolsOpen = false;
-            const threshold = 160;
-            setInterval(function() {
-                const widthDiff = window.outerWidth - window.innerWidth;
-                const heightDiff = window.outerHeight - window.innerHeight;
-                if (widthDiff > threshold || heightDiff > threshold) {
-                    if (!devToolsOpen) {
-                        devToolsOpen = true;
-                        console.clear();
-                        console.log('%c⚠️ Developer Tools terdeteksi', 'color: #ef4444; font-size: 20px; font-weight: bold;');
-                    }
-                } else { devToolsOpen = false; }
-            }, 1000);
             setTimeout(() => {
                 console.clear();
-                console.log('%c⛔ STOP!', 'color: #ef4444; font-size: 40px; font-weight: 900;');
-                console.log('%cHalaman ini dilindungi. Jangan tempel kode apapun di sini.', 'color: #f59e0b; font-size: 16px; font-weight: bold;');
-                console.log('%c© 2026 POS Kasir Multi-Buyer - @Muhasa_Digital', 'color: #64748b; font-size: 12px;');
+                console.log('%c⛔ STOP!', 'color: #dc2626; font-size: 40px; font-weight: 900;');
+                console.log('%cHalaman ini dilindungi.', 'color: #ca8a04; font-size: 14px; font-weight: bold;');
             }, 100);
         })();
     </script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-        body, .container, .left-panel, .right-panel {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body, .landing, .hero, .features, .footer, nav {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -68,213 +51,365 @@
         input, textarea, select {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
-            -ms-user-select: text !important;
             user-select: text !important;
         }
 
+        :root {
+            --ink: #242424;
+            --ink-light: #6b6b6b;
+            --ink-muted: #a0a0a0;
+            --paper: #ffffff;
+            --paper-soft: #f9f9f9;
+            --line: #e6e6e6;
+            --accent: #00A6FF;
+            --accent-dark: #0088d1;
+            --green: #1a8917;
+            --green-dark: #156d12;
+        }
+
         body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
             min-height: 100vh;
-            background: #f1f5f9;
-            color: #0f172a;
-            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* ============================================================
-           LAYOUT — Split Screen
+           NAVIGATION — Medium Style
            ============================================================ */
-        .container {
-            display: flex;
-            min-height: 100vh;
-            width: 100%;
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--line);
+            z-index: 100;
         }
-
-        /* ------------------------------------------------------------
-           LEFT PANEL — Brand Showcase (Dark)
-           ------------------------------------------------------------ */
-        .left-panel {
-            flex: 1;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
-            color: #fff;
-            padding: 60px;
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
-            position: relative;
-            overflow: hidden;
+            align-items: center;
         }
-
-        /* Decorative circles */
-        .left-panel::before {
-            content: '';
-            position: absolute;
-            top: -120px;
-            right: -120px;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(0, 166, 255, 0.18) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-        .left-panel::after {
-            content: '';
-            position: absolute;
-            bottom: -150px;
-            left: -150px;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .brand-top {
+        .nav-brand {
             display: flex;
             align-items: center;
-            gap: 12px;
-            position: relative;
-            z-index: 2;
+            gap: 10px;
+            font-family: 'Lora', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.5px;
         }
-        .brand-top-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+        .nav-brand svg { width: 28px; height: 28px; fill: var(--ink); }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .nav-links a {
+            color: var(--ink-light);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--ink); }
+        .nav-btn {
+            background: var(--ink);
+            color: #fff !important;
+            padding: 9px 20px;
+            border-radius: 99px;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s !important;
+        }
+        .nav-btn:hover { background: #000; }
+
+        /* ============================================================
+           HERO — Big Typography
+           ============================================================ */
+        .hero {
+            border-bottom: 1px solid var(--line);
+            padding: 80px 24px 60px 24px;
+            background: var(--paper);
+        }
+        .hero-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .hero-text .kicker {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 24px;
         }
-        .brand-top-icon svg { width: 22px; height: 22px; fill: #f59e0b; }
-        .brand-top-text h3 { font-size: 15px; font-weight: 800; }
-        .brand-top-text p { font-size: 11px; color: #94a3b8; }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 480px;
+        .hero-text .kicker i { font-size: 16px; }
+        .hero-text h1 {
+            font-family: 'Lora', serif;
+            font-size: 68px;
+            font-weight: 500;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            color: var(--ink);
+            margin-bottom: 24px;
         }
-        .hero-tag {
+        .hero-text h1 em {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--ink-muted);
+        }
+        .hero-text .lede {
+            font-size: 18px;
+            color: var(--ink-light);
+            line-height: 1.6;
+            max-width: 520px;
+            margin-bottom: 36px;
+            font-family: 'Lora', serif;
+            font-weight: 400;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background: var(--green);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 99px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+        .btn-primary i { font-size: 18px; }
+        
+        .btn-secondary-link {
+            color: var(--ink-light);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(0, 166, 255, 0.15);
-            border: 1px solid rgba(0, 166, 255, 0.3);
-            color: #60a5fa;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
+            padding: 14px 8px;
+            transition: color 0.2s;
+        }
+        .btn-secondary-link:hover { color: var(--ink); }
+
+        .hero-visual {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .visual-blob {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 166, 255, 0.1) 0%, transparent 60%),
+                        radial-gradient(circle at 70% 70%, rgba(26, 137, 23, 0.08) 0%, transparent 60%);
+            border-radius: 50%;
+            filter: blur(30px);
+        }
+        .visual-card {
+            position: relative;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 340px;
+        }
+        .visual-card .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .visual-card .stat-row:last-child { border-bottom: none; }
+        .visual-card .stat-label {
+            font-size: 13px;
+            color: var(--ink-light);
+        }
+        .visual-card .stat-value {
+            font-family: 'Lora', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+        .visual-card .stat-value.green { color: var(--green); }
+        .visual-card .stat-value.blue { color: var(--accent); }
+
+        /* ============================================================
+           FEATURES — Grid Minimalis
+           ============================================================ */
+        .features {
+            padding: 80px 24px;
+            background: var(--paper-soft);
+        }
+        .features-inner { max-width: 1200px; margin: 0 auto; }
+        .features-head {
+            text-align: center;
+            max-width: 620px;
+            margin: 0 auto 60px auto;
+        }
+        .features-head .kicker {
+            font-size: 13px;
+            color: var(--accent);
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 16px;
+        }
+        .features-head h2 {
+            font-family: 'Lora', serif;
+            font-size: 42px;
+            font-weight: 500;
+            letter-spacing: -1px;
+            line-height: 1.15;
+            color: var(--ink);
+        }
+        .features-head h2 em {
+            font-style: italic;
+            color: var(--ink-muted);
+            font-weight: 400;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .feature-card {
+            background: var(--paper);
+            padding: 40px 32px;
+            transition: background 0.2s;
+        }
+        .feature-card:hover { background: #fafafa; }
+        .feature-num {
+            font-family: 'Lora', serif;
+            font-size: 42px;
+            font-weight: 400;
+            color: var(--ink-muted);
+            line-height: 1;
             margin-bottom: 20px;
         }
-        .hero-tag i { font-size: 13px; }
-
-        .hero-content h1 {
-            font-size: 42px;
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 16px;
-            letter-spacing: -1px;
+        .feature-card h3 {
+            font-family: 'Lora', serif;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: var(--ink);
+            margin-bottom: 12px;
         }
-        .hero-content h1 .accent {
-            background: linear-gradient(135deg, #00A6FF 0%, #f59e0b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero-content p {
+        .feature-card p {
             font-size: 14px;
-            color: #94a3b8;
-            line-height: 1.6;
-            margin-bottom: 32px;
+            color: var(--ink-light);
+            line-height: 1.65;
         }
 
-        .features {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        /* ============================================================
+           QUOTE / CTA STRIP
+           ============================================================ */
+        .quote-strip {
+            padding: 80px 24px;
+            background: var(--paper);
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
         }
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .quote-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .quote-inner blockquote {
+            font-family: 'Lora', serif;
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+        }
+        .quote-inner blockquote em {
+            font-style: italic;
+            color: var(--accent);
+        }
+        .quote-author {
             font-size: 13px;
-            color: #cbd5e1;
-        }
-        .feature-item .check {
-            width: 24px;
-            height: 24px;
-            background: rgba(16, 185, 129, 0.15);
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .feature-item .check i {
-            font-size: 14px;
-            color: #34d399;
+            color: var(--ink-muted);
+            font-weight: 500;
         }
 
-        .left-footer {
-            position: relative;
-            z-index: 2;
-            font-size: 11px;
-            color: #64748b;
+        /* ============================================================
+           LOGIN SECTION
+           ============================================================ */
+        .login-section {
+            padding: 80px 24px 100px 24px;
+            background: var(--paper-soft);
         }
-
-        /* ------------------------------------------------------------
-           RIGHT PANEL — Login Form (Light)
-           ------------------------------------------------------------ */
-        .right-panel {
-            flex: 1;
-            background: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 24px;
-            position: relative;
+        .login-inner {
+            max-width: 440px;
+            margin: 0 auto;
         }
-
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 40px 32px;
-            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
-            border: 1px solid #e2e8f0;
-        }
-
-        .login-header {
+        .login-head {
             text-align: center;
             margin-bottom: 32px;
         }
-        .login-header-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #00A6FF 0%, #0088d1 100%);
-            border-radius: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 20px rgba(0, 166, 255, 0.3);
+        .login-head h2 {
+            font-family: 'Lora', serif;
+            font-size: 32px;
+            font-weight: 500;
+            letter-spacing: -0.8px;
+            color: var(--ink);
+            margin-bottom: 10px;
         }
-        .login-header-icon svg { width: 28px; height: 28px; fill: #fff; }
-        .login-header h2 {
-            font-size: 22px;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 6px;
+        .login-head p {
+            font-size: 14px;
+            color: var(--ink-light);
         }
-        .login-header p {
-            font-size: 13px;
-            color: #64748b;
+
+        .login-form {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 36px 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .msg {
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin-bottom: 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
             display: none;
             line-height: 1.5;
             font-weight: 500;
@@ -288,84 +423,61 @@
         .msg.success {
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
-            color: #16a34a;
+            color: var(--green-dark);
         }
 
-        .input-group { margin-bottom: 18px; }
-        .input-group label {
+        .field { margin-bottom: 20px; }
+        .field label {
             display: block;
             margin-bottom: 8px;
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 12px;
+            color: var(--ink);
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
-        .input-wrapper {
-            position: relative;
-        }
-        .input-wrapper .input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px;
-            color: #94a3b8;
-            pointer-events: none;
-        }
-        .input-wrapper input {
+        .field input {
             width: 100%;
-            padding: 14px 14px 14px 42px;
-            background: #f8fafc;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
+            padding: 13px 16px;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
             outline: none;
+            font-family: 'Inter', sans-serif;
             font-size: 14px;
-            color: #0f172a;
-            font-weight: 500;
+            color: var(--ink);
+            background: #fff;
             transition: all 0.2s;
         }
-        .input-wrapper input:focus {
-            background: #ffffff;
-            border-color: #00A6FF;
-            box-shadow: 0 0 0 4px rgba(0, 166, 255, 0.1);
+        .field input:focus {
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px rgba(36, 36, 36, 0.06);
         }
-        .input-wrapper input::placeholder {
-            color: #94a3b8;
-        }
+        .field input::placeholder { color: var(--ink-muted); }
 
-        .btn-login {
+        .btn-submit {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #00A6FF 0%, #0088d1 100%);
-            color: white;
+            padding: 14px;
+            background: var(--ink);
+            color: #fff;
             border: none;
-            border-radius: 14px;
-            font-weight: 700;
+            border-radius: 99px;
+            font-family: 'Inter', sans-serif;
             font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 20px rgba(0, 166, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             margin-top: 8px;
         }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(0, 166, 255, 0.4); }
-        .btn-login:active { transform: translateY(0); }
-        .btn-login:disabled {
-            background: #cbd5e1;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-submit:hover { background: #000; transform: translateY(-1px); }
+        .btn-submit:disabled { background: var(--ink-muted); cursor: not-allowed; transform: none; }
 
         .loading {
             display: none;
             text-align: center;
-            color: #64748b;
+            color: var(--ink-light);
             font-size: 12px;
             margin-top: 16px;
         }
@@ -375,160 +487,270 @@
 
         .login-footer {
             margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px dashed #e2e8f0;
             text-align: center;
-            font-size: 11px;
-            color: #94a3b8;
-            line-height: 1.5;
+            font-size: 12px;
+            color: var(--ink-muted);
+            line-height: 1.6;
         }
-        .login-footer strong { color: #00A6FF; font-weight: 700; }
+        .login-footer strong { color: var(--ink); font-weight: 600; }
 
         /* ============================================================
-           RESPONSIVE — Mobile
+           FOOTER
            ============================================================ */
-        @media (max-width: 900px) {
-            .container { flex-direction: column; }
+        footer {
+            background: var(--ink);
+            color: #fff;
+            padding: 60px 24px 40px 24px;
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Lora', serif;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .footer-brand svg { width: 22px; height: 22px; fill: #fff; }
+        .footer-copy {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 968px) {
+            .hero-inner { grid-template-columns: 1fr; gap: 60px; text-align: center; }
+            .hero-text h1 { font-size: 48px; }
+            .hero-text .lede { margin-left: auto; margin-right: auto; }
+            .hero-actions { justify-content: center; }
+            .hero-visual { max-width: 400px; margin: 0 auto; }
             
-            .left-panel {
-                padding: 32px 24px;
-                min-height: auto;
-                flex: 0 0 auto;
-            }
-            .hero-content h1 { font-size: 26px; }
-            .hero-content p { font-size: 12px; margin-bottom: 20px; }
-            .features { display: none; }
-            .left-footer { display: none; }
-            .hero-tag { margin-bottom: 12px; }
-            .brand-top-text h3 { font-size: 14px; }
-            .brand-top-text p { font-size: 10px; }
-            .brand-top-icon { width: 38px; height: 38px; }
-            .brand-top-icon svg { width: 18px; height: 18px; }
-
-            .right-panel {
-                padding: 24px 20px 40px 20px;
-                flex: 1;
-                align-items: flex-start;
-            }
-            .login-card {
-                padding: 28px 24px;
-                border-radius: 20px;
-            }
-            .login-header { margin-bottom: 24px; }
-            .login-header-icon { width: 48px; height: 48px; border-radius: 14px; }
-            .login-header-icon svg { width: 24px; height: 24px; }
-            .login-header h2 { font-size: 20px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .features-head h2 { font-size: 32px; }
+            
+            .quote-inner blockquote { font-size: 24px; }
         }
 
-        @media (max-width: 480px) {
-            .left-panel { padding: 24px 20px; }
-            .hero-content h1 { font-size: 22px; }
-            .right-panel { padding: 16px 16px 32px 16px; }
-            .login-card { padding: 24px 20px; }
+        @media (max-width: 640px) {
+            .nav-inner { padding: 14px 20px; }
+            .nav-links a:not(.nav-btn) { display: none; }
+            .nav-brand { font-size: 18px; }
+            .nav-brand svg { width: 24px; height: 24px; }
+            
+            .hero { padding: 48px 20px 40px 20px; }
+            .hero-text h1 { font-size: 36px; letter-spacing: -1.5px; }
+            .hero-text .lede { font-size: 16px; }
+            .hero-text .kicker { font-size: 11px; }
+            
+            .features { padding: 56px 20px; }
+            .features-head h2 { font-size: 26px; }
+            .feature-card { padding: 32px 24px; }
+            .feature-num { font-size: 32px; margin-bottom: 14px; }
+            .feature-card h3 { font-size: 18px; }
+            
+            .quote-strip { padding: 48px 20px; }
+            .quote-inner blockquote { font-size: 20px; }
+            
+            .login-section { padding: 56px 20px 80px 20px; }
+            .login-head h2 { font-size: 26px; }
+            .login-form { padding: 28px 22px; border-radius: 16px; }
+            
+            footer { padding: 40px 20px 30px 20px; }
+            .footer-inner { flex-direction: column; text-align: center; }
         }
+
+        /* Animasi masuk */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hero-text > * { animation: fadeUp 0.6s ease-out backwards; }
+        .hero-text .kicker { animation-delay: 0.05s; }
+        .hero-text h1 { animation-delay: 0.1s; }
+        .hero-text .lede { animation-delay: 0.2s; }
+        .hero-text .hero-actions { animation-delay: 0.3s; }
     </style>
 </head>
 <body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
 
-<div class="container">
-    
-    <!-- ============================================================
-         LEFT PANEL — Brand Showcase
-         ============================================================ -->
-    <div class="left-panel">
-        <div class="brand-top">
-            <div class="brand-top-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                    <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
-                </svg>
-            </div>
-            <div class="brand-top-text">
-                <h3>POS Kasir</h3>
-                <p>Multi Buyer Edition</p>
-            </div>
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav>
+    <div class="nav-inner">
+        <div class="nav-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+            </svg>
+            POS Kasir
         </div>
-
-        <div class="hero-content">
-            <div class="hero-tag">
-                <i class="ri-shield-check-line"></i> Sistem Terintegrasi
-            </div>
-            <h1>Kelola Bisnis <span class="accent">Lebih Cerdas</span> dengan Satu Aplikasi</h1>
-            <p>Platform POS modern untuk cafe, restoran, dan toko. Terintegrasi dengan Google Spreadsheet — cepat, aman, dan mudah.</p>
-            
-            <div class="features">
-                <div class="feature-item">
-                    <span class="check"><i class="ri-check-line"></i></span>
-                    <span>Transaksi cepat & akurat</span>
-                </div>
-                <div class="feature-item">
-                    <span class="check"><i class="ri-check-line"></i></span>
-                    <span>Laporan omset & margin otomatis</span>
-                </div>
-                <div class="feature-item">
-                    <span class="check"><i class="ri-check-line"></i></span>
-                    <span>Multi-toko dalam satu akun</span>
-                </div>
-                <div class="feature-item">
-                    <span class="check"><i class="ri-check-line"></i></span>
-                    <span>Cloud sync real-time</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="left-footer">
-            © 2026 POS Kasir Multi-Buyer · v1.1.5
+        <div class="nav-links">
+            <a href="#features">Fitur</a>
+            <a href="#login">Masuk</a>
+            <a href="#login" class="nav-btn">Mulai Sekarang</a>
         </div>
     </div>
+</nav>
 
-    <!-- ============================================================
-         RIGHT PANEL — Login Form
-         ============================================================ -->
-    <div class="right-panel">
-        <div class="login-card">
-            
-            <div class="login-header">
-                <div class="login-header-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                        <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
-                    </svg>
-                </div>
-                <h2>Masuk Akun</h2>
-                <p>Silakan login dengan akun toko Anda</p>
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-text">
+            <div class="kicker">
+                <i class="ri-sparkling-2-fill"></i> Platform POS #1
             </div>
+            <h1>
+                Kelola bisnis.<br>
+                <em>Tanpa drama.</em>
+            </h1>
+            <p class="lede">
+                Sistem Point of Sale modern untuk cafe, restoran, dan toko. Terintegrasi langsung dengan Google Spreadsheet — cepat, ringan, dan bisa dipakai di mana saja.
+            </p>
+            <div class="hero-actions">
+                <a href="#login" class="btn-primary">
+                    Masuk ke Akun <i class="ri-arrow-right-line"></i>
+                </a>
+                <a href="#features" class="btn-secondary-link">
+                    Lihat Fitur <i class="ri-arrow-down-line"></i>
+                </a>
+            </div>
+        </div>
 
+        <div class="hero-visual">
+            <div class="visual-blob"></div>
+            <div class="visual-card">
+                <div class="stat-row">
+                    <span class="stat-label">Omset Hari Ini</span>
+                    <span class="stat-value blue">Rp 2.450.000</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Transaksi</span>
+                    <span class="stat-value">127</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Produk Terjual</span>
+                    <span class="stat-value">342</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Margin</span>
+                    <span class="stat-value green">68.4%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     FEATURES
+     ============================================================ -->
+<section class="features" id="features">
+    <div class="features-inner">
+        <div class="features-head">
+            <div class="kicker">Kenapa POS Kasir</div>
+            <h2>
+                Semua yang bisnis Anda butuhkan,<br>
+                <em>dalam satu aplikasi.</em>
+            </h2>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-num">01</div>
+                <h3>Transaksi Instan</h3>
+                <p>Kasir cepat dengan multi-item, split bill, dan struk digital. Tidak ada training rumit — bisa langsung dipakai.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-num">02</div>
+                <h3>Laporan Real-time</h3>
+                <p>Pantau omset, HPP, dan margin keuntungan secara live. Data tersimpan otomatis di Google Spreadsheet Anda.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-num">03</div>
+                <h3>Akses Dimana Saja</h3>
+                <p>Dari HP, tablet, atau laptop — buka browser dan langsung jualan. Tidak perlu install apapun.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     QUOTE STRIP
+     ============================================================ -->
+<section class="quote-strip">
+    <div class="quote-inner">
+        <blockquote>
+            "Bisnis kecil layak punya <em>tools besar</em>. POS Kasir hadir untuk membuat operasional jadi mudah dan menyenangkan."
+        </blockquote>
+        <div class="quote-author">— Muhasa Digital, 2026</div>
+    </div>
+</section>
+
+<!-- ============================================================
+     LOGIN SECTION
+     ============================================================ -->
+<section class="login-section" id="login">
+    <div class="login-inner">
+        <div class="login-head">
+            <h2>Masuk ke Akun</h2>
+            <p>Silakan login dengan akun toko Anda</p>
+        </div>
+
+        <div class="login-form">
             <div class="msg" id="msg"></div>
-            
-            <div class="input-group">
+
+            <div class="field">
                 <label>Email Toko</label>
-                <div class="input-wrapper">
-                    <i class="ri-mail-line input-icon"></i>
-                    <input type="text" id="login-email" placeholder="admin@toko.com" autocomplete="username">
-                </div>
+                <input type="text" id="login-email" placeholder="admin@toko.com" autocomplete="username">
             </div>
-            
-            <div class="input-group">
+
+            <div class="field">
                 <label>PIN Akses</label>
-                <div class="input-wrapper">
-                    <i class="ri-lock-2-line input-icon"></i>
-                    <input type="password" id="login-pin" placeholder="••••" autocomplete="current-password">
-                </div>
+                <input type="password" id="login-pin" placeholder="••••" autocomplete="current-password">
             </div>
-            
-            <button class="btn-login" id="btn-login" onclick="handleLogin()">
-                <i class="ri-login-circle-line"></i> MASUK
+
+            <button class="btn-submit" id="btn-login" onclick="handleLogin()">
+                Masuk <i class="ri-arrow-right-line"></i>
             </button>
-            
+
             <div class="loading" id="loading">
                 <i class="ri-loader-4-line"></i> Memverifikasi akun...
             </div>
 
             <div class="login-footer">
-                Butuh bantuan? Hubungi admin di <strong>@Muhasa_Digital</strong>
+                Butuh bantuan? Hubungi <strong>@Muhasa_Digital</strong>
             </div>
         </div>
     </div>
+</section>
 
-</div>
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+            </svg>
+            POS Kasir
+        </div>
+        <div class="footer-copy">
+            © 2026 Multi-Buyer Edition · v1.1.5 · All rights reserved
+        </div>
+    </div>
+</footer>
 
 <script>
     const MASTER_AUTH_URL = 'https://script.google.com/macros/s/AKfycbzEGjvtBAD0sMCXOiM5Q8TN0g-rcZuipoTDblrSasicGXhgSNntWv-d1AdDVW3gH3OApg/exec';
@@ -540,19 +762,19 @@
         const btn = document.getElementById('btn-login');
         const msg = document.getElementById('msg');
         const loading = document.getElementById('loading');
-        
+
         msg.className = 'msg';
         msg.classList.remove('show');
-        
+
         if (!email || !pin) {
             showMsg('error', '❌ Mohon isi email dan PIN.');
             return;
         }
-        
+
         btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> MEMPROSES...';
+        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Memproses...';
         loading.classList.add('show');
-        
+
         try {
             const response = await fetch(MASTER_AUTH_URL, {
                 method: 'POST',
@@ -564,30 +786,29 @@
                     pin: pin
                 })
             });
-            
+
             const result = await response.json();
-            
             if (!result.success) throw new Error(result.error || 'Login gagal');
-            if (!result.data || !result.data.redirectUrl) throw new Error('Akun belum terhubung ke toko manapun.');
-            
+            if (!result.data || !result.data.redirectUrl) throw new Error('Akun belum terhubung ke toko.');
+
             localStorage.setItem('master_session', JSON.stringify({
                 email: email,
                 tenantId: result.data.tenantId,
                 storeName: result.data.storeName,
                 loginAt: new Date().toISOString()
             }));
-            
-            showMsg('success', '✅ Login berhasil! Mengalihkan ke ' + result.data.storeName + '...');
-            
+
+            showMsg('success', '✅ Berhasil! Mengalihkan ke ' + result.data.storeName + '...');
+
             setTimeout(() => {
                 window.location.href = result.data.redirectUrl;
             }, 800);
-            
+
         } catch (err) {
             console.error('Login error:', err);
-            showMsg('error', '❌ ' + (err.message || 'Gagal login. Periksa koneksi.'));
+            showMsg('error', '❌ ' + (err.message || 'Gagal login.'));
             btn.disabled = false;
-            btn.innerHTML = '<i class="ri-login-circle-line"></i> MASUK';
+            btn.innerHTML = 'Masuk <i class="ri-arrow-right-line"></i>';
             loading.classList.remove('show');
         }
     }
@@ -603,6 +824,17 @@
     });
     document.getElementById('login-email').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') document.getElementById('login-pin').focus();
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
     });
 </script>
 
