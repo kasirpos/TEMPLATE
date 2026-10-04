@@ -1,6 +1,6 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FINAL v5)
-   Update: user database login, update PIN cloud, admin-only add menu
+   POS KASIR - APP LOGIC (FINAL v6)
+   Update: login instan, sync hemat, user database cloud
    ========================================================= */
 
 /* ==========================================
@@ -81,7 +81,7 @@ function syncToCloud() {
         } else {
             updateCloudStatus(false);
         }
-    }, 1500);
+    }, 500); // dipercepat dari 1500 → 500ms
 }
 
 async function loadFromCloud() {
@@ -109,7 +109,7 @@ async function loadFromCloud() {
 }
 
 /* =========================================
-   AUTO SYNC + MANUAL SYNC
+   AUTO SYNC (hemat: tanpa polling 30s)
    ========================================= */
 function hashData(obj) {
     try { return JSON.stringify(obj); } catch(e) { return ''; }
@@ -214,6 +214,7 @@ async function manualSync() {
 }
 
 function setupAutoSync() {
+    // Sync hanya saat dibutuhkan (tanpa polling terus-menerus)
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             console.log('👁️ Tab aktif — sync dari cloud');
@@ -225,8 +226,10 @@ function setupAutoSync() {
         console.log('🌐 Kembali online — sync dari cloud');
         silentRefresh();
     });
-    setInterval(silentRefresh, 30000);
-    console.log('✅ Auto sync aktif (30s polling + focus + visibility + online)');
+
+    // Polling diperlambat 30s → 120s agar hemat & tidak terasa delay
+    setInterval(silentRefresh, 120000);
+    console.log('✅ Auto sync aktif (120s polling + focus + visibility + online)');
 }
 
 function applyBranding() {
@@ -527,43 +530,63 @@ function importLocalStorageJSON(event) {
 }
 
 /* ==========================================
-   5. AUTH
+   5. AUTH (LOGIN INSTAN + VERIFIKASI BACKGROUND)
    ========================================== */
 async function handleLogin() {
     const username = document.getElementById('kasir-name').value;
     const pin = document.getElementById('kasir-pin').value;
 
-    let loginOk = false;
-    let roleFromCloud = 'kasir';
+    if (!pin) { alert("PIN harus diisi!"); return; }
 
-    // 1. Coba login ke cloud
+    // ---------- Jalur cepat: PIN cocok dengan cache lokal ----------
+    if (pin === currentPinCode) {
+        currentUserRole = (username === 'admin') ? 'admin' : 'kasir';
+        currentUsername = username;
+
+        finishLogin();
+        console.log('⚡ Login instan (cache lokal)');
+
+        // Verifikasi cloud di background (kalau role berbeda, update tanpa reload)
+        api.loginUser(username, pin).then(res => {
+            if (res && res.ok && res.user) {
+                const roleCloud = res.user.role || 'kasir';
+                if (roleCloud !== currentUserRole) {
+                    console.log('🔄 Role diupdate dari cloud:', roleCloud);
+                    currentUserRole = roleCloud;
+                    currentUsername = res.user.username || username;
+                    applyRolePermissions();
+                }
+            }
+        });
+        return;
+    }
+
+    // ---------- Jalur lambat: harus tanya cloud ----------
     const cloudRes = await api.loginUser(username, pin);
 
     if (cloudRes && cloudRes.ok && cloudRes.user) {
-        roleFromCloud = cloudRes.user.role || 'kasir';
+        currentUserRole = cloudRes.user.role || 'kasir';
         currentUsername = cloudRes.user.username || username;
-        loginOk = true;
-    } else if (cloudRes && cloudRes.ok === false) {
-        // Cloud merespon tapi user/PIN salah
+
+        // Simpan PIN ke cache lokal untuk login berikutnya (instan)
+        currentPinCode = pin;
+        localStorage.setItem('luxe_pos_pin', pin);
+
+        finishLogin();
+        console.log('☁️ Login via cloud OK');
+        return;
+    }
+
+    if (cloudRes && cloudRes.ok === false) {
         alert(cloudRes.error || "PIN salah!");
         return;
-    } else {
-        // 2. Fallback lokal kalau cloud offline
-        if (pin === currentPinCode) {
-            roleFromCloud = (username === 'admin') ? 'admin' : 'kasir';
-            currentUsername = username;
-            loginOk = true;
-        }
     }
 
-    if (!loginOk) {
-        alert("PIN salah!");
-        return;
-    }
+    alert("PIN salah atau cloud tidak tersedia!");
+}
 
-    currentUserRole = roleFromCloud;
+function finishLogin() {
     document.getElementById('profile-name').innerText = currentUsername;
-
     applyRolePermissions();
     updateGreeting();
 
@@ -668,35 +691,31 @@ async function updatePassword() {
         return;
     }
 
-    // 1. Update ke cloud
-    const res = await api.updateUserPin(currentUsername, oldPinInput, newPinInput);
-
-    if (res && res.ok) {
-        currentPinCode = newPinInput;
-        localStorage.setItem('luxe_pos_pin', currentPinCode);
-
-        alert("PIN / Password berhasil diperbarui & tersinkron ke cloud!");
-        document.getElementById('old-pin').value = '';
-        document.getElementById('new-pin').value = '';
-        toggleProfileAccordion('menu-profile-password');
+    // Cek cepat: PIN lama cocok dengan cache?
+    if (oldPinInput !== currentPinCode) {
+        alert("PIN lama salah!");
         return;
     }
 
-    // 2. Fallback lokal kalau cloud offline / error
-    if (!res) {
-        if (oldPinInput === currentPinCode) {
-            currentPinCode = newPinInput;
-            localStorage.setItem('luxe_pos_pin', currentPinCode);
+    // Update lokal dulu → UI responsif
+    currentPinCode = newPinInput;
+    localStorage.setItem('luxe_pos_pin', newPinInput);
 
-            alert("Cloud tidak tersedia. PIN diubah lokal saja.");
-            document.getElementById('old-pin').value = '';
-            document.getElementById('new-pin').value = '';
-            toggleProfileAccordion('menu-profile-password');
-            return;
+    alert("PIN berhasil diperbarui!");
+    document.getElementById('old-pin').value = '';
+    document.getElementById('new-pin').value = '';
+    toggleProfileAccordion('menu-profile-password');
+
+    // Sync ke cloud di background
+    api.updateUserPin(currentUsername, oldPinInput, newPinInput).then(res => {
+        if (res && res.ok) {
+            updateCloudStatus(true);
+            console.log('☁️ PIN tersinkron ke cloud');
+        } else {
+            updateCloudStatus(false);
+            console.warn('⚠️ Gagal sync PIN ke cloud:', res?.error);
         }
-    }
-
-    alert("Gagal update PIN: " + (res && res.error ? res.error : "PIN lama salah / cloud error"));
+    });
 }
 
 /* ==========================================
