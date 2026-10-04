@@ -1,6 +1,6 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FINAL v6)
-   Update: login instan, sync hemat, user database cloud
+   POS KASIR - APP LOGIC (FINAL v7)
+   Login STRICT: wajib cloud, tidak ada fallback lokal
    ========================================================= */
 
 /* ==========================================
@@ -36,6 +36,42 @@ const api = {
             return null;
         }
     },
+
+    /* Strict login — return detail status */
+    loginUserStrict(username, pin) {
+        return new Promise(async (resolve) => {
+            if (!API_URL || API_URL.includes('GANTI_INI')) {
+                resolve({ status: 'config_error' });
+                return;
+            }
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'loginUser',
+                        token: API_TOKEN,
+                        data: { username, pin }
+                    })
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    if (json.data && json.data.ok && json.data.user) {
+                        resolve({ status: 'ok', user: json.data.user });
+                    } else {
+                        resolve({ status: 'denied', error: (json.data && json.data.error) || 'Login gagal' });
+                    }
+                } else {
+                    // json.success === false → token expired / tenant nonaktif / dll
+                    resolve({ status: 'denied', error: json.error });
+                }
+            } catch (err) {
+                resolve({ status: 'offline', error: err.toString() });
+            }
+        });
+    },
+
     getAll()             { return this.call('getAll'); },
     saveProduct(p)       { return this.call('saveProduct', { data: p }); },
     deleteProduct(id)    { return this.call('deleteProduct', { id }); },
@@ -47,9 +83,6 @@ const api = {
     deleteCoupon(code)   { return this.call('deleteCoupon', { code }); },
     saveCashFlow(c)      { return this.call('saveCashFlow', { data: c }); },
     bulkSave(data)       { return this.call('bulkSave', { data }); },
-    loginUser(username, pin) {
-        return this.call('loginUser', { data: { username, pin } });
-    },
     updateUserPin(username, oldPin, newPin) {
         return this.call('updateUserPin', { data: { username, oldPin, newPin } });
     }
@@ -81,7 +114,7 @@ function syncToCloud() {
         } else {
             updateCloudStatus(false);
         }
-    }, 500); // dipercepat dari 1500 → 500ms
+    }, 500);
 }
 
 async function loadFromCloud() {
@@ -109,13 +142,14 @@ async function loadFromCloud() {
 }
 
 /* =========================================
-   AUTO SYNC (hemat: tanpa polling 30s)
+   AUTO SYNC
    ========================================= */
 function hashData(obj) {
     try { return JSON.stringify(obj); } catch(e) { return ''; }
 }
 
 async function silentRefresh() {
+    if (currentUserRole === 'guest' || !currentUsername) return;
     const activeTag = document.activeElement?.tagName;
     if (activeTag && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) return;
     const syncBtn = document.getElementById('sync-btn');
@@ -147,7 +181,7 @@ async function silentRefresh() {
             hasChange = true;
         }
         if (hasChange) {
-            console.log('🔄 Data berubah dari cloud — render ulang');
+            console.log('🔄 Data berubah dari cloud');
             renderProducts(products, 'menu-items');
             renderPopularItems();
             renderHistory();
@@ -214,57 +248,40 @@ async function manualSync() {
 }
 
 function setupAutoSync() {
-    // Sync hanya saat dibutuhkan (tanpa polling terus-menerus)
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            console.log('👁️ Tab aktif — sync dari cloud');
-            silentRefresh();
-        }
+        if (!document.hidden) silentRefresh();
     });
     window.addEventListener('focus', () => silentRefresh());
-    window.addEventListener('online', () => {
-        console.log('🌐 Kembali online — sync dari cloud');
-        silentRefresh();
-    });
-
-    // Polling diperlambat 30s → 120s agar hemat & tidak terasa delay
+    window.addEventListener('online', () => silentRefresh());
     setInterval(silentRefresh, 120000);
-    console.log('✅ Auto sync aktif (120s polling + focus + visibility + online)');
+    console.log('✅ Auto sync aktif');
 }
 
 function applyBranding() {
     document.title = 'POS Kasir App : ' + STORE_NAME;
-
     const loginTitle = document.getElementById('login-store-name');
     if (loginTitle) loginTitle.textContent = STORE_NAME;
     const loginSlogan = document.getElementById('login-store-slogan');
     if (loginSlogan && CFG.STORE_SLOGAN) loginSlogan.textContent = CFG.STORE_SLOGAN;
-
     const headerTitle = document.getElementById('current-user');
     if (headerTitle && headerTitle.textContent.includes('Kala Space')) {
         headerTitle.textContent = STORE_NAME;
     }
-
     const receiptStore = document.getElementById('receipt-store-name');
     if (receiptStore) receiptStore.textContent = STORE_NAME;
     const receiptFooter = document.getElementById('receipt-footer-text');
     if (receiptFooter) receiptFooter.textContent = 'Sampai jumpa kembali di ' + STORE_NAME;
-
     const kitchenStore = document.getElementById('kitchen-store-name');
     if (kitchenStore) kitchenStore.textContent = STORE_NAME.toUpperCase() + ' - KITCHEN';
-
     const badge = document.getElementById('version-badge');
     if (badge && CFG.VERSION) badge.textContent = CFG.VERSION;
-
     const taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null) ? CFG.TAX_PERCENT : 10;
     const taxLabelEl = document.getElementById('tax-label');
     if (taxLabelEl) taxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
     const modalTaxLabelEl = document.getElementById('modal-tax-label');
     if (modalTaxLabelEl) modalTaxLabelEl.textContent = 'Pajak (' + taxPercent + '%)';
-
     const srStoreNameEl = document.getElementById('sr-store-name');
     if (srStoreNameEl) srStoreNameEl.textContent = STORE_NAME.toUpperCase();
-
     const waEl = document.getElementById('contact-wa');
     if (waEl && CFG.SUPPORT_WA) {
         waEl.innerHTML = '<i class="ri-whatsapp-line" style="color: var(--success);"></i> +' + CFG.SUPPORT_WA;
@@ -353,6 +370,9 @@ let products = JSON.parse(localStorage.getItem('luxe_pos_products')) || defaultP
 let transactionHistory = JSON.parse(localStorage.getItem('luxe_pos_history')) || [];
 let savedBills = JSON.parse(localStorage.getItem('luxe_pos_saved_bills')) || [];
 let currentPinCode = localStorage.getItem('luxe_pos_pin') || (CFG.DEFAULT_PIN || "1234");
+
+// Kredensial per-user (username → {pin, role})
+let userCredentials = JSON.parse(localStorage.getItem('luxe_pos_credentials')) || {};
 
 const defaultCoupons = [{ code: "JumatBerkah", type: "percent", value: 10, limit: 100, used: 0, active: true }];
 let coupons = JSON.parse(localStorage.getItem('luxe_pos_coupons')) || defaultCoupons;
@@ -530,7 +550,7 @@ function importLocalStorageJSON(event) {
 }
 
 /* ==========================================
-   5. AUTH (LOGIN INSTAN + VERIFIKASI BACKGROUND)
+   5. AUTH — LOGIN STRICT (WAJIB CLOUD)
    ========================================== */
 async function handleLogin() {
     const username = document.getElementById('kasir-name').value;
@@ -538,51 +558,53 @@ async function handleLogin() {
 
     if (!pin) { alert("PIN harus diisi!"); return; }
 
-    // ---------- Jalur cepat: PIN cocok dengan cache lokal ----------
-    if (pin === currentPinCode) {
-        currentUserRole = (username === 'admin') ? 'admin' : 'kasir';
-        currentUsername = username;
-
-        finishLogin();
-        console.log('⚡ Login instan (cache lokal)');
-
-        // Verifikasi cloud di background (kalau role berbeda, update tanpa reload)
-        api.loginUser(username, pin).then(res => {
-            if (res && res.ok && res.user) {
-                const roleCloud = res.user.role || 'kasir';
-                if (roleCloud !== currentUserRole) {
-                    console.log('🔄 Role diupdate dari cloud:', roleCloud);
-                    currentUserRole = roleCloud;
-                    currentUsername = res.user.username || username;
-                    applyRolePermissions();
-                }
-            }
-        });
-        return;
+    // Tampilkan loading
+    const loginBtn = document.querySelector('.btn-login');
+    const originalText = loginBtn ? loginBtn.innerHTML : '';
+    if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spinSync 0.8s linear infinite;"></i> MEMERIKSA...';
     }
 
-    // ---------- Jalur lambat: harus tanya cloud ----------
-    const cloudRes = await api.loginUser(username, pin);
+    // WAJIB tanya cloud — tidak ada fallback
+    const res = await api.loginUserStrict(username, pin);
 
-    if (cloudRes && cloudRes.ok && cloudRes.user) {
-        currentUserRole = cloudRes.user.role || 'kasir';
-        currentUsername = cloudRes.user.username || username;
+    if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalText;
+    }
 
-        // Simpan PIN ke cache lokal untuk login berikutnya (instan)
+    if (res.status === 'ok') {
+        currentUserRole = res.user.role || 'kasir';
+        currentUsername = res.user.username || username;
+
+        userCredentials[username] = { pin: pin, role: currentUserRole };
+        localStorage.setItem('luxe_pos_credentials', JSON.stringify(userCredentials));
         currentPinCode = pin;
         localStorage.setItem('luxe_pos_pin', pin);
 
         finishLogin();
-        console.log('☁️ Login via cloud OK');
+        console.log('☁️ Login OK');
         return;
     }
 
-    if (cloudRes && cloudRes.ok === false) {
-        alert(cloudRes.error || "PIN salah!");
+    if (res.status === 'denied') {
+        alert("Login ditolak:\n\n" + (res.error || 'PIN salah / user tidak valid'));
+        document.getElementById('kasir-pin').value = '';
         return;
     }
 
-    alert("PIN salah atau cloud tidak tersedia!");
+    if (res.status === 'offline') {
+        alert("Server tidak dapat dijangkau.\n\nCek koneksi internet atau hubungi admin.");
+        return;
+    }
+
+    if (res.status === 'config_error') {
+        alert("Konfigurasi API belum diatur.");
+        return;
+    }
+
+    alert("Login gagal: unknown error");
 }
 
 function finishLogin() {
@@ -608,6 +630,7 @@ function confirmLogout() {
     document.getElementById('login-view').style.display = 'flex';
     currentUsername = "";
     currentUserRole = 'kasir';
+    // userCredentials tetap — login berikutnya tinggal masukkan PIN yang benar
 }
 
 function applyRolePermissions() {
@@ -621,7 +644,6 @@ function applyRolePermissions() {
     const popularItems = document.getElementById('popular-items');
     const managementContainer = document.getElementById('admin-management-container');
 
-    // Tombol tambah menu (FAB) — hanya untuk admin
     if (btnAddMenu) {
         btnAddMenu.classList.toggle('admin-visible', currentUserRole === 'admin');
     }
@@ -691,31 +713,22 @@ async function updatePassword() {
         return;
     }
 
-    // Cek cepat: PIN lama cocok dengan cache?
-    if (oldPinInput !== currentPinCode) {
-        alert("PIN lama salah!");
+    const res = await api.updateUserPin(currentUsername, oldPinInput, newPinInput);
+
+    if (res && res.ok) {
+        userCredentials[currentUsername] = { pin: newPinInput, role: currentUserRole };
+        localStorage.setItem('luxe_pos_credentials', JSON.stringify(userCredentials));
+        currentPinCode = newPinInput;
+        localStorage.setItem('luxe_pos_pin', newPinInput);
+
+        alert("PIN / Password berhasil diperbarui!");
+        document.getElementById('old-pin').value = '';
+        document.getElementById('new-pin').value = '';
+        toggleProfileAccordion('menu-profile-password');
         return;
     }
 
-    // Update lokal dulu → UI responsif
-    currentPinCode = newPinInput;
-    localStorage.setItem('luxe_pos_pin', newPinInput);
-
-    alert("PIN berhasil diperbarui!");
-    document.getElementById('old-pin').value = '';
-    document.getElementById('new-pin').value = '';
-    toggleProfileAccordion('menu-profile-password');
-
-    // Sync ke cloud di background
-    api.updateUserPin(currentUsername, oldPinInput, newPinInput).then(res => {
-        if (res && res.ok) {
-            updateCloudStatus(true);
-            console.log('☁️ PIN tersinkron ke cloud');
-        } else {
-            updateCloudStatus(false);
-            console.warn('⚠️ Gagal sync PIN ke cloud:', res?.error);
-        }
-    });
+    alert("Gagal update PIN: " + ((res && res.error) ? res.error : 'Cloud tidak tersedia'));
 }
 
 /* ==========================================
@@ -812,6 +825,7 @@ function closeAddMenuModal() {
 }
 
 function addNewProduct() {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     const name = document.getElementById('new-menu-name').value.trim();
     const category = document.getElementById('new-menu-category').value;
     const price = parseFloat(document.getElementById('new-menu-price').value);
@@ -833,6 +847,7 @@ function addNewProduct() {
 }
 
 function openEditMenuModal(productId) {
+    if (currentUserRole !== 'admin') return;
     const product = products.find(p => p.id === productId);
     if (!product) return;
     document.getElementById('edit-menu-id').value = product.id;
@@ -847,6 +862,7 @@ function openEditMenuModal(productId) {
 function closeEditMenuModal() { document.getElementById('edit-menu-modal').style.display = 'none'; }
 
 function saveEditProduct() {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     const id = parseInt(document.getElementById('edit-menu-id').value);
     const name = document.getElementById('edit-menu-name').value.trim();
     const category = document.getElementById('edit-menu-category').value;
@@ -870,6 +886,7 @@ function saveEditProduct() {
 }
 
 function openDeleteMenuModal(productId) {
+    if (currentUserRole !== 'admin') return;
     const product = products.find(p => p.id === productId);
     if (!product) return;
     productToDeleteId = productId;
@@ -881,6 +898,7 @@ function closeDeleteMenuModal() {
     document.getElementById('delete-menu-modal').style.display = 'none';
 }
 function confirmDeleteProduct() {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     if (productToDeleteId !== null) {
         const deletedId = productToDeleteId;
         products = products.filter(p => p.id !== deletedId);
@@ -932,6 +950,7 @@ function renderHPPManagement() {
 }
 
 function saveHPPChanges() {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     const inputs = document.querySelectorAll('.hpp-input-field');
     inputs.forEach(input => {
         const id = parseInt(input.getAttribute('data-id'));
@@ -970,6 +989,7 @@ function renderCouponManagement() {
 }
 
 function addOrUpdateCoupon() {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     const codeInput = document.getElementById('new-coupon-code').value.trim();
     const typeInput = document.getElementById('new-coupon-type').value;
     const valInput = parseFloat(document.getElementById('new-coupon-val').value) || 0;
@@ -992,6 +1012,7 @@ function addOrUpdateCoupon() {
 }
 
 function deleteCoupon(index) {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     const deletedCode = coupons[index].code;
     coupons.splice(index, 1);
     saveState();
@@ -1024,6 +1045,7 @@ function renderProductDiscountManagement() {
 }
 
 function saveProductDiscountChanges() {
+    if (currentUserRole !== 'admin') { alert('Hanya admin!'); return; }
     document.querySelectorAll('.disc-type-input').forEach(input => {
         const id = parseInt(input.getAttribute('data-id'));
         const type = input.value;
@@ -1547,7 +1569,7 @@ function openDeleteSelectedHistoryModal() {
     
     if (historyActionMode === 'cancel') {
         if (titleEl) titleEl.innerText = 'BATALKAN TRANSAKSI?';
-        if (descEl) descEl.innerText = checkboxes.length + ' transaksi akan ditandai sebagai void. Transaksi tidak akan dihitung dalam omset, tapi tetap muncul di riwayat.';
+        if (descEl) descEl.innerText = checkboxes.length + ' transaksi akan ditandai sebagai void.';
         if (iconEl) {
             iconEl.innerHTML = '<i class="ri-close-circle-line" style="font-size: 24px; color: #f59e0b;"></i>';
             iconEl.style.background = 'rgba(245, 158, 11, 0.15)';
@@ -1555,7 +1577,7 @@ function openDeleteSelectedHistoryModal() {
         if (confirmBtn) { confirmBtn.innerText = 'YA, BATALKAN'; confirmBtn.style.background = '#f59e0b'; }
     } else {
         if (titleEl) titleEl.innerText = 'HAPUS RIWAYAT?';
-        if (descEl) descEl.innerText = checkboxes.length + ' transaksi akan dihapus dari daftar riwayat. Data tidak akan muncul lagi di halaman ini.';
+        if (descEl) descEl.innerText = checkboxes.length + ' transaksi akan dihapus dari daftar riwayat.';
         if (iconEl) {
             iconEl.innerHTML = '<i class="ri-delete-bin-line" style="font-size: 24px; color: var(--danger);"></i>';
             iconEl.style.background = 'var(--danger-light)';
@@ -2037,13 +2059,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyBranding();
     initTheme();
     updateGreeting();
-    const cloudOK = await loadFromCloud();
-    console.log(cloudOK ? '✅ Data di-load dari cloud' : '⚠️ Pakai data lokal');
+    // Login page muncul dulu — user harus login sebelum load cloud
     applyRolePermissions();
     updateCart();
     renderSavedBills();
-    updateDashboardMetrics();
     renderKasOverview();
+    // Note: loadFromCloud dipanggil setelah login sukses
     const filterDateInput = document.getElementById('filter-date');
     if (filterDateInput) filterDateInput.addEventListener('change', () => updateDashboardMetrics());
     const kitchenTableNo = document.getElementById('kitchen-table-no');
