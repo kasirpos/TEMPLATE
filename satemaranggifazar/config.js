@@ -6,7 +6,7 @@
 window.APP_CONFIG = {
 
     // ==== WAJIB DIISI (dari Apps Script deployment) ====
-    API_URL:   'https://script.google.com/macros/s/AKfycbwuUap751UwyPHtpYeZf1u6ga0KJMdeygqlSi6-EuIxJeGfcxIuxIsRXIcU_CyXxMiRMA/exec',
+    API_URL:   'https://script.google.com/macros/s/AKfycbyKUZxOE7os7iCnVwD3Jy5a6raMWRwW2RvSDomxnCm35WTzZ_qCuos1Jv-wMSj96YRuLg/exec',
     API_TOKEN: 'fazarbyd',
 
     // ==== BRANDING TOKO ====
