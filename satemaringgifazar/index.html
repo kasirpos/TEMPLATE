@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- ============================================
+         AUTH GUARD — Cek session sebelum load app
+         ============================================ -->
+    <script>
+        (function() {
+            const REQUIRED_TENANT = 'kalaspace';  // ← ganti per buyer
+            const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
+            
+            try {
+                const sessionStr = localStorage.getItem('master_session');
+                if (!sessionStr) {
+                    window.location.replace(ROOT_LOGIN_URL);
+                    return;
+                }
+                const session = JSON.parse(sessionStr);
+                
+                if (!session.tenantId || session.tenantId !== REQUIRED_TENANT) {
+                    window.location.replace(ROOT_LOGIN_URL);
+                    return;
+                }
+                
+                // Cek expiry session (24 jam)
+                const loginAt = new Date(session.loginAt);
+                const now = new Date();
+                const hoursSinceLogin = (now - loginAt) / (1000 * 60 * 60);
+                if (hoursSinceLogin > 24) {
+                    localStorage.removeItem('master_session');
+                    window.location.replace(ROOT_LOGIN_URL);
+                    return;
+                }
+                
+                // Session valid — lanjut load app
+                console.log('✅ Auth OK:', session.storeName);
+            } catch (e) {
+                window.location.replace(ROOT_LOGIN_URL);
+            }
+        })();
+    </script>
+    <title>POS Kasir App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="config.js" defer></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+
+<div class="app-container" id="app-wrapper">
+
+    <div id="cloud-status"><i class="ri-cloud-line"></i> <span id="cloud-status-text">Offline</span></div>
+
+    <!-- login screen -->
+    <div id="login-view">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 60px; height: 60px; fill: #f59e0b;">
+                    <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+                </svg>
+            </div>
+            <h2 id="login-store-name" style="color: #fff; font-size: 20px; font-weight: 800;">Kala Space Cafe</h2>
+            <p id="login-store-slogan" style="color: #94a3b8; font-size: 12px; margin-top: 2px;">Selamat Datang! Silahkan masuk ke akun anda.</p>
+        </div>
+        <div class="login-card">
+            <div class="input-group">
+                <label>Nama Pengguna</label>
+                <select id="kasir-name">
+                    <option value="admin">Admin</option>
+                    <option value="Kasir1">Kasir 1</option>
+                    <option value="Kasir2">Kasir 2</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>pin akses</label>
+                <input type="password" id="kasir-pin" placeholder="****" value="1234">
+            </div>
+            <button class="btn-login" onclick="handleLogin()">LOGIN</button>
+        </div>
+    </div>
+
+    <!-- modal filter omset -->
+    <div class="modal-overlay" id="omset-filter-modal">
+        <div class="modal-card">
+            <div class="receipt-header">
+                <i class="ri-calendar-todo-line" style="font-size: 28px; color: var(--accent);"></i>
+                <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-top: 4px;">PENGATURAN & FILTER OMSET</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Lihat ringkasan total dan filter berdasarkan bulan.</p>
+            </div>
+            <div style="background: var(--bg-app); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">TOTAL SEMUA OMSET</div>
+                <div id="modal-all-time-omset" style="font-size: 18px; font-weight: 800; color: var(--accent); margin-top: 4px;">Rp 0</div>
+            </div>
+            <div class="input-group" style="margin-top: 10px;">
+                <label style="color: var(--text-muted);">FILTER BERDASARKAN BULAN</label>
+                <input type="month" id="modal-month-picker" onchange="applyMonthlyFilter(this.value)" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="resetToCurrentMonth()">BULAN SEKARANG</button>
+                <button class="btn-primary" style="padding: 10px; flex: 1;" onclick="closeOmsetFilterModal()">TUTUP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal logout -->
+    <div class="modal-overlay" id="logout-modal">
+        <div class="modal-card" style="text-align: center;">
+            <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <i class="ri-logout-box-r-line" style="font-size: 24px; color: var(--danger);"></i>
+            </div>
+            <h3 style="font-size: 16px; color: var(--text-main); font-weight: 800; margin-bottom: 6px;">KONFIRMASI LOGOUT</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+                Apakah Anda yakin ingin mengakhiri shift bertugas dan keluar dari akun ini?
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" style="flex: 1; padding: 10px;" onclick="closeLogoutModal()">BATAL</button>
+                <button class="btn-primary" style="flex: 1; padding: 10px; background: var(--danger); box-shadow: none;" onclick="confirmLogout()">YA, KELUAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal clear bill -->
+    <div class="modal-overlay" id="clear-bill-modal">
+        <div class="modal-card" style="text-align: center;">
+            <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <i class="ri-delete-bin-line" style="font-size: 24px; color: var(--danger);"></i>
+            </div>
+            <h3 style="font-size: 16px; color: var(--text-main); font-weight: 800; margin-bottom: 6px;">HAPUS SELURUH PESANAN?</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+            Tindakan ini akan mengosongkan item menu yang telah ditambahkan ke dalam daftar pesanan saat ini.
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" style="flex: 1; padding: 10px;" onclick="closeClearBillModal()">BATAL</button>
+                <button class="btn-primary" style="flex: 1; padding: 10px; background: var(--danger); box-shadow: none;" onclick="confirmClearCart()">HAPUS PESANAN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal reset -->
+    <div class="modal-overlay" id="reset-modal">
+        <div class="modal-card" style="text-align: center;">
+            <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <i class="ri-refresh-line" style="font-size: 24px; color: var(--danger);"></i>
+            </div>
+            <h3 style="font-size: 16px; color: var(--text-main); font-weight: 800; margin-bottom: 6px;">Konfirmasi Reset Data</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+                PERINGATAN! Seluruh cache data lokal (menu, riwayat transaksi, & bill tersimpan) akan dihapus secara permanen. Lanjutkan?
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" style="flex: 1; padding: 10px;" onclick="closeResetModal()">BATAL</button>
+                <button class="btn-primary" style="flex: 1; padding: 10px; background: var(--danger); box-shadow: none;" onclick="confirmResetLocalStorageData()">RESET DATA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal delete menu -->
+    <div class="modal-overlay" id="delete-menu-modal">
+        <div class="modal-card" style="text-align: center;">
+            <div style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <i class="ri-delete-bin-line" style="font-size: 24px; color: var(--danger);"></i>
+            </div>
+            <h3 style="font-size: 16px; color: var(--text-main); font-weight: 800; margin-bottom: 6px;">HAPUS ITEM MENU?</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;" id="delete-menu-text">
+                Menu ini akan dihapus secara permanen dari daftar Cafe.
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" style="flex: 1; padding: 10px;" onclick="closeDeleteMenuModal()">BATAL</button>
+                <button class="btn-primary" style="flex: 1; padding: 10px; background: var(--danger); box-shadow: none;" onclick="confirmDeleteProduct()">YA, HAPUS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal confirm history action -->
+    <div class="modal-overlay" id="delete-history-modal">
+        <div class="modal-card" style="text-align: center;">
+            <div id="history-modal-icon" style="width: 50px; height: 50px; background: var(--danger-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <i class="ri-history-line" style="font-size: 24px; color: var(--danger);"></i>
+            </div>
+            <h3 id="history-modal-title" style="font-size: 16px; color: var(--text-main); font-weight: 800; margin-bottom: 6px;">KONFIRMASI</h3>
+            <p id="history-modal-desc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+                Transaksi yang dipilih akan diproses.
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" style="flex: 1; padding: 10px;" onclick="closeDeleteHistoryModal()">BATAL</button>
+                <button class="btn-primary" id="history-modal-confirm-btn" style="flex: 1; padding: 10px; background: var(--danger); box-shadow: none;" onclick="confirmClearHistory()">YA, LANJUT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal add menu -->
+    <div class="modal-overlay" id="add-menu-modal">
+        <div class="modal-card">
+            <div class="receipt-header">
+                <i class="ri-restaurant-2-line" style="font-size: 28px; color: var(--accent);"></i>
+                <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-top: 4px;">TAMBAH MENU BARU</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Masukkan detail & foto item menu baru.</p>
+            </div>
+            <div class="input-group" style="margin-top: 10px;">
+                <label style="color: var(--text-muted);">Nama Menu</label>
+                <input type="text" id="new-menu-name" placeholder="Contoh: Matcha latte" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted);">Kategori</label>
+                <select id="new-menu-category" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+                    <option value="Drink">Drink</option>
+                    <option value="Food">Food</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Dessert">Dessert</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted);">Harga (Rp)</label>
+                <input type="number" id="new-menu-price" placeholder="Contoh: 25000" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted);">URL Foto / Gambar menu</label>
+                <input type="text" id="new-menu-image" placeholder="https://... (opsional)" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div class="input-group">
+            <label style="color: var(--text-muted);">HPP / Modal (Rp)</label>
+            <input type="number" id="new-menu-hpp" placeholder="Contoh: 10000" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            
+            <button class="btn-primary" onclick="addNewProduct()">SIMPAN MENU</button>
+            <button class="btn-secondary" style="margin-top: 8px;" onclick="closeAddMenuModal()">BATAL</button>
+        </div>
+    </div>
+
+    <!-- modal edit menu -->
+    <div class="modal-overlay" id="edit-menu-modal">
+        <div class="modal-card">
+            <div class="receipt-header">
+                <i class="ri-edit-line" style="font-size: 28px; color: var(--accent);"></i>
+                <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-top: 4px;">EDIT ITEM MENU</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Perbarui detail & foto item menu.</p>
+            </div>
+            <input type="hidden" id="edit-menu-id">
+            <div class="input-group" style="margin-top: 10px;">
+                <label style="color: var(--text-muted);">Nama menu</label>
+                <input type="text" id="edit-menu-name" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted);">Kategori</label>
+                <select id="edit-menu-category" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+                    <option value="Drink">Drink</option>
+                    <option value="Food">Food</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Dessert">Dessert</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted);">Harga (Rp)</label>
+                <input type="number" id="edit-menu-price" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted);">URL Foto / Gambar Menu</label>
+                <input type="text" id="edit-menu-image" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <div class="input-group">
+            <label style="color: var(--text-muted);">HPP / Modal (Rp)</label>
+            <input type="number" id="edit-menu-hpp" placeholder="Contoh: 10000" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            
+            <button class="btn-primary" onclick="saveEditProduct()">SIMPAN PERUBAHAN</button>
+            <button class="btn-secondary" style="margin-top: 8px;" onclick="closeEditMenuModal()">BATAL</button>
+        </div>
+    </div>
+
+    <!-- modal save bill -->
+    <div class="modal-overlay" id="save-bill-modal">
+        <div class="modal-card">
+            <div class="receipt-header">
+                <i class="ri-bookmark-3-line" style="font-size: 28px; color: var(--accent);"></i>
+                <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-top: 4px;">SIMPAN / SPLIT BILL</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Simpan pesanan sementara.</p>
+            </div>
+            <div class="input-group" style="margin-top: 10px;">
+                <label style="color: var(--text-muted);">Nama Pelanggan</label>
+                <input type="text" id="bill-customer-name" placeholder="Contoh: Meja 05 / Bpk. Rian" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);">
+            </div>
+            <button class="btn-primary" onclick="confirmSaveBill()">SIMPAN BILL</button>
+            <button class="btn-secondary" style="margin-top: 8px;" onclick="closeSaveBillModal()">BATAL</button>
+        </div>
+    </div>
+
+    <!-- modal receipt -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-card">
+            <div class="receipt-header">
+                <i class="ri-cup-fill" style="font-size: 24px; color: var(--accent);"></i>
+                <h3 id="receipt-store-name" style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-top: 4px;">Kala Space Cafe</h3>
+                <p style="font-size: 10px; color: var(--text-muted);" id="modal-time">-</p>
+            </div>
+            <div style="font-size: 11px; margin-bottom: 12px; color: var(--text-muted);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>ID Transaksi:</span> <strong id="modal-trx-id" style="color: var(--text-main);text-transform:uppercase">-</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Kasir:</span> <strong id="modal-cashier" style="color: var(--text-main);">-</strong>
+                </div>
+            </div>
+            <div class="receipt-items" id="modal-items-list"></div>
+            <div>
+                <div class="receipt-row"><span>Subtotal</span><span id="modal-subtotal">Rp 0</span></div>
+                <div class="receipt-row"><span>Discount</span><span id="modal-discount" style="color: var(--danger);">Rp 0</span></div>
+                <div class="receipt-row"><span id="modal-tax-label">Pajak (10%)</span><span id="modal-tax">Rp 0</span></div>
+                <div class="receipt-total"><span>Total Tagihan</span><span id="modal-total" style="color: var(--accent);">Rp 0</span></div>
+                <div class="receipt-row" style="margin-top: 8px;"><span>Tunai dibayar</span><span id="modal-paid">Rp 0</span></div>
+                <div class="receipt-row"><span>Kembalian</span><span id="modal-change" style="font-weight: 700; color: var(--success);">Rp 0</span></div>
+            </div>
+            <div style="text-align: center; margin-top: 16px; padding-top: 12px; padding-bottom: 20px; border-top: 1px dashed var(--border); color: var(--text-muted);">
+            <p style="margin: 0; font-weight: 600; font-size: 10px;">Terima kasih atas kunjungan Anda!</p>
+            <p id="receipt-footer-text" style="margin: 2px 0 0 0; font-size: 7.5px; white-space: nowrap; letter-spacing: -0.2px; overflow: hidden;">Sampai jumpa kembali di Kala Space Cafe</p>
+            </div>
+            <div class="no-print" style="margin-top: 16px; display: flex; gap: 8px;">
+                <button class="btn-primary" style="padding: 10px; flex: 1;" onclick="printReceipt()"><i class="ri-printer-line"></i> CETAK STRUK</button>
+                <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="closeModal()">TUTUP</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- modal kitchen -->
+    <div class="modal-overlay" id="kitchen-modal">
+    <div class="modal-card">
+    <div class="receipt-header">
+    <i class="ri-restaurant-2-line" style="font-size: 24px; color: var(--accent);"></i>
+    <h3 id="kitchen-store-name" style="font-size: 16px; color: var(--text-main); font-weight: 800; margin-top: 4px;">KALA SPACE CAFE - KITCHEN</h3>
+    <p style="font-size: 10px; color: var(--text-muted);" id="kitchen-modal-time">-</p>
+    </div>
+    
+    <div class="no-print" style="margin-bottom: 14px; background: var(--bg-app); padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
+    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+    <div style="flex: 1;">
+    <label style="font-size: 10px; color: var(--text-muted); font-weight: 700;">TIPE ORDER</label>
+    <select id="kitchen-order-type" onchange="toggleTableInput(this.value)" style="width: 100%; padding: 8px; font-size: 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+    <option value="Dine In">Dine In (Makan di Tempat)</option>
+    <option value="Takeaway">Takeaway (Bawa Pulang)</option>
+    </select>
+    </div>
+    <div style="flex: 1;" id="table-number-box">
+    <label style="font-size: 10px; color: var(--text-muted); font-weight: 700;">NO. MEJA</label>
+    <input type="text" id="kitchen-table-no" placeholder="Contoh: 05" style="width: 100%; padding: 8px; font-size: 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+    </div>
+    </div>
+    <div>
+    <label style="font-size: 10px; color: var(--text-muted); font-weight: 700;">CATATAN PESANAN (OPSIONAL)</label>
+    <input type="text" id="kitchen-order-notes" placeholder="Contoh: Tanpa pedas / Es sedikit" style="width: 100%; padding: 8px; font-size: 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+    </div>
+    </div>
+    
+    <div style="font-size: 11px; margin-bottom: 12px; color: var(--text-main);">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+    <span>Tipe Order:</span> <strong id="print-order-type" style="text-transform: uppercase;">Dine In</strong>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;" id="print-table-row">
+    <span>No. Meja:</span> <strong id="print-table-no">-</strong>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+    <span>Kasir:</span> <strong id="kitchen-cashier-name">-</strong>
+    </div>
+    <div id="print-notes-row" style="margin-top: 6px; padding: 6px; background: var(--border-light); border-radius: 6px; display: none;">
+    <span style="font-size: 10px; color: var(--text-muted); display: block;">Catatan:</span>
+    <strong id="print-order-notes" style="font-size: 11px; color: var(--danger);">-</strong>
+    </div>
+    </div>
+    
+    <div class="receipt-items" id="kitchen-items-list" style="border-top: 1px dashed var(--border); padding-top: 8px;"></div>
+    
+    <div class="no-print" style="margin-top: 16px; display: flex; gap: 8px;">
+    <button class="btn-primary" style="padding: 10px; flex: 1; background: var(--accent);" onclick="triggerPrintKitchen()"><i class="ri-printer-line"></i> CETAK STRUK</button>
+    <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="closeKitchenModal()">TUTUP</button>
+    </div>
+    </div>
+    </div>
+    
+    <!-- header -->
+    <div class="app-header">
+        <div class="header">
+            <div class="brand-info">
+                <div class="brand-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="width: 22px; height: 22px; fill: var(--accent);">
+                        <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+                    </svg>
+                </div>
+                <div class="brand-details">
+                    <h2 id="current-user">Kala Space Cafe</h2>
+                    <p id="current-cashier-shift">Selamat Pagi</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="icon-btn" id="sync-btn" onclick="manualSync()" title="Sync data dari cloud">
+                    <i class="ri-refresh-line" id="sync-icon" style="font-size: 18px; color: var(--text-main);"></i>
+                </div>
+                <div class="icon-btn" onclick="switchTab('saved-bills')" title="bill tersimpan">
+                    <i class="ri-bookmark-3-line" style="font-size: 18px; color: var(--text-main);"></i>
+                    <span class="badge-count" id="saved-bills-count">0</span>
+                </div>
+                <div class="icon-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="ubah mode tampilan">
+                    <i class="ri-moon-line" id="theme-icon" style="font-size: 18px; color: var(--text-main);"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <i class="ri-search-2-line" style="color: var(--text-muted); font-size: 16px;"></i>
+            <input type="text" id="search-input" placeholder="cari menu favorit..." oninput="handleSearch(this.value)">
+        </div>
+    </div>
+
+    <!-- TAB: HOME -->
+    <div id="home" class="view active">
+    <div id="dashboard-section">
+    <div class="stats-grid">
+    <div class="stat-box">
+    <div class="stat-title">omset hari ini</div>
+    <div class="stat-value" id="home-daily-omset" style="color: var(--accent);">Rp 0</div>
+    </div>
+    <div class="stat-box">
+    <div class="stat-title">total transaksi hari ini</div>
+    <div class="stat-value" id="home-daily-trx-count">0</div>
+    </div>
+    </div>
+    
+    <div class="stats-grid" id="admin-stats-container" style="display: none; margin-bottom: 14px;">
+    <div class="stat-box" onclick="openOmsetFilterModal()" style="background: var(--accent-light); color: var(--card-bg); cursor: pointer; grid-column: span 2;" title="klik untuk filter bulanan & total semua omset">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="stat-title" style="color: var(--text-muted);" id="dashboard-omset-title">omset bulan ini</div>
+    <span style="font-size: 10px; background: var(--accent-light); color: var(--accent); padding: 2px 6px; border-radius: 6px;"><i class="ri-filter-3-line"></i> Filter</span>
+    </div>
+    <div class="stat-value" id="dashboard-omset" style="font-size: 22px; color: var(--accent);">Rp 0</div>
+    </div>
+    </div>
+    
+    <div class="dashboard-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <div>
+    <h4 style="font-size: 12px; font-weight: 700; color: var(--text-main);">Grafik Penjualan Harian</h4>
+    <p style="font-size: 10px; color: var(--text-muted);text-transform:capitalize;" id="current-date-display">-</p>
+    </div>
+    <input type="date" id="filter-date" onchange="updateDashboardMetrics()" style="display: none; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 10px; outline: none; background: var(--bg-app); color: var(--text-main);">
+    </div>
+    <div style="position: relative; height: 180px; width: 100%;">
+    <canvas id="salesChart"></canvas>
+    </div>
+    </div>
+    </div>
+    
+    <h3 id="home-section-title" style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: var(--text-main);">Populer Hari Ini</h3>
+    
+    <div class="product-grid" id="popular-items"></div>
+    
+    <div id="admin-management-container">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+    
+    <div id="laporan-shortcut-container" style="display: none;">
+    <div onclick="switchTab('laporan')" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+    <i class="ri-file-chart-line"></i>
+    </div>
+    <div>
+    <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">Laporan Keuangan & Penjualan</h4>
+    <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Cek detail Omset, HPP, Margin Laba, & Penjualan Produk</p>
+    </div>
+    </div>
+    <i class="ri-arrow-right-s-line" style="font-size: 18px; color: var(--accent);"></i>
+    </div>
+    </div>
+    
+    <div onclick="switchTab('hpp-margin')" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+    <i class="ri-calculator-line"></i>
+    </div>
+    <div>
+    <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">Management HPP & Margin</h4>
+    <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Atur modal dasar produk dan estimasi margin keuntungan</p>
+    </div>
+    </div>
+    <i class="ri-arrow-right-s-line" style="font-size: 18px; color: var(--accent);"></i>
+    </div>
+    
+    <div onclick="switchTab('kupon-diskon')" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+    <i class="ri-coupon-3-line"></i>
+    </div>
+    <div>
+    <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">Setting Kupon Diskon</h4>
+    <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Kelola kode kupon promo dan batasan penggunaan</p>
+    </div>
+    </div>
+    <i class="ri-arrow-right-s-line" style="font-size: 18px; color: var(--accent);"></i>
+    </div>
+    
+    <div onclick="switchTab('diskon-produk')" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">
+    <i class="ri-percent-line"></i>
+    </div>
+    <div>
+    <h4 style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 0;">Setting Diskon Produk</h4>
+    <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Pengaturan diskon per item produk</p>
+    </div>
+    </div>
+    <i class="ri-arrow-right-s-line" style="font-size: 18px; color: var(--accent);"></i>
+    </div>
+    
+    </div>
+    </div>
+    
+    </div>
+    
+    <!-- TAB: MENU -->
+    <div id="menu" class="view">
+    
+    <div class="category-scroll">
+    <div class="cat-chip active" onclick="filterCategory('all', this)"><i class="ri-layout-grid-fill"></i> Semua</div>
+    <div class="cat-chip" onclick="filterCategory('Drink', this)"><i class="ri-cup-line"></i> Drink</div>
+    <div class="cat-chip" onclick="filterCategory('Food', this)"><i class="ri-restaurant-line"></i> Food</div>
+    <div class="cat-chip" onclick="filterCategory('Snack', this)"><i class="ri-goblet-line"></i> Snack</div>
+    <div class="cat-chip" onclick="filterCategory('Dessert', this)"><i class="ri-cake-3-line"></i> Dessert</div>
+    </div>
+    
+    <div style="flex: 1; overflow-y: auto; padding: 4px 2px 90px 2px; box-sizing: border-box;">
+    <div class="product-grid" id="menu-items"></div>
+    </div>
+    
+    </div>
+    
+    <button id="btn-add-menu-admin" class="btn-fab" onclick="openAddMenuModal()">
+    <i class="ri-add-line" style="font-size: 16px;"></i>
+    </button>
+    
+    <!-- TAB: ORDER -->
+    <div id="order" class="view">
+    
+    <div class="cart-split-layout">
+        
+        <div class="cart-left-col">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main);">Detail Pesanan</h3>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn-secondary" id="btn-clear-bill" style="padding: 6px 10px; font-size: 11px; width: auto; background: var(--danger-light); color: var(--danger);border:none;" onclick="clearCart()" disabled>
+                        <i class="ri-delete-bin-line"></i> Clear Bill
+                    </button>
+                    <button class="btn-secondary" id="btn-save-bill" style="padding: 6px 10px; font-size: 11px; width: auto; background: var(--accent-light); color: var(--accent);border:none;" onclick="openSaveBillModal()" disabled>
+                        <i class="ri-bookmark-3-line"></i> Simpan Bill
+                    </button>
+                </div>
+            </div>
+
+            <div id="active-bill-indicator" class="active-bill-banner" style="display: none;">
+                <span>Editing Bill: <strong id="active-bill-name">-</strong></span>
+                <button onclick="cancelActiveBill()" style="background: transparent; border: none; color: var(--danger); font-weight: 700; font-size: 11px; cursor: pointer;">Batal Edit</button>
+            </div>
+
+            <div id="cart-list"></div>
+        </div>
+
+        <div class="summary-card">        
+            <div class="summary-row"><span>Subtotal</span><span id="subtotal-val">Rp 0</span></div>
+            <div class="summary-row"><span>Discount</span><span id="coupon-val" style="color: var(--danger);">Rp 0</span></div>
+            <div class="summary-row"><span id="tax-label">Pajak (10%)</span><span id="tax-val">Rp 0</span></div>
+            <div class="summary-row total"><span>Total Tagihan</span><span id="total-val" style="color: var(--accent);">Rp 0</span></div>
+            
+            <div class="input-group" style="margin-top: 10px; margin-bottom: 4px;">
+            <label style="color: var(--text-muted);">Uang tunai diterima (Rp)</label>
+            <input type="number" id="cash-paid" placeholder="Masukkan nominal..." oninput="calculateChange()" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main);height:40px;" >
+            </div>
+            
+            <div class="quick-cash-container" id="quick-cash-box">
+                <button class="quick-cash-btn" onclick="setCashExact()">Uang Pas</button>
+                <button class="quick-cash-btn" onclick="setCash(20000)">20Rb</button>
+                <button class="quick-cash-btn" onclick="setCash(50000)">50Rb</button>
+                <button class="quick-cash-btn" onclick="setCash(100000)">100Rb</button>
+            </div>
+            
+            <div style="display: flex; gap: 8px; margin: 8px 0; width: 100%; align-items: center;">
+            <input type="text" id="coupon-code-input" placeholder="Kode Kupon (misal: JumatBerkah)" style="flex: 1; min-width: 0; padding: 10px 12px; font-size: 11px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main);">
+            <button class="btn-primary" style="display:flex;width:40px;height:40px; flex-shrink: 0;align-items:center;justify-content:center;border:unset; border-radius: 16px; font-weight: 600;" onclick="applyCouponInOrder()"><i class="ri-coupon-line" style="color:white;font-size:20px;" ></i></button>
+            </div>
+            
+            <div class="summary-row change" id="change-row">
+                <span>UANG KEMBALIAN</span>
+                <span id="change-val">Rp 0</span>
+            </div>
+        <div style="display: flex; gap: 10px; margin-top: 14px; align-items: stretch;">
+        <button class="btn-primary" id="btn-print-kitchen" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 16px; border: unset; background: var(--accent); cursor: pointer; flex-shrink: 0; color: white;" onclick="billDapur()" title="Cetak Kitchen">
+        <i class="ri-printer-line" style="font-size: 20px;"></i>
+        </button>
+        
+        <button class="btn-primary" id="btn-pay" style="flex: 1; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 16px; font-weight: 800; font-size: 13px; text-transform: uppercase;" onclick="processPayment()" disabled>
+        KONFIRMASI PEMBAYARAN
+        </button>
+        </div>
+        </div>
+        
+    </div>
+
+</div>
+
+    <!-- tab saved bills -->
+    <div id="saved-bills" class="view">
+        <h3 style="margin-bottom: 4px; font-size: 15px; font-weight: 800; color: var(--text-main);">Bill Tersimpan (Split / Hold)</h3>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;">Pilih bill Pelanggan untuk menambah menu atau memproses pembayaran.</p>
+        <div id="saved-bills-list"></div>
+    </div>
+
+    <!-- tab history -->
+    <div id="history" class="view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main);">Riwayat Transaksi</h3>
+                <p style="font-size: 11px; color: var(--text-muted);">Klik item transaksi untuk memeriksa struk.</p>
+            </div>
+            
+            <div id="history-default-actions" style="display: flex; gap: 8px; align-items: center; position: relative;">
+            <button class="btn-secondary btn-history-action" style="background:var(--accent); color:white; font-size: 11px; padding: 6px 12px;" onclick="exportHistoryCSV()">
+            <i class="ri-file-download-line"></i> <span>Ekspor CSV</span>
+            </button>
+            
+            <div id="admin-actions-dropdown" style="position: relative; display: none;">
+            <button class="btn-secondary" onclick="toggleHistoryDropdown(event)" style="padding: 6px 12px; font-size: 11px; background: var(--card-bg); border-color: var(--border); color: var(--text-main); display: inline-flex; align-items: center; gap: 6px; height: 32px;">
+            <i class="ri-settings-3-line" style="font-size: 14px;"></i> Kelola
+            </button>
+            
+            <div id="history-dropdown-menu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08); z-index: 100; min-width: 240px; padding: 8px; flex-direction: column; gap: 4px;">
+            
+            <div style="font-size: 10px; color: var(--text-muted); padding: 6px 10px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; border-bottom: 1px solid var(--border); margin-bottom: 4px;">Pilih Aksi</div>
+            
+            <button onclick="selectHistoryAction('cancel')" class="history-dropdown-item" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer; border-radius: 10px; transition: all 0.15s ease;">
+            <div style="width: 32px; height: 32px; border-radius: 9px; background: rgba(245, 158, 11, 0.15); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="ri-close-circle-line" style="font-size: 16px; color: #f59e0b;"></i>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">Batalkan Transaksi</span>
+            <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Tandai transaksi sebagai void</span>
+            </div>
+            </button>
+            
+            <button onclick="selectHistoryAction('delete')" class="history-dropdown-item" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; background: none; border: none; text-align: left; cursor: pointer; border-radius: 10px; transition: all 0.15s ease;">
+            <div style="width: 32px; height: 32px; border-radius: 9px; background: var(--danger-light); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="ri-delete-bin-2-line" style="font-size: 16px; color: var(--danger);"></i>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">Hapus Riwayat</span>
+            <span style="font-size: 10px; color: var(--text-muted); font-weight: 500;">Hilangkan dari daftar riwayat</span>
+            </div>
+            </button>
+            </div>
+            
+            </div>
+            </div>
+            
+        </div>
+
+        <div id="history-selection-actions" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--card-bg); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="select-all-history" class="custom-theme-checkbox" onchange="toggleSelectAllHistory(this)">
+                <label for="select-all-history" style="font-size: 12px; font-weight: 600; color: var(--text-main); cursor: pointer;"><strong>Pilih semua</strong></label>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px; width: auto; height: 32px;" onclick="toggleHistorySelectionMode()">Batal</button>
+                <button class="btn-primary" id="history-selection-confirm" style="padding: 6px 12px; font-size: 11px; width: auto; height: 32px; background: var(--danger); box-shadow: none;" onclick="openDeleteSelectedHistoryModal()">Konfirmasi</button>
+            </div>
+        </div>
+
+        <div id="history-list"></div>
+    </div>
+
+    <!-- tab profile -->
+    <div id="profile" class="view">
+        <h3 style="margin-bottom: 14px; font-size: 15px; font-weight: 800; color: var(--text-main);">Pengaturan Profil & Sistem</h3>
+        
+        <div class="profile-menu-container">
+            <div class="profile-menu-item" id="menu-profile-user">
+                <div class="profile-menu-header" onclick="toggleProfileAccordion('menu-profile-user')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="ri-user-3-fill" style="font-size: 18px; color: var(--accent);"></i>
+                        <span>Profil Pengguna</span>
+                    </div>
+                    <i class="ri-arrow-down-s-line arrow"></i>
+                </div>
+                <div class="profile-menu-content">
+                    <div style="text-align: center; padding: 4px 0;">
+                        <div style="width: 50px; height: 50px; background: var(--border-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                            <i class="ri-user-3-fill" style="font-size: 24px; color: var(--primary);"></i>
+                        </div>
+                        <h4 id="profile-name" style="font-size: 14px; color: var(--text-main); font-weight: 800;"></h4>
+                        <p id="profile-status" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Aktif</p>
+                        <button class="btn-primary" style="background: var(--danger); box-shadow: none; font-size: 12px; padding: 10px; margin-top: 12px;" onclick="handleLogout()">Keluar Shift</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-menu-item" id="menu-profile-password">
+                <div class="profile-menu-header" onclick="toggleProfileAccordion('menu-profile-password')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="ri-lock-password-line" style="font-size: 18px; color: var(--accent);"></i>
+                        <span>Ubah Password</span>
+                    </div>
+                    <i class="ri-arrow-down-s-line arrow"></i>
+                </div>
+                <div class="profile-menu-content">
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label style="color: var(--text-muted); font-size: 10px;">Pin / Password lama</label>
+                        <input type="password" id="old-pin" placeholder="****" style="background: var(--card-bg); border-color: var(--border); color: var(--text-main); padding: 10px; font-size: 13px;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 12px;">
+                        <label style="color: var(--text-muted); font-size: 10px;">Pin / Password baru</label>
+                        <input type="password" id="new-pin" placeholder="****" style="background: var(--card-bg); border-color: var(--border); color: var(--text-main); padding: 10px; font-size: 13px;">
+                    </div>
+                    <button class="btn-primary" style="font-size: 12px; padding: 10px;" onclick="updatePassword()">Simpan PIN Baru</button>
+                </div>
+            </div>
+
+            <div class="profile-menu-item" id="menu-profile-kas">
+            <div class="profile-menu-header" onclick="toggleProfileAccordion('menu-profile-kas')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="ri-wallet-3-line" style="font-size: 18px; color: var(--accent);"></i>
+            <span>Operasional & Kas Kecil</span>
+            </div>
+            <i class="ri-arrow-down-s-line arrow"></i>
+            </div>
+            <div class="profile-menu-content">
+            <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: var(--text-muted);">
+            <span>Modal Awal:</span>
+            <strong id="display-modal-awal" style="color: var(--text-main);">Rp 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: var(--text-muted);">
+            <span>Petty Cash (Keluar):</span>
+            <strong id="display-petty-cash" style="color: var(--danger);">Rp 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; border-top: 1px dashed var(--border); padding-top: 6px; color: var(--text-main);">
+            <span>Estimasi Kas Laci:</span>
+            <strong id="display-estimasi-kas" style="color: var(--accent);">Rp 0</strong>
+            </div>
+            </div>
+            
+            <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 10px;">
+            <label style="font-size: 10px; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">MODAL AWAL</label>
+            <div style="display: flex; gap: 6px;">
+            <input type="number" id="input-modal-awal" placeholder="Nominal Rp" style="flex: 1; padding: 8px; font-size: 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main);width:100%;">
+            <button class="btn-primary" style="width: auto; padding: 8px 12px; font-size: 11px;" onclick="simpanModalAwal()">Simpan</button>
+            </div>
+            </div>
+            
+            <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 12px;">
+            <label style="font-size: 10px; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">PETTY CASH (PENGELUARAN)</label>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+            <input type="text" id="input-petty-ket" placeholder="Keterangan" style="width: 100%; padding: 8px; font-size: 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main);width:100%;">
+            <div style="display: flex; gap: 6px;">
+            <input type="number" id="input-petty-nominal" placeholder="Nominal Rp" style="flex: 1; padding: 8px; font-size: 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text-main);width:100%;">
+            <button class="btn-primary" style="width: auto; padding: 8px 12px; font-size: 11px; background: var(--danger);" onclick="tambahPettyCash()">Catat Keluar</button>
+            </div>
+            </div>
+            </div>
+            
+            <button class="btn-primary" style="font-size: 12px; padding: 10px;" onclick="openTutupShiftModal()">
+            <i class="ri-door-lock-line"></i> Tutup Shift Kasir
+            </button>
+            </div>
+            </div>
+
+<div class="profile-menu-item" id="menu-profile-accent">
+    <div class="profile-menu-header" onclick="toggleProfileAccordion('menu-profile-accent')">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="ri-palette-line" style="font-size: 18px; color: var(--accent);"></i>
+            <span>Tema & Warna Aksen</span>
+        </div>
+        <i class="ri-arrow-down-s-line arrow"></i>
+    </div>
+    <div class="profile-menu-content">
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+            Pilih warna aksen utama aplikasi untuk tombol, ikon, dan elemen sorotan.
+        </p>
+
+        <div style="background: var(--card-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed var(--border);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div id="accent-preview-box" style="width: 32px; height: 32px; border-radius: 8px; background: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.15); flex-shrink: 0;"></div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted); display: block;">Warna Terpilih:</span>
+                        <div id="accent-hex-label" style="font-size: 13px; font-weight: 700; color: var(--text-main); font-family: monospace;">#00A6FF</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px;">Kode Warna HEX:</label>
+                <input type="text" id="accent-hex-input" placeholder="#00A6FF" maxlength="7" onchange="handleHexInput(this.value)" style="width: 100%;max-width:70px; box-sizing: border-box; padding: 6px 10px; font-size: 11px; font-family: monospace; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+            </div>
+
+            <span style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 8px;">Pilihan Warna Populer:</span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="preset-container">
+                <button type="button" class="accent-preset-btn" data-color="#00A6FF" onclick="updateAppAccent('#00A6FF')" style="width: 26px; height: 26px; border-radius: 50%; background: #00A6FF; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#2563eb" onclick="updateAppAccent('#2563eb')" style="width: 26px; height: 26px; border-radius: 50%; background: #2563eb; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#10b981" onclick="updateAppAccent('#10b981')" style="width: 26px; height: 26px; border-radius: 50%; background: #10b981; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#f59e0b" onclick="updateAppAccent('#f59e0b')" style="width: 26px; height: 26px; border-radius: 50%; background: #f59e0b; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#ef4444" onclick="updateAppAccent('#ef4444')" style="width: 26px; height: 26px; border-radius: 50%; background: #ef4444; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#8b5cf6" onclick="updateAppAccent('#8b5cf6')" style="width: 26px; height: 26px; border-radius: 50%; background: #8b5cf6; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#ec4899" onclick="updateAppAccent('#ec4899')" style="width: 26px; height: 26px; border-radius: 50%; background: #ec4899; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+                <button type="button" class="accent-preset-btn" data-color="#1e293b" onclick="updateAppAccent('#1e293b')" style="width: 26px; height: 26px; border-radius: 50%; background: #1e293b; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s;"></button>
+            </div>
+        </div>
+
+        <button class="btn-secondary" style="font-size: 11px; padding: 8px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="updateAppAccent('#00A6FF')">
+            <i class="ri-refresh-line"></i> Reset ke Warna Default
+        </button>
+    </div>
+</div>
+
+            <div class="profile-menu-item" id="menu-profile-storage">
+                <div class="profile-menu-header" onclick="toggleProfileAccordion('menu-profile-storage')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="ri-database-2-line" style="font-size: 18px; color: var(--accent);"></i>
+                        <span>Data Penyimpanan > Reset Data</span>
+                    </div>
+                    <i class="ri-arrow-down-s-line arrow"></i>
+                </div>
+                <div class="profile-menu-content">
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+                Kelola atau reset seluruh cache data lokal aplikasi (menu, transaksi, dan bill tersimpan).
+                </p>
+                
+                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                <button class="btn-secondary" style="font-size: 11px; padding: 10px 6px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" onclick="exportLocalStorageJSON()">
+                <i class="ri-download-cloud-line" style="font-size: 14px;"></i>
+                <span>Ekspor JSON</span>
+                </button>
+                
+                <button class="btn-secondary" id="btn-import-json" style="font-size: 11px; padding: 10px 6px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" onclick="triggerImportJSON()">
+                <i class="ri-upload-cloud-line" style="font-size: 14px;"></i>
+                <span>Import JSON</span>
+                </button>
+                
+                <button class="btn-primary" style="background: var(--danger, #ef4444); box-shadow: none; font-size: 11px; padding: 10px 6px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;" onclick="resetLocalStorageData()">
+                <i class="ri-refresh-line" style="font-size: 14px;"></i>
+                <span>Reset Data</span>
+                </button>
+                </div>
+                </div>
+                
+            </div>
+            
+
+            <div class="profile-menu-item" id="menu-profile-contact">
+                <div class="profile-menu-header" onclick="toggleProfileAccordion('menu-profile-contact')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="ri-customer-service-2-line" style="font-size: 18px; color: var(--accent);"></i>
+                        <span>Hubungi Kami</span>
+                    </div>
+                    <i class="ri-arrow-down-s-line arrow"></i>
+                </div>
+                <div class="profile-menu-content">
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Butuh bantuan teknis atau pelaporan kendala sistem?</p>
+                    <div id="contact-wa" style="font-size: 12px; color: var(--text-main); font-weight: 600; margin-bottom: 4px;"><i class="ri-whatsapp-line" style="color: var(--success);"></i> +62 882-1663-7292</div>
+                    <div id="contact-ig" style="font-size: 12px; color: var(--text-main); font-weight: 600;"><i class="ri-instagram-line" style="color: var(--accent);"></i> @muhasa_digital</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-version-card" style="transition: background-color 0.3s ease;" >
+             <i class="ri-vip-crown-line" style="font-size: 18px; color: var(--accent);"></i>
+             <span> Version PRO</span>
+            <span class="badge-ver" id="version-badge">v1.1.5</span>
+        </div>
+    </div>
+    
+    <!-- TAB: HPP -->
+    <div id="hpp-margin" class="view">
+    <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+    <button class="icon-btn" onclick="switchTab('home')">
+    <i class="ri-arrow-left-line"></i>
+    </button>
+    <div>
+    <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0;">Management HPP & Margin</h3>
+    <p style="font-size: 11px; color: var(--text-muted); margin: 0;">Atur modal dasar dan persentase keuntungan</p>
+    </div>
+    </div>
+    </div>
+    <div class="dashboard-card" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; padding: 14px;">
+    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; flex-shrink: 0;">
+    Atur Modal (HPP) per produk untuk menghitung persentase margin keuntungan bersih toko Anda.
+    </p>
+    <div id="hpp-product-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; box-sizing: border-box;">
+    </div>
+    <button class="btn-primary" style="margin-top: 12px; font-size: 12px; padding: 12px; width: 100%; cursor: pointer; flex-shrink: 0;" onclick="saveHPPChanges()">
+    <i class="ri-save-line"></i> Simpan Perubahan HPP
+    </button>
+    </div>
+    </div>   
+    
+    <!-- TAB: KUPON -->
+    <div id="kupon-diskon" class="view">
+    <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+    <button class="icon-btn" onclick="switchTab('home')">
+    <i class="ri-arrow-left-line"></i>
+    </button>
+    <div>
+    <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0;">Setting Kupon Diskon</h3>
+    <p style="font-size: 11px; color: var(--text-muted); margin: 0;">Kelola kode kupon promo dan batasan penggunaan</p>
+    </div>
+    </div>
+    </div>
+    <div class="dashboard-card" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; padding: 14px;">
+    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; flex-shrink: 0;">
+    Kelola kode kupon (seperti "JumatBerkah"), batas penggunaan, dan diskon yang tersambung langsung ke pesanan.
+    </p>
+    <div style="background: var(--bg-app); padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+    <input type="text" id="new-coupon-code" placeholder="Kode Kupon (misal: JumatBerkah)" style="padding: 8px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); outline: none;">
+    <div style="display: flex; gap: 8px; width: 100%; min-width: 0;">
+    <select id="new-coupon-type" style="width: 130px; padding: 8px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); outline: none;">
+    <option value="percent">Persen (%)</option>
+    <option value="fixed">Nominal (Rp)</option>
+    </select>
+    <input type="number" id="new-coupon-val" placeholder="Nilai Diskon" style="flex: 1; min-width: 0; width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); outline: none;">
+    </div>
+    <input type="number" id="new-coupon-limit" placeholder="Batas Pakai / Limit (0 = Tanpa Batas)" style="padding: 8px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); outline: none;">
+    <button type="button" class="btn-primary" style="font-size: 11px; padding: 10px; width: 100%; cursor: pointer;" onclick="addOrUpdateCoupon()">
+    <i class="ri-add-line"></i> Tambah / Perbarui Kupon
+    </button>
+    </div>
+    <h4 style="font-size: 12px; font-weight: 700; color: var(--text-main); margin: 0 0 10px 0; flex-shrink: 0;">Daftar Kupon Aktif</h4>
+    <div id="coupon-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; padding-right: 4px;">
+    </div>
+    </div>
+    </div>
+    
+    <!-- TAB: DISKON PRODUK -->
+    <div id="diskon-produk" class="view">
+    <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+    <button class="icon-btn" onclick="switchTab('home')">
+    <i class="ri-arrow-left-line"></i>
+    </button>
+    <div>
+    <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0;">Setting Diskon Produk</h3>
+    <p style="font-size: 11px; color: var(--text-muted); margin: 0;">Pengaturan diskon per item produk</p>
+    </div>
+    </div>
+    </div>
+    <div class="dashboard-card" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; padding: 14px;">
+    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; flex-shrink: 0;">
+    Atur potongan harga diskon (Persen % atau Nominal Rp) untuk setiap produk.
+    </p>
+    <div id="product-discount-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; box-sizing: border-box;">
+    </div>
+    <button class="btn-primary" style="margin-top: 12px; font-size: 12px; padding: 12px; width: 100%; cursor: pointer; flex-shrink: 0;" onclick="saveProductDiscountChanges()">
+    <i class="ri-save-line"></i> Simpan Diskon Produk
+    </button>
+    </div>    
+    </div>
+    
+    <!-- TAB: LAPORAN -->
+    <div id="laporan" class="view">
+    <div style="transition: background-color 0.3s ease;flex-shrink: 0; padding-bottom: 12px; background: var(--bg-app); display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: flex-start; gap: 10px;">
+    <button class="icon-btn" onclick="switchTab('home')" style="flex-shrink: 0; margin-top: 2px;">
+    <i class="ri-arrow-left-line"></i>
+    </button>
+    <div style="flex: 1; min-width: 0;">
+    <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.2;">
+    Laporan Penjualan & Performa
+    </h3>
+    <p style="font-size: 11px; color: var(--text-muted); margin: 3px 0 0 0; line-height: 1.3;">
+    Ringkasan Omset, HPP, Margin, dan Penjualan Produk
+    </p>
+    </div>
+    </div>
+    
+    <div style="display: flex; justify-content: flex-end; align-items: center;">
+    <select id="laporan-filter-period" onchange="renderLaporanData()" style="padding: 6px 12px; font-size: 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-weight: 600; cursor: pointer;">
+    <option value="today">Hari Ini</option>
+    <option value="month" selected>Bulan Ini</option>
+    <option value="all">Semua Waktu</option>
+    </select>
+    </div>    
+    </div>
+    
+    <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; box-sizing: border-box;">
+    
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+    <div class="stat-box" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
+    <div class="stat-title" style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total Omset (Penjualan)</div>
+    <div class="stat-value" id="lap-total-omset" style="font-size: 18px; font-weight: 800; color: var(--accent); margin-top: 4px;">Rp 0</div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;" id="lap-total-trx-info">0 Transaksi</div>
+    </div>
+    
+    <div class="stat-box" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
+    <div class="stat-title" style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Total HPP (Modal Produk)</div>
+    <div class="stat-value" id="lap-total-hpp" style="font-size: 18px; font-weight: 800; color: var(--danger); margin-top: 4px;">Rp 0</div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Harga Pokok Penjualan</div>
+    </div>
+    
+    <div class="stat-box" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
+    <div class="stat-title" style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Laba Kotor (Profit)</div>
+    <div class="stat-value" id="lap-laba-kotor" style="font-size: 18px; font-weight: 800; color: var(--success, #10b981); margin-top: 4px;">Rp 0</div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Omset - HPP</div>
+    </div>
+    
+    <div class="stat-box" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
+    <div class="stat-title" style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Margin Keuntungan</div>
+    <div class="stat-value" id="lap-margin-persen" style="font-size: 18px; font-weight: 800; color: var(--accent); margin-top: 4px;">0%</div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">(Laba / Omset) x 100%</div>
+    </div>
+    </div>
+    
+    <div class="dashboard-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h4 style="font-size: 13px; font-weight: 800; color: var(--text-main); margin: 0;">📦 Detail Penjualan Produk</h4>
+    <span style="font-size: 10px; font-weight: 700; color: var(--accent);" id="lap-product-period-label">Bulan Ini</span>
+    </div>
+    
+    <div id="lap-products-list" style="display: flex; flex-direction: column; gap: 8px;">
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+
+    <!-- bottom navbar -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home')">
+            <i class="ri-home-5-line"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('menu')">
+            <i class="ri-restaurant-2-line"></i>
+            <span>Menu</span>
+        </div>
+        <div class="nav-item order-btn-nav" id="order-tab-target" onclick="switchTab('order')">
+            <i class="ri-shopping-bag-3-fill"></i>
+            <span class="badge-count" id="nav-cart-count" style="display: none;">0</span>
+            <span>Order</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('history')">
+            <i class="ri-history-line"></i>
+            <span>History</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile')">
+            <i class="ri-user-3-line"></i>
+            <span>Profil</span>
+        </div>
+    </div>
+
+    <!-- modal tutup shift -->
+    <div class="modal-overlay" id="tutup-shift-modal">
+        <div class="modal-card">
+            <h3 style="font-size: 15px; color: var(--text-main); font-weight: 800; margin-bottom: 10px;">Penutupan Shift Kasir</h3>
+            <div style="font-size: 11px; background: var(--bg-app); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Modal Awal:</span><span id="shift-modal-awal">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Petty Cash:</span><span id="shift-modal-petty" style="color: var(--danger);">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 800; border-top: 1px dashed var(--border); padding-top: 4px;"><span>Ekspektasi Kas Laci:</span><span id="shift-modal-ekspektasi" style="color: var(--accent);">Rp 0</span></div>
+            </div>
+            <div class="input-group">
+                <label style="color: var(--text-muted); font-size: 10px;">Uang Fisik di Laci (Rp)</label>
+                <input type="number" id="shift-input-fisik" placeholder="Hitung uang fisik..." oninput="hitungSelisihShift()" style="background: var(--bg-app); border-color: var(--border); color: var(--text-main); font-size: 13px;">
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 14px;">
+                <span>Selisih:</span>
+                <span id="shift-selisih-val" style="color: var(--text-main);">Rp 0</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" style="padding: 10px; flex: 1;" onclick="prosesCetakLaporanShift()">Cetak Rekap</button>
+                <button class="btn-secondary" style="padding: 10px; flex: 1;" onclick="closeTutupShiftModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal shift receipt -->
+    <div class="modal-overlay" id="shift-receipt-modal" style="display: none;">
+        <div class="modal-card" style="width: 280px; text-align: center; font-family: monospace;">
+            <h3 id="sr-store-name" style="font-size: 14px; margin-bottom: 2px;">KALA SPACE CAFE</h3>
+            <p style="font-size: 10px; margin-bottom: 10px;">REKAP PENUTUPAN SHIFT</p>
+            <div style="border-bottom: 1px dashed #000; margin-bottom: 8px;"></div>
+            
+            <div style="font-size: 11px; text-align: left; line-height: 1.5;">
+                <div style="display: flex; justify-content: space-between;"><span>Waktu:</span><span id="sr-waktu">-</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Kasir:</span><span id="sr-kasir">-</span></div>
+                
+                <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+                
+                <div style="display: flex; justify-content: space-between;"><span>Modal Awal:</span><span id="sr-modal">Rp 0</span></div>
+                
+                <div style="margin: 4px 0;">
+                    <div style="font-weight: bold; font-size: 10px; text-transform: uppercase;">Rincian Petty Cash:</div>
+                    <div id="sr-petty-list" style="padding-left: 6px; font-size: 10px; color: #333;"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between;"><span>Total Petty Cash:</span><span id="sr-petty">Rp 0</span></div>
+                
+                <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+                
+                <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Ekspektasi Kas:</span><span id="sr-ekspektasi">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Kas Fisik:</span><span id="sr-fisik">Rp 0</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;"><span>Selisih:</span><span id="sr-selisih">Rp 0</span></div>
+            </div>
+            
+            <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+            
+            <div class="no-print" style="display: flex; gap: 6px; margin-top: 10px;">
+                <button class="btn-primary" style="padding: 8px; font-size: 11px; flex: 1;" onclick="eksekusiPrint()">PRINT REKAP</button>
+                <button class="btn-secondary" style="padding: 8px; font-size: 11px; flex: 1;" onclick="closeShiftReceiptModal()">TUTUP</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="json-import-input" accept=".json" style="display:none;">
+
+</div>
+
+</body>
+</html>
