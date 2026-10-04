@@ -868,7 +868,7 @@
         .modal-card button:hover { background: #000; }
         .modal-card button i { font-size: 16px; }
 
-        /* ========== QRIS MODAL ========== */
+        /* ========== QRIS MODAL (SIMPLIFIED) ========== */
         .qris-modal-overlay {
             position: fixed; inset: 0;
             background: rgba(10, 10, 10, 0.75);
@@ -877,29 +877,24 @@
             z-index: 9999;
             display: none;
             justify-content: center; align-items: center;
-            padding: 16px;
-            overflow-y: auto;
+            padding: 16px; overflow-y: auto;
         }
         .qris-modal-overlay.show { display: flex; }
-        
+
         .qris-modal-card {
-            background: #fff; border-radius: 24px;
-            max-width: 460px; width: 100%;
-            padding: 32px 28px; text-align: center;
+            background: #fff; border-radius: 22px;
+            max-width: 380px; width: 100%;
+            padding: 26px 22px;
+            text-align: center;
             animation: modalIn 0.3s ease-out;
             max-height: calc(100vh - 32px);
             overflow-y: auto;
             position: relative;
         }
-        @media (max-width: 480px) {
-            .qris-modal-card { padding: 24px 18px; border-radius: 20px; }
-        }
-        
+
         .qris-close-btn {
-            position: absolute;
-            top: 14px; right: 14px;
-            width: 34px; height: 34px;
-            border-radius: 50%;
+            position: absolute; top: 12px; right: 12px;
+            width: 32px; height: 32px; border-radius: 50%;
             background: var(--paper-soft);
             border: 1px solid var(--line);
             display: flex; align-items: center; justify-content: center;
@@ -907,187 +902,94 @@
         }
         .qris-close-btn:hover { background: var(--ink); }
         .qris-close-btn:hover i { color: #fff; }
-        .qris-close-btn i { font-size: 18px; color: var(--ink); }
-        
-        .qris-head-icon {
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg, #fff3ef 0%, #fff8f6 100%);
-            border: 1.5px solid rgba(255, 87, 34, 0.25);
-            border-radius: 18px;
-            display: inline-flex; align-items: center; justify-content: center;
-            margin-bottom: 14px;
-        }
-        .qris-head-icon svg { width: 32px; height: 32px; fill: var(--orange); }
-        
+        .qris-close-btn i { font-size: 17px; color: var(--ink); }
+
         .qris-title {
             font-family: 'Fraunces', serif;
-            font-size: 24px; font-weight: 600;
-            letter-spacing: -0.6px;
+            font-size: 21px; font-weight: 600;
+            letter-spacing: -0.5px;
             color: var(--ink); margin-bottom: 4px;
-            line-height: 1.2;
         }
         .qris-subtitle {
-            font-size: 13px; color: var(--ink-soft);
-            margin-bottom: 18px;
-            line-height: 1.5;
+            font-size: 12px; color: var(--ink-soft);
+            margin-bottom: 16px;
         }
-        
+
         .qris-amount-box {
             background: linear-gradient(135deg, #ff5722 0%, #ff7a45 100%);
-            border-radius: 16px;
-            padding: 18px 16px;
-            margin-bottom: 18px;
-            box-shadow: 0 8px 24px rgba(255, 87, 34, 0.35);
-            position: relative;
-            overflow: hidden;
-        }
-        .qris-amount-box::before {
-            content: '';
-            position: absolute;
-            top: -50%; right: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 50%);
-            pointer-events: none;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 18px rgba(255, 87, 34, 0.3);
         }
         .qris-amount-label {
-            font-size: 11px;
+            font-size: 10px;
             color: rgba(255,255,255,0.85);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             font-weight: 700;
-            margin-bottom: 6px;
-            position: relative;
+            margin-bottom: 4px;
         }
         .qris-amount-value {
             font-family: 'Fraunces', serif;
-            font-size: 42px; font-weight: 800;
-            color: #fff;
-            letter-spacing: -2px;
+            font-size: 32px; font-weight: 800;
+            color: #fff; letter-spacing: -1.5px;
             line-height: 1;
-            position: relative;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .qris-amount-plan {
-            font-size: 12px; color: rgba(255,255,255,0.9);
-            margin-top: 8px; font-weight: 600;
-            position: relative;
+            font-size: 11px; color: rgba(255,255,255,0.9);
+            margin-top: 6px; font-weight: 600;
         }
-        
-        .qris-amount-warning {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            border-left: 3px solid #d97706;
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-bottom: 16px;
-            font-size: 11.5px;
-            color: #92400e;
-            line-height: 1.5;
-            text-align: left;
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
-        }
-        .qris-amount-warning svg {
-            width: 16px; height: 16px;
-            fill: #d97706;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-        .qris-amount-warning strong { font-weight: 700; }
-        
+
         .qris-image-box {
             background: #fff;
-            border: 2px solid var(--line);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 240px;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 10px;
+            margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 220px;
         }
         .qris-image-box img {
-            width: 100%;
-            max-width: 260px;
-            height: auto;
-            display: block;
-            border-radius: 8px;
+            width: 100%; max-width: 240px; height: auto;
+            display: block; border-radius: 6px;
         }
-        .qris-image-box .qris-loading {
-            font-size: 12px;
-            color: var(--ink-mute);
-        }
+        .qris-image-box .qris-loading { font-size: 12px; color: var(--ink-mute); }
         .qris-image-box .qris-error {
-            font-size: 12px;
-            color: #dc2626;
-            padding: 20px;
-            text-align: center;
-            line-height: 1.6;
+            font-size: 12px; color: #dc2626;
+            padding: 20px; text-align: center; line-height: 1.6;
         }
-        
+
         .qris-instructions {
             background: var(--paper-soft);
-            border-radius: 12px;
-            padding: 12px 14px;
+            border-radius: 10px;
+            padding: 10px 14px;
             text-align: left;
             margin-bottom: 14px;
-            font-size: 12px;
+            font-size: 11.5px;
             color: var(--ink-soft);
-            line-height: 1.6;
+            line-height: 1.55;
         }
         .qris-instructions strong {
-            display: block;
-            color: var(--ink);
-            font-size: 12px;
-            margin-bottom: 6px;
-            font-weight: 700;
+            display: block; color: var(--ink);
+            font-size: 11.5px; margin-bottom: 4px; font-weight: 700;
         }
-        .qris-instructions ol {
-            padding-left: 18px;
-            margin: 0;
-        }
-        .qris-instructions ol li { margin-bottom: 4px; }
+        .qris-instructions ol { padding-left: 16px; margin: 0; }
+        .qris-instructions ol li { margin-bottom: 2px; }
         .qris-instructions ol li strong {
-            color: var(--orange);
-            display: inline;
+            color: var(--orange); display: inline;
             font-size: inherit;
         }
-        
-        .qris-bank-list {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            border-radius: 12px;
-            padding: 10px 14px;
-            margin-bottom: 16px;
-            font-size: 11px;
-            color: #92400e;
-            line-height: 1.6;
-            text-align: left;
-        }
-        .qris-bank-list strong {
-            display: block;
-            margin-bottom: 3px;
-            font-weight: 700;
-        }
-        
-        .qris-actions {
-            display: flex;
-            gap: 10px;
-        }
+
+        .qris-actions { display: flex; gap: 8px; }
         .qris-actions button {
-            flex: 1;
-            padding: 13px;
-            border-radius: 12px;
+            flex: 1; padding: 12px;
+            border-radius: 11px;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
             border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-flex; align-items: center; justify-content: center;
             gap: 6px;
         }
         .qris-btn-cancel {
@@ -1099,32 +1001,20 @@
         .qris-btn-pay {
             background: var(--green);
             color: #fff;
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
+            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.28);
         }
-        .qris-btn-pay:hover {
-            background: var(--green-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(22, 163, 74, 0.4);
+        .qris-btn-pay:hover { background: var(--green-dark); transform: translateY(-1px); }
+        .qris-btn-pay:disabled { background: var(--ink-mute); cursor: not-allowed; transform: none; box-shadow: none; }
+        .qris-btn-pay svg, .qris-btn-cancel svg {
+            width: 15px; height: 15px; fill: currentColor;
         }
-        .qris-btn-pay:disabled {
-            background: var(--ink-mute);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+
+        @media (max-width: 480px) {
+            .qris-modal-card { padding: 22px 16px; border-radius: 18px; }
+            .qris-amount-value { font-size: 28px; }
+            .qris-title { font-size: 19px; }
+            .qris-image-box { min-height: 200px; }
         }
-        .qris-btn-pay svg { width: 16px; height: 16px; fill: currentColor; }
-        .qris-btn-cancel svg { width: 16px; height: 16px; fill: currentColor; }
-        
-        .qris-trust {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 14px;
-            font-size: 11px;
-            color: var(--ink-mute);
-        }
-        .qris-trust svg { width: 14px; height: 14px; fill: var(--green); }
 
         /* ========== FOOTER ========== */
         footer { background: var(--ink); color: #fff; padding: 56px 0 28px; overflow-x: hidden; }
@@ -1278,10 +1168,6 @@
             .modal-card { padding: 26px 20px; }
             .modal-card h3 { font-size: 20px; }
 
-            .qris-modal-card { padding: 24px 18px; border-radius: 20px; }
-            .qris-amount-value { font-size: 34px; }
-            .qris-title { font-size: 20px; }
-
             footer { padding: 40px 0 24px; }
             .footer-top { grid-template-columns: 1fr 1fr; gap: 24px 20px; padding-bottom: 24px; }
             .footer-brand-block { grid-column: span 2; }
@@ -1300,7 +1186,6 @@
             .hero-stat .stat-value { font-size: 20px; }
             .footer-top { grid-template-columns: 1fr; }
             .footer-brand-block { grid-column: span 1; }
-            .qris-amount-value { font-size: 30px; }
         }
     </style>
 </head>
@@ -1872,56 +1757,39 @@
     </div>
 </section>
 
-<!-- QRIS MODAL -->
+<!-- QRIS MODAL (SIMPLIFIED) -->
 <div class="qris-modal-overlay" id="qris-modal">
     <div class="qris-modal-card">
         <button class="qris-close-btn" onclick="closeQRISModal()" aria-label="Tutup">
             <i class="ri-close-line"></i>
         </button>
-        
-        <div class="qris-head-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v2h-3v-2zm-3 0h2v2h-2v-2zm-2 0h1v2h-1v-2zm5 3h3v2h-3v-2zm-3 0h2v2h-2v-2zm-2 0h1v2h-1v-2zm5 3h3v2h-3v-2zm-3 0h2v2h-2v-2zm-2 0h1v2h-1v-2z"/></svg>
-        </div>
-        
+
         <div class="qris-title">Pembayaran QRIS</div>
-        <div class="qris-subtitle">Scan QR di bawah untuk mengaktifkan akun toko Anda</div>
-        
+        <div class="qris-subtitle">Scan untuk mengaktifkan akun toko Anda</div>
+
         <div class="qris-amount-box">
-            <div class="qris-amount-label">Nominal yang harus dibayar</div>
+            <div class="qris-amount-label">Nominal Pembayaran</div>
             <div class="qris-amount-value" id="qris-amount-display">Rp 75.000</div>
             <div class="qris-amount-plan" id="qris-plan-label">Paket Pro &middot; Bulan Pertama</div>
         </div>
-        
-        <div class="qris-amount-warning">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-            <div>
-                <strong>PENTING:</strong> Masukkan nominal <strong id="qris-warning-amount">Rp 75.000</strong> dengan <strong>TEPAT</strong> saat scan QR. Nominal berbeda akan memperlambat proses aktivasi akun Anda.
-            </div>
-        </div>
-        
+
         <div class="qris-image-box" id="qris-image-box">
             <div class="qris-loading">
                 <i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block; font-size: 20px;"></i>
-                <div style="margin-top: 8px;">Memuat QR code...</div>
+                <div style="margin-top: 6px;">Memuat QR...</div>
             </div>
         </div>
-        
+
         <div class="qris-instructions">
-            <strong>Cara Pembayaran:</strong>
+            <strong>Cara Bayar:</strong>
             <ol>
-                <li>Buka aplikasi bank / e-wallet Anda</li>
-                <li>Pilih menu <strong>Scan QRIS</strong></li>
-                <li>Arahkan kamera ke QR di atas</li>
+                <li>Buka m-banking / e-wallet</li>
+                <li>Pilih <strong>Scan QRIS</strong></li>
                 <li>Masukkan nominal <strong id="qris-instruction-amount">Rp 75.000</strong></li>
-                <li>Konfirmasi &amp; simpan bukti transfer</li>
+                <li>Konfirmasi &amp; simpan bukti</li>
             </ol>
         </div>
-        
-        <div class="qris-bank-list">
-            <strong>Support semua bank &amp; e-wallet:</strong>
-            BCA &middot; Mandiri &middot; BNI &middot; BRI &middot; GoPay &middot; OVO &middot; DANA &middot; ShopeePay &middot; LinkAja
-        </div>
-        
+
         <div class="qris-actions">
             <button class="qris-btn-cancel" onclick="closeQRISModal()">
                 <i class="ri-close-line"></i> Batal
@@ -1930,11 +1798,6 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                 Sudah Bayar
             </button>
-        </div>
-        
-        <div class="qris-trust">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-            Transaksi aman &amp; terverifikasi
         </div>
     </div>
 </div>
@@ -1947,7 +1810,7 @@
         </div>
         <h3>Pendaftaran Berhasil</h3>
         <p>Terima kasih <strong id="modal-name">-</strong>. Pembayaran Anda sedang diverifikasi oleh admin. Mohon tunggu konfirmasi via WhatsApp.</p>
-        
+
         <div class="highlight">
             <div><span>Nama Toko:</span> <strong id="modal-store">-</strong></div>
             <div><span>Email Login:</span> <strong id="modal-email">-</strong></div>
@@ -2023,20 +1886,14 @@
        KONFIGURASI QRIS
        ============================================================ */
     const QRIS_CONFIG = {
-        // QR Code dari Cloudinary (static, 1 QR untuk semua plan)
         imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791086004/1000418937.jpg',
-        
-        // Nama merchant
         merchantName: 'Muhasa Digital',
-        
-        // Harga per plan (dalam Rupiah)
         prices: {
             'basic': 100000,
             'pro': 75000
         }
     };
 
-    // Data pendaftaran sementara
     let pendingRegistration = null;
 
     /* ============================================================
@@ -2130,7 +1987,7 @@
        ============================================================ */
     async function handleRegister(e) {
         e.preventDefault();
-        
+
         const store = document.getElementById('reg-store').value.trim();
         const owner = document.getElementById('reg-owner').value.trim();
         const phone = document.getElementById('reg-phone').value.trim();
@@ -2150,7 +2007,6 @@
             return;
         }
 
-        // Simpan data sementara
         pendingRegistration = {
             storeName: store,
             ownerName: owner,
@@ -2162,7 +2018,6 @@
             amount: QRIS_CONFIG.prices[plan] || 75000
         };
 
-        // Buka modal QRIS
         openQRISModal(pendingRegistration);
     }
 
@@ -2171,19 +2026,18 @@
        ============================================================ */
     function openQRISModal(regData) {
         const amountStr = 'Rp ' + regData.amount.toLocaleString('id-ID');
-        
+
         document.getElementById('qris-amount-display').innerText = amountStr;
         document.getElementById('qris-instruction-amount').innerText = amountStr;
-        document.getElementById('qris-warning-amount').innerText = amountStr;
-        
-        const planLabel = regData.plan === 'pro' 
-            ? 'Paket Pro · Bulan Pertama' 
+
+        const planLabel = regData.plan === 'pro'
+            ? 'Paket Pro · Bulan Pertama'
             : 'Paket Basic · Bulan Pertama';
         document.getElementById('qris-plan-label').innerText = planLabel;
-        
+
         const imageBox = document.getElementById('qris-image-box');
         imageBox.innerHTML = `<img src="${QRIS_CONFIG.imageUrl}" alt="QRIS Code" id="qris-img">`;
-        
+
         const img = document.getElementById('qris-img');
         if (img) {
             img.onerror = function() {
@@ -2191,7 +2045,7 @@
                     <div class="qris-error">
                         <strong>Gagal memuat QR Code</strong><br>
                         Hubungi admin via WhatsApp untuk melanjutkan.<br><br>
-                        <a href="https://wa.me/6288216637292?text=Halo%20admin,%20saya%20ingin%20daftar" 
+                        <a href="https://wa.me/6288216637292?text=Halo%20admin,%20saya%20ingin%20daftar"
                            target="_blank"
                            style="color: var(--orange); font-weight: 700; text-decoration: none;">
                             Hubungi WhatsApp &rarr;
@@ -2200,13 +2054,13 @@
                 `;
             };
         }
-        
+
         const btn = document.getElementById('qris-confirm-btn');
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
         }
-        
+
         document.getElementById('qris-modal').classList.add('show');
         document.body.style.overflow = 'hidden';
     }
@@ -2222,11 +2076,10 @@
        ============================================================ */
     async function confirmQRISPayment() {
         if (!pendingRegistration) return;
-        
+
         const amountStr = 'Rp ' + pendingRegistration.amount.toLocaleString('id-ID');
         const planName = pendingRegistration.plan === 'pro' ? 'PRO' : 'BASIC';
-        
-        // LAYER 1: Konfirmasi
+
         const confirmed = confirm(
             '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
             '   KONFIRMASI PEMBAYARAN\n' +
@@ -2239,26 +2092,25 @@
             '   TEPAT ' + amountStr + '\n\n' +
             'Lanjutkan?'
         );
-        
+
         if (!confirmed) return;
-        
-        // LAYER 2: User ketik ulang nominal
+
         const userInput = prompt(
             '🔒 VERIFIKASI NOMINAL\n\n' +
             'Ketik nominal yang baru saja Anda transfer\n' +
             '(tanpa titik/koma/spasi):\n\n' +
             'Contoh: ' + pendingRegistration.amount
         );
-        
+
         if (userInput === null) return;
-        
+
         const userAmount = parseInt(userInput.replace(/[^0-9]/g, ''));
-        
+
         if (!userAmount || isNaN(userAmount)) {
             alert('❌ Nominal tidak valid. Coba lagi.');
             return;
         }
-        
+
         if (userAmount !== pendingRegistration.amount) {
             alert(
                 '❌ NOMINAL TIDAK SESUAI!\n\n' +
@@ -2269,12 +2121,11 @@
             );
             return;
         }
-        
-        // SUBMIT KE APPS SCRIPT
+
         const btn = document.getElementById('qris-confirm-btn');
         btn.disabled = true;
         btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Mengirim...';
-        
+
         try {
             const response = await fetch(MASTER_AUTH_URL, {
                 method: 'POST',
@@ -2297,12 +2148,12 @@
 
             document.getElementById('qris-modal').classList.remove('show');
             document.body.style.overflow = '';
-            
+
             document.getElementById('modal-name').innerText = pendingRegistration.ownerName;
             document.getElementById('modal-store').innerText = pendingRegistration.storeName;
             document.getElementById('modal-email').innerText = pendingRegistration.email;
-            document.getElementById('modal-plan').innerText = pendingRegistration.plan === 'pro' 
-                ? 'Pro (Rp 75.000/bln)' 
+            document.getElementById('modal-plan').innerText = pendingRegistration.plan === 'pro'
+                ? 'Pro (Rp 75.000/bln)'
                 : 'Basic (Rp 100.000/bln)';
             document.getElementById('success-modal').classList.add('show');
 
