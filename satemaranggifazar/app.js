@@ -1,6 +1,6 @@
 /* =========================================================
-   POS KASIR - APP LOGIC (FINAL v4)
-   Fix: tax config, bills sync, click card toggle, dropdown theme
+   POS KASIR - APP LOGIC (FINAL v5)
+   Update: user database login, update PIN cloud, admin-only add menu
    ========================================================= */
 
 /* ==========================================
@@ -46,7 +46,13 @@ const api = {
     saveCoupon(c)        { return this.call('saveCoupon', { data: c }); },
     deleteCoupon(code)   { return this.call('deleteCoupon', { code }); },
     saveCashFlow(c)      { return this.call('saveCashFlow', { data: c }); },
-    bulkSave(data)       { return this.call('bulkSave', { data }); }
+    bulkSave(data)       { return this.call('bulkSave', { data }); },
+    loginUser(username, pin) {
+        return this.call('loginUser', { data: { username, pin } });
+    },
+    updateUserPin(username, oldPin, newPin) {
+        return this.call('updateUserPin', { data: { username, oldPin, newPin } });
+    }
 };
 
 let __syncTimer = null;
@@ -350,6 +356,7 @@ let coupons = JSON.parse(localStorage.getItem('luxe_pos_coupons')) || defaultCou
 let activeAppliedCoupon = null;
 
 let currentUserRole = "kasir";
+let currentUsername = "";
 let cart = [];
 let grandTotal = 0;
 let couponDiscountAmount = 0;
@@ -522,21 +529,49 @@ function importLocalStorageJSON(event) {
 /* ==========================================
    5. AUTH
    ========================================== */
-function handleLogin() {
+async function handleLogin() {
+    const username = document.getElementById('kasir-name').value;
     const pin = document.getElementById('kasir-pin').value;
-    if (pin !== currentPinCode) { alert("PIN salah!"); return; }
-    const selectedUser = document.getElementById('kasir-name').value;
-    if (selectedUser === 'admin') {
-        currentUserRole = 'admin';
-        document.getElementById('profile-name').innerText = 'admin';
+
+    let loginOk = false;
+    let roleFromCloud = 'kasir';
+
+    // 1. Coba login ke cloud
+    const cloudRes = await api.loginUser(username, pin);
+
+    if (cloudRes && cloudRes.ok && cloudRes.user) {
+        roleFromCloud = cloudRes.user.role || 'kasir';
+        currentUsername = cloudRes.user.username || username;
+        loginOk = true;
+    } else if (cloudRes && cloudRes.ok === false) {
+        // Cloud merespon tapi user/PIN salah
+        alert(cloudRes.error || "PIN salah!");
+        return;
     } else {
-        currentUserRole = 'kasir';
-        document.getElementById('profile-name').innerText = selectedUser;
+        // 2. Fallback lokal kalau cloud offline
+        if (pin === currentPinCode) {
+            roleFromCloud = (username === 'admin') ? 'admin' : 'kasir';
+            currentUsername = username;
+            loginOk = true;
+        }
     }
+
+    if (!loginOk) {
+        alert("PIN salah!");
+        return;
+    }
+
+    currentUserRole = roleFromCloud;
+    document.getElementById('profile-name').innerText = currentUsername;
+
     applyRolePermissions();
     updateGreeting();
+
     const filterDateInput = document.getElementById('filter-date');
-    if (filterDateInput && !filterDateInput.value) filterDateInput.value = getLocalDateString();
+    if (filterDateInput && !filterDateInput.value) {
+        filterDateInput.value = getLocalDateString();
+    }
+
     updateDashboardMetrics();
     document.getElementById('login-view').style.display = 'none';
 }
@@ -548,6 +583,8 @@ function confirmLogout() {
     switchTab('home');
     document.getElementById('kasir-pin').value = CFG.DEFAULT_PIN || '1234';
     document.getElementById('login-view').style.display = 'flex';
+    currentUsername = "";
+    currentUserRole = 'kasir';
 }
 
 function applyRolePermissions() {
@@ -560,9 +597,13 @@ function applyRolePermissions() {
     const homeTitle = document.getElementById('home-section-title');
     const popularItems = document.getElementById('popular-items');
     const managementContainer = document.getElementById('admin-management-container');
-    
+
+    // Tombol tambah menu (FAB) — hanya untuk admin
+    if (btnAddMenu) {
+        btnAddMenu.classList.toggle('admin-visible', currentUserRole === 'admin');
+    }
+
     if (currentUserRole === 'admin') {
-        if (btnAddMenu) btnAddMenu.style.display = 'inline-flex';
         if (adminDropdown) adminDropdown.style.display = 'inline-block';
         if (storageMenu) storageMenu.style.display = 'block';
         if (adminStatsContainer) adminStatsContainer.style.display = 'block';
@@ -572,7 +613,6 @@ function applyRolePermissions() {
         if (popularItems) popularItems.style.display = 'none';
         if (managementContainer) managementContainer.style.display = 'grid';
     } else {
-        if (btnAddMenu) btnAddMenu.style.display = 'none';
         if (adminDropdown) adminDropdown.style.display = 'none';
         if (storageMenu) storageMenu.style.display = 'none';
         if (adminStatsContainer) adminStatsContainer.style.display = 'none';
@@ -614,17 +654,49 @@ function toggleProfileAccordion(itemId) {
     if (!isOpen) itemEl.classList.add('open');
 }
 
-function updatePassword() {
-    const oldPinInput = document.getElementById('old-pin').value;
+async function updatePassword() {
+    const oldPinInput = document.getElementById('old-pin').value.trim();
     const newPinInput = document.getElementById('new-pin').value.trim();
-    if (oldPinInput !== currentPinCode) { alert("PIN lama salah!"); return; }
-    if (!newPinInput || newPinInput.length < 4) { alert("PIN baru minimal 4 karakter!"); return; }
-    currentPinCode = newPinInput;
-    saveState();
-    alert("PIN / Password berhasil diperbarui!");
-    document.getElementById('old-pin').value = '';
-    document.getElementById('new-pin').value = '';
-    toggleProfileAccordion('menu-profile-password');
+
+    if (!newPinInput || newPinInput.length < 4) {
+        alert("PIN baru minimal 4 karakter!");
+        return;
+    }
+
+    if (!currentUsername) {
+        alert("User tidak dikenal. Silakan login ulang.");
+        return;
+    }
+
+    // 1. Update ke cloud
+    const res = await api.updateUserPin(currentUsername, oldPinInput, newPinInput);
+
+    if (res && res.ok) {
+        currentPinCode = newPinInput;
+        localStorage.setItem('luxe_pos_pin', currentPinCode);
+
+        alert("PIN / Password berhasil diperbarui & tersinkron ke cloud!");
+        document.getElementById('old-pin').value = '';
+        document.getElementById('new-pin').value = '';
+        toggleProfileAccordion('menu-profile-password');
+        return;
+    }
+
+    // 2. Fallback lokal kalau cloud offline / error
+    if (!res) {
+        if (oldPinInput === currentPinCode) {
+            currentPinCode = newPinInput;
+            localStorage.setItem('luxe_pos_pin', currentPinCode);
+
+            alert("Cloud tidak tersedia. PIN diubah lokal saja.");
+            document.getElementById('old-pin').value = '';
+            document.getElementById('new-pin').value = '';
+            toggleProfileAccordion('menu-profile-password');
+            return;
+        }
+    }
+
+    alert("Gagal update PIN: " + (res && res.error ? res.error : "PIN lama salah / cloud error"));
 }
 
 /* ==========================================
