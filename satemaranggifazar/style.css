@@ -188,8 +188,7 @@ h2, h1 {text-transform:capitalize;}
 }
 .btn-fab:active { transform: scale(0.92); }
 .btn-fab { display: none !important; }
-#menu.active ~ .btn-fab,
-#menu.active .btn-fab { display: inline-flex !important; }
+#menu.active ~ .btn-fab.admin-visible { display: inline-flex !important; }
 
 .cat-chip { flex: 0 0 auto; padding: 8px 14px; background: var(--card-bg); border-radius: 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: var(--shadow-sm); }
 .cat-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2); }
