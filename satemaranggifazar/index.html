@@ -3,44 +3,64 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- ============================================
-         AUTH GUARD — Cek session sebelum load app
-         ============================================ -->
-    <script>
-        (function() {
-            const REQUIRED_TENANT = 'satemaranggifazar';  // ← ganti per buyer
-            const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
-            
-            try {
-                const sessionStr = localStorage.getItem('master_session');
-                if (!sessionStr) {
-                    window.location.replace(ROOT_LOGIN_URL);
-                    return;
-                }
-                const session = JSON.parse(sessionStr);
-                
-                if (!session.tenantId || session.tenantId !== REQUIRED_TENANT) {
-                    window.location.replace(ROOT_LOGIN_URL);
-                    return;
-                }
-                
-                // Cek expiry session (24 jam)
-                const loginAt = new Date(session.loginAt);
-                const now = new Date();
-                const hoursSinceLogin = (now - loginAt) / (1000 * 60 * 60);
-                if (hoursSinceLogin > 24) {
+        <script>
+(function() {
+    const REQUIRED_TENANT = 'satemaranggifazar';  // ← ganti perbuyer
+    const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
+
+    // Ambil dari config.js setelah load, atau hardcode
+    const API_URL_CFG = 'https://script.google.com/macros/s/AKfycbwsbK5C1ZpojiFxxJY9mebGGbj10e-Mhv0JookaLbo4ddeXnvZrp-_amkpRNia6hM8xSQ/exec';   // ← sama dengan config.js
+    const API_TOKEN_CFG = 'fazarbyd';              // ← sama dengan config.js
+
+    try {
+        const sessionStr = localStorage.getItem('master_session');
+        if (!sessionStr) {
+            window.location.replace(ROOT_LOGIN_URL);
+            return;
+        }
+        const session = JSON.parse(sessionStr);
+
+        if (!session.tenantId || session.tenantId !== REQUIRED_TENANT) {
+            window.location.replace(ROOT_LOGIN_URL);
+            return;
+        }
+
+        const loginAt = new Date(session.loginAt);
+        const hoursSinceLogin = (new Date() - loginAt) / (1000 * 60 * 60);
+        if (hoursSinceLogin > 24) {
+            localStorage.removeItem('master_session');
+            window.location.replace(ROOT_LOGIN_URL);
+            return;
+        }
+
+        console.log('✅ Auth OK:', session.storeName);
+
+        // === Cek token ke server (blokir total kalau token expired / tenant nonaktif) ===
+        if (API_URL_CFG && !API_URL_CFG.includes('ISI_URL')) {
+            fetch(API_URL_CFG, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'ping', token: API_TOKEN_CFG })
+            })
+            .then(r => r.json())
+            .then(j => {
+                if (!j.success) {
+                    console.warn('⚠️ Token expired / tenant nonaktif');
                     localStorage.removeItem('master_session');
+                    alert('Akses berakhir. Silakan hubungi admin.');
                     window.location.replace(ROOT_LOGIN_URL);
-                    return;
                 }
-                
-                // Session valid — lanjut load app
-                console.log('✅ Auth OK:', session.storeName);
-            } catch (e) {
-                window.location.replace(ROOT_LOGIN_URL);
-            }
-        })();
-    </script>
+            })
+            .catch(err => {
+                // Network error → biarkan user masuk (fallback)
+                console.log('⚠️ Server tidak terjangkau, lanjut offline');
+            });
+        }
+    } catch (e) {
+        window.location.replace(ROOT_LOGIN_URL);
+    }
+})();
+</script>
     <title>POS Kasir App</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
