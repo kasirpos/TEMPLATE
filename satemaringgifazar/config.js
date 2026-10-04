@@ -6,17 +6,17 @@
 window.APP_CONFIG = {
 
     // ==== WAJIB DIISI (dari Apps Script deployment) ====
-    API_URL:   'https://script.google.com/macros/s/GANTI_INI/exec',
-    API_TOKEN: 'TOKEN_UNIK_BUYER_INI',
+    API_URL:   'https://script.google.com/macros/s/AKfycbyORDHih-r85KfVA73MRLzEG7MtJXshBUUeXc_-EleJ2Ki4Kt_KnaQERJ3mgeEqltXV1w/exec',
+    API_TOKEN: 'fazarbyd',
 
     // ==== BRANDING TOKO ====
-    STORE_NAME:   'NAMA TOKO PEMBELI',
+    STORE_NAME:   'Sate Maranggi Fazar',
     STORE_SLOGAN: 'Selamat Datang! Silahkan masuk ke akun anda.',
     STORE_LOGO:   '',
 
     // ==== PAJAK & MATA UANG ====
     CURRENCY:     'Rp',
-    TAX_PERCENT:  10,
+    TAX_PERCENT:  0,
 
     // ==== FITUR TOGGLE ====
     ENABLE_KITCHEN_PRINT:  true,
