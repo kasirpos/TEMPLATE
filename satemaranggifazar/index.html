@@ -2,64 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script>
-(function() {
-    const REQUIRED_TENANT = 'satemaranggifazar';
-    const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
-
-    const API_URL_CFG = 'https://poskasir.muhasa48.workers.dev/pos?tenant=satemaranggifazar';
-    // Token tidak ada lagi di sisi client.
-
-    try {
-        const sessionStr = localStorage.getItem('master_session');
-        if (!sessionStr) {
-            window.location.replace(ROOT_LOGIN_URL);
-            return;
-        }
-        const session = JSON.parse(sessionStr);
-
-        if (!session.tenantId || session.tenantId !== REQUIRED_TENANT) {
-            window.location.replace(ROOT_LOGIN_URL);
-            return;
-        }
-
-        const loginAt = new Date(session.loginAt);
-        const hoursSinceLogin = (new Date() - loginAt) / (1000 * 60 * 60);
-        if (hoursSinceLogin > 24) {
-            localStorage.removeItem('master_session');
-            window.location.replace(ROOT_LOGIN_URL);
-            return;
-        }
-
-        console.log('✅ Auth OK:', session.storeName);
-
-        // === Cek token ke server (blokir total kalau token expired / tenant nonaktif) ===
-        if (API_URL_CFG && !API_URL_CFG.includes('ISI_URL')) {
-            fetch(API_URL_CFG, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'ping' })
-})
-            .then(r => r.json())
-            .then(j => {
-                if (!j.success) {
-                    console.warn('⚠️ Token expired / tenant nonaktif');
-                    localStorage.removeItem('master_session');
-                    alert('Akses berakhir. Silakan hubungi admin.');
-                    window.location.replace(ROOT_LOGIN_URL);
-                }
-            })
-            .catch(err => {
-                // Network error → biarkan user masuk (fallback)
-                console.log('⚠️ Server tidak terjangkau, lanjut offline');
-            });
-        }
-    } catch (e) {
-        window.location.replace(ROOT_LOGIN_URL);
-    }
-})();
-</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>POS Kasir App</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,6 +11,109 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="style.css">
+
+    <!-- ================= ANTI-ZOOM (override style.css) ================= -->
+    <style>
+        html, body {
+            touch-action: pan-x pan-y;
+            -ms-touch-action: pan-x pan-y;
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        /* Cegah iOS auto-zoom saat fokus ke input */
+        input, textarea, select {
+            font-size: 16px !important;
+            -webkit-user-select: text !important;
+            user-select: text !important;
+        }
+    </style>
+
+    <!-- ================= AUTH + ANTI-ZOOM SCRIPT ================= -->
+    <script>
+    (function() {
+        /* ---------- ANTI-ZOOM ---------- */
+        // Pinch-zoom (iOS Safari)
+        ['gesturestart','gesturechange','gestureend'].forEach(function(evt){
+            document.addEventListener(evt, function(e){ e.preventDefault(); }, { passive: false });
+        });
+
+        // Double-tap zoom
+        var _lastTouchZoom = 0;
+        document.addEventListener('touchend', function(e) {
+            var now = Date.now();
+            if (now - _lastTouchZoom <= 300) e.preventDefault();
+            _lastTouchZoom = now;
+        }, { passive: false });
+
+        // Ctrl + scroll (desktop)
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) e.preventDefault();
+        }, { passive: false });
+
+        // Ctrl + / - / 0 (desktop)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && ['+','-','=','0'].includes(e.key)) e.preventDefault();
+        });
+
+        /* ---------- AUTH CHECK ---------- */
+        const REQUIRED_TENANT = 'satemaranggifazar';
+        const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
+
+        // API lewat Cloudflare Worker. Token tidak ada di sini.
+        const API_URL_CFG = 'https://poskasir.muhasa48.workers.dev/pos?tenant=satemaranggifazar';
+
+        try {
+            const sessionStr = localStorage.getItem('master_session');
+            if (!sessionStr) {
+                window.location.replace(ROOT_LOGIN_URL);
+                return;
+            }
+            const session = JSON.parse(sessionStr);
+
+            if (!session.tenantId || session.tenantId !== REQUIRED_TENANT) {
+                window.location.replace(ROOT_LOGIN_URL);
+                return;
+            }
+
+            const loginAt = new Date(session.loginAt);
+            const hoursSinceLogin = (new Date() - loginAt) / (1000 * 60 * 60);
+            if (hoursSinceLogin > 24) {
+                localStorage.removeItem('master_session');
+                window.location.replace(ROOT_LOGIN_URL);
+                return;
+            }
+
+            console.log('✅ Auth OK:', session.storeName);
+
+            // Ping ke Worker (untuk cek token masih valid)
+            if (API_URL_CFG && !API_URL_CFG.includes('ISI_URL')) {
+                fetch(API_URL_CFG, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'ping' })
+                })
+                .then(r => r.json())
+                .then(j => {
+                    if (!j.success) {
+                        console.warn('⚠️ Token expired / tenant nonaktif');
+                        localStorage.removeItem('master_session');
+                        alert('Akses berakhir. Silakan hubungi admin.');
+                        window.location.replace(ROOT_LOGIN_URL);
+                    }
+                })
+                .catch(err => {
+                    console.log('⚠️ Server tidak terjangkau, lanjut offline');
+                });
+            }
+        } catch (e) {
+            window.location.replace(ROOT_LOGIN_URL);
+        }
+    })();
+    </script>
 
     <script src="config.js" defer></script>
     <script src="app.js" defer></script>
