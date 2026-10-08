@@ -1,13 +1,13 @@
 /* =========================================================
-   KONFIGURASI BUYER - [NAMA TOKO]
-   File ini HARUS di-edit per pembeli.
+   KONFIGURASI BUYER - Sate Maranggi Fazar
+   File ini di-edit per pembeli.
+   Token tidak ada di sini — disimpan di Cloudflare Worker.
    ========================================================= */
 
 window.APP_CONFIG = {
 
-    // ==== WAJIB DIISI (dari Apps Script deployment) ====
-    API_URL:   'https://script.google.com/macros/s/AKfycbxuNmmssq94P9aZpvLGY7xFQKGN9eyJK0B-MwYB9LUeHGEOT1Jngi6WE-fwfY-6PynDHQ/exec',
-    API_TOKEN: 'fazarbyd',
+    // ==== API Worker (proxy). Token TIDAK ada di sini. ====
+    API_BASE: 'https://poskasir.muhasa48.workers.dev/pos?tenant=satemaranggifazar',
 
     // ==== BRANDING TOKO ====
     STORE_NAME:   'Sate Maranggi Fazar',
