@@ -7,9 +7,8 @@
    0. API CLIENT
    ========================================== */
 const CFG = window.APP_CONFIG || {};
-const API_URL   = CFG.API_URL   || '';
-const API_TOKEN = CFG.API_TOKEN || '';
-const STORE_NAME = CFG.STORE_NAME || 'Kala Space Cafe';
+const API_URL   = CFG.API_BASE || '';
+const STORE_NAME = CFG.STORE_NAME || 'Sate Maranggi Fazar';
 
 const __taxPercent = (CFG.TAX_PERCENT !== undefined && CFG.TAX_PERCENT !== null && !isNaN(CFG.TAX_PERCENT)) 
     ? Number(CFG.TAX_PERCENT) 
@@ -26,7 +25,7 @@ const api = {
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action, token: API_TOKEN, ...payload })
+                body: JSON.stringify({ action, ...payload })
             });
             const json = await res.json();
             if (!json.success) throw new Error(json.error);
@@ -49,10 +48,9 @@ const api = {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
-                        action: 'loginUser',
-                        token: API_TOKEN,
-                        data: { username, pin }
-                    })
+    action: 'loginUser',
+    data: { username, pin }
+})
                 });
                 const json = await res.json();
 
