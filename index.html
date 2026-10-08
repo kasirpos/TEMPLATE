@@ -2013,16 +2013,15 @@
         loading.classList.add('show');
 
         try {
-            const response = await fetch(MASTER_AUTH_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'login',
-                    token: MASTER_AUTH_TOKEN,
-                    email: email,
-                    pin: pin
-                })
-            });
+            const response = await fetch(API_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+        action: 'login',
+        email: email,
+        pin: pin
+    })
+});
 
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Login gagal');
@@ -2200,21 +2199,20 @@
         btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Mengirim...';
 
         try {
-            const response = await fetch(MASTER_AUTH_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'register',
-                    token: MASTER_AUTH_TOKEN,
-                    data: {
-                        ...pendingRegistration,
-                        paymentStatus: 'paid_pending_verification',
-                        paidAmount: pendingRegistration.amount,
-                        userClaimedAmount: pendingRegistration.amount,
-                        paidAt: new Date().toISOString()
-                    }
-                })
-            });
+            const response = await fetch(API_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+        action: 'register',
+        data: {
+            ...pendingRegistration,
+            paymentStatus: 'paid_pending_verification',
+            paidAmount: pendingRegistration.amount,
+            userClaimedAmount: pendingRegistration.amount,
+            paidAt: new Date().toISOString()
+        }
+    })
+});
 
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Pendaftaran gagal');
