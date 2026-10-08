@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script>
 (function() {
-    const REQUIRED_TENANT = 'satemaranggifazar';  // ← ganti perbuyer
+    const REQUIRED_TENANT = 'satemaranggifazar';
     const ROOT_LOGIN_URL = 'https://kasirpos.github.io/';
 
-    // Ambil dari config.js setelah load, atau hardcode
-    const API_URL_CFG = 'https://script.google.com/macros/s/AKfycbxuNmmssq94P9aZpvLGY7xFQKGN9eyJK0B-MwYB9LUeHGEOT1Jngi6WE-fwfY-6PynDHQ/exec';   // ← sama dengan config.js
-    const API_TOKEN_CFG = 'fazarbyd';              // ← sama dengan config.js
+    const API_URL_CFG = 'https://poskasir.muhasa48.workers.dev/pos?tenant=satemaranggifazar';
+    // Token tidak ada lagi di sisi client.
 
     try {
         const sessionStr = localStorage.getItem('master_session');
@@ -38,10 +37,10 @@
         // === Cek token ke server (blokir total kalau token expired / tenant nonaktif) ===
         if (API_URL_CFG && !API_URL_CFG.includes('ISI_URL')) {
             fetch(API_URL_CFG, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'ping', token: API_TOKEN_CFG })
-            })
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'ping' })
+})
             .then(r => r.json())
             .then(j => {
                 if (!j.success) {
