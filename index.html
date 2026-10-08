@@ -1005,11 +1005,12 @@
             font-weight: 600;
         }
 
+        /* === MODIFIKASI: Container QRIS dihilangkan visualnya === */
         .qris-image-box {
-            background: #fff;
-            border: 1.5px solid var(--line);
-            border-radius: 14px;
-            padding: 10px;
+            /* Menghapus background, border, dan padding agar foto QRIS langsung terlihat */
+            background: transparent;
+            border: none;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1017,15 +1018,19 @@
             min-height: 0;
             overflow: hidden;
         }
+        
+        /* === MODIFIKASI: Gambar QRIS diberi lengkungan dan bayangan === */
         .qris-image-box img {
             width: 100%;
-            max-width: 220px;
+            max-width: 260px; /* Sedikit diperbesar karena tidak ada padding container */
             max-height: 100%;
             height: auto;
             object-fit: contain;
             display: block;
-            border-radius: 6px;
+            border-radius: 16px; /* Ujung melengkung */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Bayangan lembut */
         }
+        
         .qris-image-box .qris-loading {
             font-size: 12px;
             color: var(--ink-mute);
@@ -1120,7 +1125,7 @@
             .qris-amount-value { font-size: 28px; }
             .qris-title { font-size: 19px; }
             .qris-subtitle { font-size: 11.5px; }
-            .qris-image-box img { max-width: 180px; }
+            .qris-image-box img { max-width: 200px; } /* Penyesuaian ukuran di layar kecil */
             .qris-instructions { font-size: 11px; padding: 9px 12px; }
             .qris-instructions ol { padding-left: 14px; }
             .qris-actions button { padding: 11px; font-size: 12.5px; }
@@ -1129,7 +1134,7 @@
         @media (max-width: 380px) {
             .qris-modal-card { padding: 18px 14px; }
             .qris-amount-value { font-size: 24px; }
-            .qris-image-box img { max-width: 160px; }
+            .qris-image-box img { max-width: 180px; }
         }
 
         @media (max-height: 640px) {
