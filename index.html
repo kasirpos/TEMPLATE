@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>POS Kasir - Platform Bisnis Modern</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,14 +29,48 @@
                 if (e.ctrlKey && key === 's') { e.preventDefault(); return false; }
                 if (e.ctrlKey && key === 'p') { e.preventDefault(); return false; }
             });
+
+            /* ============ ANTI-ZOOM ============ */
+            // Pinch-zoom (iOS)
+            ['gesturestart','gesturechange','gestureend'].forEach(function(evt){
+                document.addEventListener(evt, function(e){ e.preventDefault(); }, { passive: false });
+            });
+            // Double-tap zoom
+            var _lastTouch = 0;
+            document.addEventListener('touchend', function(e) {
+                var now = Date.now();
+                if (now - _lastTouch <= 300) e.preventDefault();
+                _lastTouch = now;
+            }, { passive: false });
+            // Ctrl + scroll (desktop)
+            document.addEventListener('wheel', function(e) {
+                if (e.ctrlKey) e.preventDefault();
+            }, { passive: false });
+            // Ctrl + / - / 0 (desktop)
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && ['+','-','=','0'].includes(e.key)) e.preventDefault();
+            });
         })();
     </script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { max-width: 100vw; overflow-x: hidden; }
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            touch-action: pan-x pan-y;
+            -ms-touch-action: pan-x pan-y;
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
         body, nav, section, footer { -webkit-user-select: none; user-select: none; }
-        input, textarea, select { -webkit-user-select: text !important; user-select: text !important; }
+        input, textarea, select {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+            font-size: 16px;
+        }
         img, svg { max-width: 100%; height: auto; }
 
         :root {
@@ -607,7 +641,7 @@
             width: 100%; padding: 12px 14px;
             border: 1.5px solid var(--line); border-radius: 11px;
             outline: none; font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 14px; color: var(--ink);
+            font-size: 16px; color: var(--ink);
             background: #fff; transition: all 0.2s;
         }
         .register-field textarea { resize: vertical; min-height: 70px; }
@@ -765,7 +799,7 @@
             width: 100%; padding: 12px 14px;
             border: 1.5px solid var(--line); border-radius: 11px;
             outline: none; font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 14px; color: var(--ink);
+            font-size: 16px; color: var(--ink);
             background: #fff; transition: all 0.2s;
         }
         .field input:focus {
@@ -868,7 +902,7 @@
         .modal-card button:hover { background: #000; }
         .modal-card button i { font-size: 16px; }
 
-        /* ========== QRIS MODAL (CLEAN, NO SCROLL, RESPONSIVE) ========== */
+        /* ========== QRIS MODAL ========== */
         .qris-modal-overlay {
             position: fixed;
             inset: 0;
@@ -1972,7 +2006,7 @@
 
 <script>
     /* ============================================================
-       KONFIGURASI
+       KONFIGURASI — API Worker (token tidak ada di client)
        ============================================================ */
     const API_BASE = 'https://poskasir.muhasa48.workers.dev/master';
 
@@ -1981,7 +2015,7 @@
        ============================================================ */
     const QRIS_CONFIG = {
         imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791086004/1000418937.jpg',
-        merchantName: 'Muhasa Digital',
+        merchantName: 'Muhasa.id',
         prices: {
             'basic': 100000,
             'pro': 75000
@@ -2014,14 +2048,14 @@
 
         try {
             const response = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({
-        action: 'login',
-        email: email,
-        pin: pin
-    })
-});
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'login',
+                    email: email,
+                    pin: pin
+                })
+            });
 
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Login gagal');
@@ -2189,7 +2223,7 @@
     }
 
     /* ============================================================
-       CONFIRM QRIS PAYMENT — NO BROWSER DIALOG
+       CONFIRM QRIS PAYMENT
        ============================================================ */
     async function confirmQRISPayment() {
         if (!pendingRegistration) return;
@@ -2200,28 +2234,26 @@
 
         try {
             const response = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({
-        action: 'register',
-        data: {
-            ...pendingRegistration,
-            paymentStatus: 'paid_pending_verification',
-            paidAmount: pendingRegistration.amount,
-            userClaimedAmount: pendingRegistration.amount,
-            paidAt: new Date().toISOString()
-        }
-    })
-});
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'register',
+                    data: {
+                        ...pendingRegistration,
+                        paymentStatus: 'paid_pending_verification',
+                        paidAmount: pendingRegistration.amount,
+                        userClaimedAmount: pendingRegistration.amount,
+                        paidAt: new Date().toISOString()
+                    }
+                })
+            });
 
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Pendaftaran gagal');
 
-            // Tutup QRIS modal + unlock scroll
             document.getElementById('qris-modal').classList.remove('show');
             unlockBodyScroll();
 
-            // Isi success modal
             document.getElementById('modal-name').innerText = pendingRegistration.ownerName;
             document.getElementById('modal-store').innerText = pendingRegistration.storeName;
             document.getElementById('modal-email').innerText = pendingRegistration.email;
@@ -2229,11 +2261,9 @@
                 ? 'Pro (Rp 75.000/bln)'
                 : 'Basic (Rp 100.000/bln)';
 
-            // Buka success modal + lock scroll lagi
             document.getElementById('success-modal').classList.add('show');
             lockBodyScroll();
 
-            // Reset form
             document.getElementById('register-form').reset();
             onPlanChange('pro');
             pendingRegistration = null;
