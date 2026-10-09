@@ -908,39 +908,43 @@
             display: none;
             justify-content: center;
             align-items: center;
-            padding: max(16px, env(safe-area-inset-top))
-                     max(16px, env(safe-area-inset-right))
-                     max(16px, env(safe-area-inset-bottom))
-                     max(16px, env(safe-area-inset-left));
+            padding: max(12px, env(safe-area-inset-top))
+                     max(12px, env(safe-area-inset-right))
+                     max(12px, env(safe-area-inset-bottom))
+                     max(12px, env(safe-area-inset-left));
             overflow: hidden;
             overscroll-behavior: contain;
         }
         .qris-modal-overlay.show { display: flex; }
 
-        /* Container modal QRIS */
+        /* Container modal QRIS - dibuat lebih kompak */
         .qris-modal-card {
             background: #fff;
-            border-radius: 22px;
+            border-radius: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             max-height: 100%;
-            padding: 24px 22px 22px;
+            padding: 18px 18px 16px;  /* padding lebih kecil */
             text-align: center;
             animation: modalIn 0.3s ease-out;
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 16px; /* spacing lebih konsisten */
+            gap: 10px;  /* gap lebih kecil */
             overflow-y: auto;
             box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+            /* Hide scrollbar visual */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
+        .qris-modal-card::-webkit-scrollbar { display: none; }
 
         .qris-close-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 32px;
-            height: 32px;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: var(--paper-soft);
             border: 1px solid var(--line);
@@ -953,77 +957,77 @@
         }
         .qris-close-btn:hover { background: var(--ink); }
         .qris-close-btn:hover i { color: #fff; }
-        .qris-close-btn i { font-size: 17px; color: var(--ink); }
+        .qris-close-btn i { font-size: 16px; color: var(--ink); }
 
         .qris-title {
             font-family: 'Fraunces', serif;
-            font-size: 21px;
+            font-size: 19px;
             font-weight: 600;
             letter-spacing: -0.5px;
             color: var(--ink);
             margin: 0;
-            padding-right: 30px;
-            padding-left: 30px;
+            padding-right: 28px;
+            padding-left: 28px;
+            line-height: 1.2;
         }
         .qris-subtitle {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--ink-soft);
-            margin: -10px 0 0;
+            margin: -6px 0 0;
         }
 
         .qris-amount-box {
             background: linear-gradient(135deg, #ff5722 0%, #ff7a45 100%);
-            border-radius: 14px;
-            padding: 14px 16px;
-            box-shadow: 0 6px 18px rgba(255, 87, 34, 0.3);
+            border-radius: 12px;
+            padding: 10px 14px;
+            box-shadow: 0 4px 14px rgba(255, 87, 34, 0.3);
             flex-shrink: 0;
         }
         .qris-amount-label {
-            font-size: 10px;
+            font-size: 9px;
             color: rgba(255, 255, 255, 0.85);
             text-transform: uppercase;
             letter-spacing: 1.2px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .qris-amount-value {
             font-family: 'Fraunces', serif;
-            font-size: 32px;
+            font-size: 26px;
             font-weight: 800;
             color: #fff;
-            letter-spacing: -1.5px;
-            line-height: 1;
+            letter-spacing: -1.2px;
+            line-height: 1.05;
         }
         .qris-amount-plan {
-            font-size: 11px;
+            font-size: 10.5px;
             color: rgba(255, 255, 255, 0.9);
-            margin-top: 6px;
+            margin-top: 3px;
             font-weight: 600;
         }
 
-        /* Container QR - transparan, tanpa border */
+        /* Container QR - compact */
         .qris-image-box {
             background: transparent;
             border: none;
-            padding: 4px 0;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 1 0 auto;
+            flex: 0 0 auto;  /* tidak stretch */
             min-height: 0;
             overflow: visible;
         }
         
-        /* Gambar QR - shadow lebih halus, tidak "melayang" berlebihan */
+        /* Gambar QR - max-height diperkecil jadi 30vh */
         .qris-image-box img {
             width: 100%;
-            max-width: 230px;
-            max-height: 42vh;
+            max-width: 200px;
+            max-height: 30vh;  /* kunci utama: perkecil dari 42vh ke 30vh */
             height: auto;
             object-fit: contain;
             display: block;
-            border-radius: 14px;
-            /* Shadow jauh lebih lembut dan menyatu */
+            border-radius: 12px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
         
@@ -1039,22 +1043,21 @@
             line-height: 1.6;
         }
 
-        /* Tombol aksi cepat - dibuat lebih ringan & seimbang */
+        /* Tombol aksi cepat - compact */
         .qris-quick-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
-            margin-top: -4px; /* rapatkan sedikit ke gambar QR */
         }
         .qris-quick-btn {
             flex: 1;
-            padding: 10px 12px;
-            border-radius: 11px;
+            padding: 9px 10px;
+            border-radius: 10px;
             background: #fff;
             border: 1.5px solid var(--line);
             color: var(--ink-soft);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -1073,32 +1076,32 @@
             transform: scale(0.98);
         }
         .qris-quick-btn i {
-            font-size: 15px;
+            font-size: 14px;
             flex-shrink: 0;
         }
 
         .qris-instructions {
             background: var(--paper-soft);
-            border-radius: 12px;
-            padding: 12px 14px;
+            border-radius: 10px;
+            padding: 9px 12px;
             text-align: left;
-            font-size: 11.5px;
+            font-size: 11px;
             color: var(--ink-soft);
-            line-height: 1.55;
+            line-height: 1.5;
             flex-shrink: 0;
         }
         .qris-instructions strong {
             display: block;
             color: var(--ink);
-            font-size: 11.5px;
-            margin-bottom: 4px;
+            font-size: 11px;
+            margin-bottom: 3px;
             font-weight: 700;
         }
         .qris-instructions ol {
-            padding-left: 16px;
+            padding-left: 15px;
             margin: 0;
         }
-        .qris-instructions ol li { margin-bottom: 2px; }
+        .qris-instructions ol li { margin-bottom: 1px; }
         .qris-instructions ol li strong {
             color: var(--orange);
             display: inline;
@@ -1107,15 +1110,15 @@
 
         .qris-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
         }
         .qris-actions button {
             flex: 1;
-            padding: 12px;
-            border-radius: 11px;
+            padding: 11px;
+            border-radius: 10px;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -1123,7 +1126,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
         }
         .qris-btn-cancel {
             background: #fff;
@@ -1137,7 +1140,7 @@
         .qris-btn-pay {
             background: var(--green);
             color: #fff;
-            box-shadow: 0 6px 16px rgba(22, 163, 74, 0.28);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28);
         }
         .qris-btn-pay:hover { background: var(--green-dark); transform: translateY(-1px); }
         .qris-btn-pay:disabled {
@@ -1148,8 +1151,8 @@
         }
         .qris-btn-pay svg,
         .qris-btn-cancel svg {
-            width: 15px;
-            height: 15px;
+            width: 14px;
+            height: 14px;
             fill: currentColor;
         }
 
@@ -1186,37 +1189,49 @@
             flex-shrink: 0;
         }
 
+        /* Mobile kecil */
         @media (max-width: 480px) {
             .qris-modal-card {
-                padding: 20px 16px 18px;
-                border-radius: 18px;
-                gap: 14px;
+                padding: 16px 14px 14px;
+                border-radius: 16px;
+                gap: 9px;
             }
-            .qris-amount-value { font-size: 28px; }
-            .qris-title { font-size: 19px; }
-            .qris-subtitle { font-size: 11.5px; }
-            .qris-image-box img { max-width: 200px; max-height: 40vh; }
-            .qris-quick-btn { padding: 9px 10px; font-size: 11.5px; }
-            .qris-instructions { font-size: 11px; padding: 10px 12px; }
+            .qris-amount-value { font-size: 24px; }
+            .qris-title { font-size: 18px; }
+            .qris-subtitle { font-size: 10.5px; }
+            .qris-image-box img { max-width: 180px; max-height: 28vh; }
+            .qris-quick-btn { padding: 8px 8px; font-size: 11px; }
+            .qris-instructions { font-size: 10.5px; padding: 8px 10px; }
             .qris-instructions ol { padding-left: 14px; }
-            .qris-actions button { padding: 11px; font-size: 12.5px; }
+            .qris-actions button { padding: 10px; font-size: 12px; }
         }
 
         @media (max-width: 380px) {
-            .qris-modal-card { padding: 18px 14px 16px; gap: 12px; }
-            .qris-amount-value { font-size: 24px; }
-            .qris-image-box img { max-width: 180px; max-height: 35vh; }
-            .qris-quick-btn { padding: 8px; font-size: 11px; }
+            .qris-modal-card { padding: 14px 12px 12px; gap: 8px; }
+            .qris-amount-value { font-size: 22px; }
+            .qris-image-box img { max-width: 160px; max-height: 25vh; }
+            .qris-quick-btn { padding: 7px; font-size: 10.5px; }
         }
 
-        @media (max-height: 640px) {
+        /* Layar pendek (landscape / HP lama) - sangat kompak */
+        @media (max-height: 700px) {
             .qris-modal-card {
-                max-width: 500px;
-                padding: 16px 20px;
-                gap: 10px;
+                max-width: 460px;
+                padding: 14px 16px 12px;
+                gap: 8px;
             }
-            .qris-image-box img { max-width: 140px; max-height: 35vh; }
-            .qris-amount-value { font-size: 26px; }
+            .qris-image-box img { max-width: 150px; max-height: 26vh; }
+            .qris-amount-value { font-size: 22px; }
+            .qris-amount-box { padding: 8px 12px; }
+            .qris-quick-btn { padding: 7px 8px; font-size: 10.5px; }
+            .qris-instructions { font-size: 10px; padding: 7px 10px; line-height: 1.4; }
+            .qris-actions button { padding: 9px; font-size: 11.5px; }
+        }
+
+        /* Layar sangat pendek - sembunyikan instruksi */
+        @media (max-height: 600px) {
+            .qris-instructions { display: none; }
+            .qris-image-box img { max-height: 30vh; }
         }
 
         /* ========== FOOTER ========== */
