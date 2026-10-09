@@ -1979,7 +1979,7 @@
         <!-- Tombol Aksi Cepat -->
         <div class="qris-quick-actions">
             <button class="qris-quick-btn" onclick="saveQRToGallery()" type="button">
-                <i class="ri-download-2-line"></i> Simpan QR
+                <i class="ri-download-2-line"></i> Unduh QR
             </button>
             <button class="qris-quick-btn" onclick="copyNominal()" type="button">
                 <i class="ri-file-copy-line"></i> Salin Nominal
@@ -2097,7 +2097,6 @@
        KONFIGURASI QRIS
        ============================================================ */
     const QRIS_CONFIG = {
-        // URL sudah diganti ke gambar baru
         imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791515733/IMG_20261009_101239.png',
         merchantName: 'Muhasa.id',
         prices: {
@@ -2134,7 +2133,7 @@
     }
 
     /* ============================================================
-       SIMPAN QR KE GALERI
+       UNDUH QR LANGSUNG (TANPA SHARE)
        ============================================================ */
     async function saveQRToGallery() {
         const btn = event?.currentTarget;
@@ -2145,28 +2144,12 @@
         }
 
         try {
+            // Fetch image sebagai blob
             const response = await fetch(QRIS_CONFIG.imageUrl, { mode: 'cors' });
             if (!response.ok) throw new Error('Gagal ambil gambar');
             const blob = await response.blob();
 
-            if (navigator.share && navigator.canShare) {
-                const file = new File([blob], 'qris-poskasir.png', { type: blob.type || 'image/png' });
-                if (navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'QRIS Pembayaran POS Kasir',
-                            text: 'Scan QRIS untuk bayar langganan POS Kasir'
-                        });
-                        showToast('QR berhasil dibagikan');
-                        return;
-                    } catch (shareErr) {
-                        if (shareErr.name === 'AbortError') return;
-                        console.warn('Share failed, fallback to download', shareErr);
-                    }
-                }
-            }
-
+            // LANGSUNG DOWNLOAD (tanpa Web Share API)
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -2176,10 +2159,11 @@
             document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 2000);
 
-            showToast('QR tersimpan ke perangkat');
+            showToast('QR berhasil diunduh');
 
         } catch (err) {
             console.error('Save QR error:', err);
+            // Fallback terakhir: buka tab baru (user bisa long-press save)
             window.open(QRIS_CONFIG.imageUrl, '_blank');
             showToast('Ketuk & tahan gambar untuk simpan');
         } finally {
@@ -2390,7 +2374,6 @@
         document.getElementById('qris-plan-label').innerText = planLabel;
 
         const imageBox = document.getElementById('qris-image-box');
-        // Menggunakan QRIS_CONFIG.imageUrl yang sudah diperbarui
         imageBox.innerHTML = `<img src="${QRIS_CONFIG.imageUrl}" alt="QRIS Code" id="qris-img">`;
 
         const img = document.getElementById('qris-img');
