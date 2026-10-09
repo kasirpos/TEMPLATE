@@ -30,7 +30,6 @@
                 if (e.ctrlKey && key === 'p') { e.preventDefault(); return false; }
             });
 
-            /* ============ ANTI-ZOOM ============ */
             ['gesturestart','gesturechange','gestureend'].forEach(function(evt){
                 document.addEventListener(evt, function(e){ e.preventDefault(); }, { passive: false });
             });
@@ -931,8 +930,7 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            /* REVISI: Ganti hidden menjadi auto agar bisa discroll jika layar pendek */
-            overflow-y: auto; 
+            overflow-y: auto;
             box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
         }
 
@@ -1002,7 +1000,6 @@
             font-weight: 600;
         }
 
-        /* REVISI: Container QRIS diubah agar tidak memotong gambar */
         .qris-image-box {
             background: transparent;
             border: none;
@@ -1010,21 +1007,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex: 1 0 auto; /* Ubah dari flex: 1 agar tingginya menyesuaikan gambar */
+            flex: 1 0 auto;
             min-height: 0;
-            overflow: visible; /* Ubah dari hidden agar gambar tidak terpotong */
+            overflow: visible;
         }
         
-        /* REVISI: Gambar QRIS diberi batas tinggi maksimum agar pas di layar */
         .qris-image-box img {
             width: 100%;
-            max-width: 240px; 
-            max-height: 45vh; /* Batasi tinggi agar tidak melebihi layar */
+            max-width: 240px;
+            max-height: 45vh;
             height: auto;
             object-fit: contain;
             display: block;
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
         
         .qris-image-box .qris-loading {
@@ -1037,6 +1033,43 @@
             padding: 20px;
             text-align: center;
             line-height: 1.6;
+        }
+
+        /* === BARU: Tombol Aksi Cepat (Simpan QR & Salin Nominal) === */
+        .qris-quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .qris-quick-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: var(--paper-soft);
+            border: 1.5px solid var(--line);
+            color: var(--ink);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .qris-quick-btn:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+            background: var(--orange-soft);
+        }
+        .qris-quick-btn:active {
+            transform: scale(0.97);
+        }
+        .qris-quick-btn i {
+            font-size: 15px;
+            flex-shrink: 0;
         }
 
         .qris-instructions {
@@ -1112,6 +1145,40 @@
             fill: currentColor;
         }
 
+        /* === BARU: Toast Notification === */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: var(--ink);
+            color: #fff;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: calc(100vw - 40px);
+            white-space: nowrap;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast i {
+            font-size: 18px;
+            color: #4ade80;
+            flex-shrink: 0;
+        }
+
         @media (max-width: 480px) {
             .qris-modal-card {
                 padding: 20px 16px;
@@ -1121,7 +1188,8 @@
             .qris-amount-value { font-size: 28px; }
             .qris-title { font-size: 19px; }
             .qris-subtitle { font-size: 11.5px; }
-            .qris-image-box img { max-width: 200px; max-height: 40vh; } /* Penyesuaian tinggi */
+            .qris-image-box img { max-width: 200px; max-height: 40vh; }
+            .qris-quick-btn { padding: 9px 10px; font-size: 11.5px; }
             .qris-instructions { font-size: 11px; padding: 9px 12px; }
             .qris-instructions ol { padding-left: 14px; }
             .qris-actions button { padding: 11px; font-size: 12.5px; }
@@ -1131,6 +1199,7 @@
             .qris-modal-card { padding: 18px 14px; }
             .qris-amount-value { font-size: 24px; }
             .qris-image-box img { max-width: 180px; max-height: 35vh; }
+            .qris-quick-btn { padding: 8px; font-size: 11px; }
         }
 
         @media (max-height: 640px) {
@@ -1141,7 +1210,6 @@
             }
             .qris-image-box img { max-width: 140px; max-height: 35vh; }
             .qris-amount-value { font-size: 26px; }
-            /* .qris-instructions { display: none; } <-- Hapus agar instruksi tetap terlihat */
         }
 
         /* ========== FOOTER ========== */
@@ -1910,6 +1978,16 @@
             </div>
         </div>
 
+        <!-- === BARU: Tombol Aksi Cepat === -->
+        <div class="qris-quick-actions">
+            <button class="qris-quick-btn" onclick="saveQRToGallery()" type="button">
+                <i class="ri-download-2-line"></i> Simpan QR
+            </button>
+            <button class="qris-quick-btn" onclick="copyNominal()" type="button">
+                <i class="ri-file-copy-line"></i> Salin Nominal
+            </button>
+        </div>
+
         <div class="qris-instructions">
             <strong>Cara Bayar:</strong>
             <ol>
@@ -1921,10 +1999,10 @@
         </div>
 
         <div class="qris-actions">
-            <button class="qris-btn-cancel" onclick="closeQRISModal()">
+            <button class="qris-btn-cancel" onclick="closeQRISModal()" type="button">
                 <i class="ri-close-line"></i> Batal
             </button>
-            <button class="qris-btn-pay" id="qris-confirm-btn" onclick="confirmQRISPayment()">
+            <button class="qris-btn-pay" id="qris-confirm-btn" onclick="confirmQRISPayment()" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                 Sudah Bayar
             </button>
@@ -1958,6 +2036,12 @@
     </div>
 </div>
 
+<!-- === BARU: Toast Notification === -->
+<div class="toast" id="toast">
+    <i class="ri-checkbox-circle-fill"></i>
+    <span id="toast-text">Berhasil</span>
+</div>
+
 <!-- FOOTER -->
 <footer>
     <div class="container">
@@ -1969,7 +2053,7 @@
                     </svg>
                     POS Kasir
                 </div>
-                <p>Platform Point of Sale modern untuk cafe, restoran, toko dan UMKM. Terintegrasi dengan Google Spreadsheet &mdash; cepat, ringan, dan aman.</p>
+                <p>Platform Point of Sale modern untuk cafe, restoran, dan toko. Terintegrasi dengan Google Spreadsheet &mdash; cepat, ringan, dan aman.</p>
             </div>
 
             <div class="footer-links-group">
@@ -2007,7 +2091,7 @@
 
 <script>
     /* ============================================================
-       KONFIGURASI — API Worker (token tidak ada di client)
+       KONFIGURASI — API Worker
        ============================================================ */
     const API_BASE = 'https://poskasir.muhasa48.workers.dev/master';
 
@@ -2024,6 +2108,138 @@
     };
 
     let pendingRegistration = null;
+
+    /* ============================================================
+       TOAST NOTIFICATION
+       ============================================================ */
+    let toastTimer = null;
+    function showToast(message, iconClass) {
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toast-text');
+        const icon = toast.querySelector('i');
+
+        toastText.innerText = message;
+        if (iconClass) {
+            icon.className = iconClass;
+            icon.style.color = '';  // Reset
+        } else {
+            icon.className = 'ri-checkbox-circle-fill';
+            icon.style.color = '#4ade80';
+        }
+
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2200);
+    }
+
+    /* ============================================================
+       SIMPAN QR KE GALERI
+       Prioritas: Web Share API → Download blob → Buka tab baru
+       ============================================================ */
+    async function saveQRToGallery() {
+        const btn = event?.currentTarget;
+        const originalHTML = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite;"></i> Menyiapkan...';
+        }
+
+        try {
+            // Fetch image sebagai blob
+            const response = await fetch(QRIS_CONFIG.imageUrl, { mode: 'cors' });
+            if (!response.ok) throw new Error('Gagal ambil gambar');
+            const blob = await response.blob();
+
+            // 1. Coba Web Share API (mobile-friendly, bisa save ke galeri)
+            if (navigator.share && navigator.canShare) {
+                const file = new File([blob], 'qris-poskasir.jpg', { type: blob.type || 'image/jpeg' });
+                if (navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: 'QRIS Pembayaran POS Kasir',
+                            text: 'Scan QRIS untuk bayar langganan POS Kasir'
+                        });
+                        showToast('QR berhasil dibagikan');
+                        return;
+                    } catch (shareErr) {
+                        // User cancel share — jangan fallback, cukup diam
+                        if (shareErr.name === 'AbortError') {
+                            return;
+                        }
+                        console.warn('Share failed, fallback to download', shareErr);
+                    }
+                }
+            }
+
+            // 2. Fallback: download sebagai file
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qris-poskasir-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+            showToast('QR tersimpan ke perangkat');
+
+        } catch (err) {
+            console.error('Save QR error:', err);
+            // 3. Fallback terakhir: buka di tab baru (user bisa long-press save)
+            window.open(QRIS_CONFIG.imageUrl, '_blank');
+            showToast('Ketuk & tahan gambar untuk simpan');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        }
+    }
+
+    /* ============================================================
+       SALIN NOMINAL
+       ============================================================ */
+    function copyNominal() {
+        const amount = pendingRegistration ? pendingRegistration.amount : 75000;
+        const raw = amount.toString(); // "75000" — angka polos untuk paste di m-banking
+
+        // Coba Clipboard API modern
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(raw).then(() => {
+                showToast(`Nominal ${raw} disalin`);
+            }).catch(() => {
+                fallbackCopy(raw);
+            });
+        } else {
+            fallbackCopy(raw);
+        }
+    }
+
+    function fallbackCopy(text) {
+        try {
+            const input = document.createElement('textarea');
+            input.value = text;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            input.style.pointerEvents = 'none';
+            document.body.appendChild(input);
+            input.select();
+            input.setSelectionRange(0, 99999); // Untuk iOS
+            const success = document.execCommand('copy');
+            document.body.removeChild(input);
+            if (success) {
+                showToast(`Nominal ${text} disalin`);
+            } else {
+                showToast('Gagal menyalin, salin manual: ' + text);
+            }
+        } catch (err) {
+            console.error('Fallback copy error:', err);
+            showToast('Gagal menyalin, salin manual: ' + text);
+        }
+    }
 
     /* ============================================================
        LOGIN
@@ -2051,11 +2267,7 @@
             const response = await fetch(API_BASE, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'login',
-                    email: email,
-                    pin: pin
-                })
+                body: JSON.stringify({ action: 'login', email, pin })
             });
 
             const result = await response.json();
