@@ -917,19 +917,20 @@
         }
         .qris-modal-overlay.show { display: flex; }
 
+        /* Container modal QRIS */
         .qris-modal-card {
             background: #fff;
             border-radius: 22px;
             width: 100%;
             max-width: 400px;
             max-height: 100%;
-            padding: 24px 22px;
+            padding: 24px 22px 22px;
             text-align: center;
             animation: modalIn 0.3s ease-out;
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 16px; /* spacing lebih konsisten */
             overflow-y: auto;
             box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
         }
@@ -967,7 +968,7 @@
         .qris-subtitle {
             font-size: 12px;
             color: var(--ink-soft);
-            margin: -8px 0 0;
+            margin: -10px 0 0;
         }
 
         .qris-amount-box {
@@ -1000,10 +1001,11 @@
             font-weight: 600;
         }
 
+        /* Container QR - transparan, tanpa border */
         .qris-image-box {
             background: transparent;
             border: none;
-            padding: 0;
+            padding: 4px 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1012,15 +1014,17 @@
             overflow: visible;
         }
         
+        /* Gambar QR - shadow lebih halus, tidak "melayang" berlebihan */
         .qris-image-box img {
             width: 100%;
-            max-width: 240px;
-            max-height: 45vh;
+            max-width: 230px;
+            max-height: 42vh;
             height: auto;
             object-fit: contain;
             display: block;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 14px;
+            /* Shadow jauh lebih lembut dan menyatu */
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
         
         .qris-image-box .qris-loading {
@@ -1035,18 +1039,20 @@
             line-height: 1.6;
         }
 
+        /* Tombol aksi cepat - dibuat lebih ringan & seimbang */
         .qris-quick-actions {
             display: flex;
             gap: 8px;
             flex-shrink: 0;
+            margin-top: -4px; /* rapatkan sedikit ke gambar QR */
         }
         .qris-quick-btn {
             flex: 1;
             padding: 10px 12px;
-            border-radius: 10px;
-            background: var(--paper-soft);
+            border-radius: 11px;
+            background: #fff;
             border: 1.5px solid var(--line);
-            color: var(--ink);
+            color: var(--ink-soft);
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 12px;
             font-weight: 600;
@@ -1055,16 +1061,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             white-space: nowrap;
         }
         .qris-quick-btn:hover {
-            border-color: var(--orange);
-            color: var(--orange);
-            background: var(--orange-soft);
+            border-color: var(--ink);
+            color: var(--ink);
+            background: var(--paper-soft);
         }
         .qris-quick-btn:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
         .qris-quick-btn i {
             font-size: 15px;
@@ -1073,8 +1079,8 @@
 
         .qris-instructions {
             background: var(--paper-soft);
-            border-radius: 10px;
-            padding: 10px 14px;
+            border-radius: 12px;
+            padding: 12px 14px;
             text-align: left;
             font-size: 11.5px;
             color: var(--ink-soft);
@@ -1120,11 +1126,14 @@
             gap: 6px;
         }
         .qris-btn-cancel {
-            background: var(--paper-soft);
-            color: var(--ink);
+            background: #fff;
+            color: var(--ink-soft);
             border: 1.5px solid var(--line) !important;
         }
-        .qris-btn-cancel:hover { border-color: var(--ink) !important; }
+        .qris-btn-cancel:hover {
+            border-color: var(--ink) !important;
+            color: var(--ink);
+        }
         .qris-btn-pay {
             background: var(--green);
             color: #fff;
@@ -1179,22 +1188,22 @@
 
         @media (max-width: 480px) {
             .qris-modal-card {
-                padding: 20px 16px;
+                padding: 20px 16px 18px;
                 border-radius: 18px;
-                gap: 12px;
+                gap: 14px;
             }
             .qris-amount-value { font-size: 28px; }
             .qris-title { font-size: 19px; }
             .qris-subtitle { font-size: 11.5px; }
             .qris-image-box img { max-width: 200px; max-height: 40vh; }
             .qris-quick-btn { padding: 9px 10px; font-size: 11.5px; }
-            .qris-instructions { font-size: 11px; padding: 9px 12px; }
+            .qris-instructions { font-size: 11px; padding: 10px 12px; }
             .qris-instructions ol { padding-left: 14px; }
             .qris-actions button { padding: 11px; font-size: 12.5px; }
         }
 
         @media (max-width: 380px) {
-            .qris-modal-card { padding: 18px 14px; }
+            .qris-modal-card { padding: 18px 14px 16px; gap: 12px; }
             .qris-amount-value { font-size: 24px; }
             .qris-image-box img { max-width: 180px; max-height: 35vh; }
             .qris-quick-btn { padding: 8px; font-size: 11px; }
@@ -2144,12 +2153,10 @@
         }
 
         try {
-            // Fetch image sebagai blob
             const response = await fetch(QRIS_CONFIG.imageUrl, { mode: 'cors' });
             if (!response.ok) throw new Error('Gagal ambil gambar');
             const blob = await response.blob();
 
-            // LANGSUNG DOWNLOAD (tanpa Web Share API)
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -2163,7 +2170,6 @@
 
         } catch (err) {
             console.error('Save QR error:', err);
-            // Fallback terakhir: buka tab baru (user bisa long-press save)
             window.open(QRIS_CONFIG.imageUrl, '_blank');
             showToast('Ketuk & tahan gambar untuk simpan');
         } finally {
@@ -2179,7 +2185,7 @@
        ============================================================ */
     function copyNominal() {
         const amount = pendingRegistration ? pendingRegistration.amount : 75000;
-        const raw = amount.toString(); // angka polos
+        const raw = amount.toString();
 
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(raw).then(() => {
