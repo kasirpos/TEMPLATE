@@ -1035,7 +1035,6 @@
             line-height: 1.6;
         }
 
-        /* === BARU: Tombol Aksi Cepat (Simpan QR & Salin Nominal) === */
         .qris-quick-actions {
             display: flex;
             gap: 8px;
@@ -1145,7 +1144,6 @@
             fill: currentColor;
         }
 
-        /* === BARU: Toast Notification === */
         .toast {
             position: fixed;
             bottom: 32px;
@@ -1978,7 +1976,7 @@
             </div>
         </div>
 
-        <!-- === BARU: Tombol Aksi Cepat === -->
+        <!-- Tombol Aksi Cepat -->
         <div class="qris-quick-actions">
             <button class="qris-quick-btn" onclick="saveQRToGallery()" type="button">
                 <i class="ri-download-2-line"></i> Simpan QR
@@ -2036,7 +2034,7 @@
     </div>
 </div>
 
-<!-- === BARU: Toast Notification === -->
+<!-- Toast Notification -->
 <div class="toast" id="toast">
     <i class="ri-checkbox-circle-fill"></i>
     <span id="toast-text">Berhasil</span>
@@ -2099,7 +2097,8 @@
        KONFIGURASI QRIS
        ============================================================ */
     const QRIS_CONFIG = {
-        imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791086004/1000418937.jpg',
+        // URL sudah diganti ke gambar baru
+        imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791515733/IMG_20261009_101239.png',
         merchantName: 'Muhasa.id',
         prices: {
             'basic': 100000,
@@ -2121,7 +2120,7 @@
         toastText.innerText = message;
         if (iconClass) {
             icon.className = iconClass;
-            icon.style.color = '';  // Reset
+            icon.style.color = '';
         } else {
             icon.className = 'ri-checkbox-circle-fill';
             icon.style.color = '#4ade80';
@@ -2136,7 +2135,6 @@
 
     /* ============================================================
        SIMPAN QR KE GALERI
-       Prioritas: Web Share API → Download blob → Buka tab baru
        ============================================================ */
     async function saveQRToGallery() {
         const btn = event?.currentTarget;
@@ -2147,14 +2145,12 @@
         }
 
         try {
-            // Fetch image sebagai blob
             const response = await fetch(QRIS_CONFIG.imageUrl, { mode: 'cors' });
             if (!response.ok) throw new Error('Gagal ambil gambar');
             const blob = await response.blob();
 
-            // 1. Coba Web Share API (mobile-friendly, bisa save ke galeri)
             if (navigator.share && navigator.canShare) {
-                const file = new File([blob], 'qris-poskasir.jpg', { type: blob.type || 'image/jpeg' });
+                const file = new File([blob], 'qris-poskasir.png', { type: blob.type || 'image/png' });
                 if (navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
@@ -2165,20 +2161,16 @@
                         showToast('QR berhasil dibagikan');
                         return;
                     } catch (shareErr) {
-                        // User cancel share — jangan fallback, cukup diam
-                        if (shareErr.name === 'AbortError') {
-                            return;
-                        }
+                        if (shareErr.name === 'AbortError') return;
                         console.warn('Share failed, fallback to download', shareErr);
                     }
                 }
             }
 
-            // 2. Fallback: download sebagai file
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `qris-poskasir-${Date.now()}.jpg`;
+            a.download = `qris-poskasir-${Date.now()}.png`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -2188,7 +2180,6 @@
 
         } catch (err) {
             console.error('Save QR error:', err);
-            // 3. Fallback terakhir: buka di tab baru (user bisa long-press save)
             window.open(QRIS_CONFIG.imageUrl, '_blank');
             showToast('Ketuk & tahan gambar untuk simpan');
         } finally {
@@ -2204,9 +2195,8 @@
        ============================================================ */
     function copyNominal() {
         const amount = pendingRegistration ? pendingRegistration.amount : 75000;
-        const raw = amount.toString(); // "75000" — angka polos untuk paste di m-banking
+        const raw = amount.toString(); // angka polos
 
-        // Coba Clipboard API modern
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(raw).then(() => {
                 showToast(`Nominal ${raw} disalin`);
@@ -2227,7 +2217,7 @@
             input.style.pointerEvents = 'none';
             document.body.appendChild(input);
             input.select();
-            input.setSelectionRange(0, 99999); // Untuk iOS
+            input.setSelectionRange(0, 99999);
             const success = document.execCommand('copy');
             document.body.removeChild(input);
             if (success) {
@@ -2400,6 +2390,7 @@
         document.getElementById('qris-plan-label').innerText = planLabel;
 
         const imageBox = document.getElementById('qris-image-box');
+        // Menggunakan QRIS_CONFIG.imageUrl yang sudah diperbarui
         imageBox.innerHTML = `<img src="${QRIS_CONFIG.imageUrl}" alt="QRIS Code" id="qris-img">`;
 
         const img = document.getElementById('qris-img');
