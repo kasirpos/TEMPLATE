@@ -54,8 +54,13 @@ window.POS_CONFIG = {
         stores: [
             'Kala Space Cafe',
             'Kopi Senja',
-            'Rumah Makan Spesial Sambal',
-            'Bakery Co.',
+            'Sate Solo Pak Yamin',
+            'RM Dapur Nusantara',
+            'Soto Boyolali Hj Hesti',
+            'Es Teh Solo',
+            'Martabak Bangka 99',
+            'Seblak Prasmanan Bekasi',
+            'Sweet Bakery Co.',
             'Cafe Breaks',
             'Waroeng Iga Bakar & Steak'
         ],
