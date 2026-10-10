@@ -4,9 +4,9 @@
    ✏️  EDIT FILE INI SAJA untuk mengubah:
        - Endpoint API
        - Harga paket Basic & Pro
-       - Teks promo (hero + banner)
-       - Daftar fitur di section "Fitur Lengkap"
-       - Daftar fitur di kartu pricing
+       - Teks promo
+       - Daftar toko "Dipercaya oleh"
+       - Fitur section & pricing
 
    ⚠️  Kalau ubah HARGA, wajib ubah juga di master.gs:
        - PRICE_BASIC
@@ -27,7 +27,7 @@ window.POS_CONFIG = {
        ============================================================ */
     QRIS: {
         imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791515733/IMG_20261009_101239.png',
-        merchantName: 'kasirpedia.my.id'
+        merchantName: 'Muhasa.id'
     },
 
 
@@ -36,18 +36,36 @@ window.POS_CONFIG = {
        ============================================================ */
     PROMO: {
         enabled: true,
-        heroBadge: 'Promo Bulan Ini · Pro hanya Rp 75.000',
-        bannerTitle: 'Promo Bulan Ini — <em>Pro dari Rp 150.000 jadi Rp 75.000</em>',
+
+        // Hero badge di bagian atas
+        heroBadge: 'Tanpa Install · Setup 5 Menit · Support 24/7',
+
+        // Countdown banner di section pricing
+        bannerTitle: 'Promo Spesial — <em>Pro dari Rp 150.000 jadi Rp 75.000</em>',
         bannerSubtitle: 'Hemat Rp 75.000/bulan · berlaku untuk 50 pembeli pertama'
     },
 
 
     /* ============================================================
-       4. HARGA PAKET
+       4. LOGO STRIP (Dipercaya oleh)
        ============================================================ */
-    /* price: angka asli untuk hitung kode unik QRIS */
-    /* priceDisplay + priceUnit: yang tampil di kartu pricing */
-    /* formLabel + formDesc: yang tampil di form register */
+    LOGO_STRIP: {
+        label: 'Dipercaya oleh',
+        stores: [
+            'Kala Space Cafe',
+            'Kopi Senja',
+            'Rumah Makan Spesial Sambal',
+            'Bakery Co.',
+            'Cafe Breaks',
+            'Waroeng Iga Bakar & Steak'
+        ],
+        moreText: '+50 toko lainnya di seluruh Indonesia'
+    },
+
+
+    /* ============================================================
+       5. HARGA PAKET
+       ============================================================ */
     PLANS: {
         basic: {
             price: 100000,
@@ -77,12 +95,7 @@ window.POS_CONFIG = {
 
 
     /* ============================================================
-       5. DAFTAR FITUR DI SECTION "FITUR LENGKAP"
-       ============================================================
-       Setiap kategori:
-         - icon: SVG path (viewBox 0 0 24 24)
-         - items: array fitur { title, desc, tag, icon }
-         - tag: 'basic' atau 'pro'
+       6. FITUR SECTION
        ============================================================ */
     FEATURES: [
 
@@ -211,9 +224,7 @@ window.POS_CONFIG = {
 
 
     /* ============================================================
-       6. FITUR DI KARTU PRICING
-       ============================================================
-       strong: true → teks di-bold
+       7. FITUR DI KARTU PRICING
        ============================================================ */
     PRICING_FEATURES: {
         basic: [
@@ -234,8 +245,8 @@ window.POS_CONFIG = {
             { text: '2 Toko / Cabang', strong: true },
             { text: 'Manajemen HPP & Margin', strong: true },
             { text: 'Laporan Laba Rugi', strong: true },
-            { text: 'Kupon Diskon', strong: true },
-            { text: 'Diskon Per Produk', strong: true },
+            'Kupon Diskon',
+            'Diskon Per Produk',
             { text: 'Priority Support', strong: true }
         ]
     }
