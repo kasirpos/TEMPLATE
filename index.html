@@ -9,6 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
+    <!-- CONFIG — edit config.js untuk ubah harga/fitur/teks -->
+    <script src="config.js"></script>
+
     <script>
         (function() {
             document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
@@ -345,14 +348,11 @@
             flex-shrink: 0;
         }
 
-        /* Feature grid */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 14px;
         }
-
-        /* Feature card: icon sejajar judul, deskripsi di bawah icon */
         .feature-card {
             background: #fff;
             border: 1px solid var(--line);
@@ -427,7 +427,6 @@
             line-height: 1.3;
             align-self: center;
         }
-
         .feature-card p {
             grid-column: 1 / -1;
             grid-row: 2;
@@ -1451,7 +1450,6 @@
             .footer-brand-block { grid-column: span 1; }
         }
 
-        /* Pricing side-by-side untuk tablet (768px) ke atas */
         @media (min-width: 768px) {
             .pricing-grid {
                 grid-template-columns: 1fr 1.15fr;
@@ -1488,9 +1486,9 @@
     <div class="container">
         <div class="hero-inner">
             <div class="hero-text">
-                <div class="hero-badge fade-in">
+                <div class="hero-badge fade-in" id="promo-hero-badge">
                     <span class="hero-badge-dot"></span>
-                    Promo Bulan Ini &middot; Pro hanya Rp 75.000
+                    <span id="promo-hero-text">Promo Bulan Ini &middot; Pro hanya Rp 75.000</span>
                 </div>
                 <h1 class="fade-in delay-1">
                     Bisnis rapi.<br>
@@ -1574,7 +1572,7 @@
     </div>
 </section>
 
-<!-- FEATURES -->
+<!-- FEATURES (generated dari config.js) -->
 <section class="features" id="features">
     <div class="container">
         <div class="section-head">
@@ -1585,208 +1583,7 @@
             </h2>
             <p>Tidak perlu belajar rumit. Tidak perlu install. Cukup buka browser dan mulai berjualan.</p>
         </div>
-
-        <!-- KATEGORI 1 — KASIR & TRANSAKSI (SEMUA BASIC) -->
-        <div class="feature-category">
-            <div class="feature-cat-head">
-                <div class="feature-cat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-                </div>
-                <h3>Kasir &amp; Transaksi</h3>
-                <span class="count">4 fitur</span>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Kasir Cepat</h4>
-                    <p>Input pesanan multi-item dengan hitungan otomatis. Cukup tap produk, jumlah, dan bayar.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5zM19 19.09H5V4.91h14v14.18zM6 15h12v2H6zm0-4h12v2H6zm0-4h12v2H6z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Cetak Struk Pelanggan</h4>
-                    <p>Cetak struk thermal 58mm langsung dari browser. Support printer thermal standar kasir.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5zM19 19.09H5V4.91h14v14.18zM6 15h12v2H6zm0-4h12v2H6zm0-4h12v2H6z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Cetak Struk Dapur</h4>
-                    <p>Kirim pesanan ke dapur dengan tipe Dine In/Takeaway, nomor meja, dan catatan khusus pelanggan.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Split Bill / Hold Bill</h4>
-                    <p>Simpan pesanan pelanggan sementara. Lanjutkan kapan saja tanpa kehilangan data.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- KATEGORI 2 — LAPORAN & ANALISA (Export CSV naik ke atas HPP) -->
-        <div class="feature-category">
-            <div class="feature-cat-head">
-                <div class="feature-cat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <h3>Laporan &amp; Analisa</h3>
-                <span class="count">5 fitur</span>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Dashboard Omset</h4>
-                    <p>Lihat omset harian, bulanan, dan grafik penjualan live. Tahu performa toko dalam sekejap.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Laporan Harian</h4>
-                    <p>Rekap transaksi per hari &mdash; omset, jumlah transaksi, produk terlaris, dan total tunai.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Export CSV</h4>
-                    <p>Download riwayat transaksi ke CSV. Mudah diolah di Excel untuk laporan pajak atau audit.</p>
-                </div>
-                <div class="feature-card pro-feature">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-                        </div>
-                        <span class="feature-tag pro">Pro</span>
-                    </div>
-                    <h4>Manajemen HPP &amp; Margin</h4>
-                    <p>Hitung margin keuntungan tiap produk. Ketahui produk mana untung besar, mana yang rugi.</p>
-                </div>
-                <div class="feature-card pro-feature">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-                        </div>
-                        <span class="feature-tag pro">Pro</span>
-                    </div>
-                    <h4>Laporan Laba Rugi</h4>
-                    <p>Lihat profit bersih toko per periode. Omset dikurangi HPP = margin asli bisnis Anda.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- KATEGORI 3 — PROMO & MARKETING -->
-        <div class="feature-category">
-            <div class="feature-cat-head">
-                <div class="feature-cat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
-                </div>
-                <h3>Promo &amp; Marketing</h3>
-                <span class="count">2 fitur</span>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card pro-feature">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-9 7.5h-2v-2h2v2zm0-4.5h-2v-2h2v2zm0-4.5h-2v-2h2v2z"/></svg>
-                        </div>
-                        <span class="feature-tag pro">Pro</span>
-                    </div>
-                    <h4>Kupon Diskon</h4>
-                    <p>Buat kode kupon seperti "JUMATBERKAH" dengan diskon persen atau nominal. Batas penggunaan bisa diatur.</p>
-                </div>
-                <div class="feature-card pro-feature">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                        </div>
-                        <span class="feature-tag pro">Pro</span>
-                    </div>
-                    <h4>Diskon Per Produk</h4>
-                    <p>Beri diskon khusus per produk &mdash; persen atau nominal. Cocok untuk produk slow-moving atau promo flash sale.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- KATEGORI 4 — OPERASIONAL TOKO (SEMUA BASIC) -->
-        <div class="feature-category">
-            <div class="feature-cat-head">
-                <div class="feature-cat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                </div>
-                <h3>Operasional Toko</h3>
-                <span class="count">4 fitur</span>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Kas &amp; Petty Cash</h4>
-                    <p>Catat modal awal, pengeluaran operasional (beli gas, bayar listrik), dan lihat estimasi kas laci.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Tutup Shift Kasir</h4>
-                    <p>Hitung uang fisik di laci, bandingkan dengan sistem, cetak rekap penutupan shift untuk serah terima.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Cloud Sync Google Sheet</h4>
-                    <p>Data otomatis tersimpan ke Google Spreadsheet pribadi Anda. Backup aman &amp; bisa diakses kapan saja.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Custom Warna &amp; Dark Mode</h4>
-                    <p>Sesuaikan warna aksen aplikasi dengan brand toko Anda. Plus dark mode untuk kenyamanan mata.</p>
-                </div>
-            </div>
-        </div>
+        <div id="features-container"></div>
     </div>
 </section>
 
@@ -1802,13 +1599,13 @@
             <p>Langganan bulanan, bisa berhenti kapan saja. Tidak ada kontrak jangka panjang.</p>
         </div>
 
-        <div class="countdown-banner">
+        <div class="countdown-banner" id="promo-banner">
             <div class="countdown-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
             </div>
             <div class="countdown-text">
-                <strong>Promo Bulan Ini &mdash; <em>Pro dari Rp 150.000 jadi Rp 75.000</em></strong>
-                <span>Hemat Rp 75.000/bulan &middot; berlaku untuk 50 pembeli pertama</span>
+                <strong id="promo-banner-title">Promo Bulan Ini &mdash; <em>Pro dari Rp 150.000 jadi Rp 75.000</em></strong>
+                <span id="promo-banner-subtitle">Hemat Rp 75.000/bulan &middot; berlaku untuk 50 pembeli pertama</span>
             </div>
         </div>
 
@@ -1819,25 +1616,15 @@
                 <div class="price-desc">Untuk toko kecil yang baru mulai</div>
                 <div class="price-amount">
                     <span class="price-currency">Rp</span>
-                    <span class="price-number">100</span>
-                    <span class="price-period">rb</span>
+                    <span class="price-number" id="basic-price-display">100</span>
+                    <span class="price-period" id="basic-price-unit">rb</span>
                 </div>
                 <div class="price-per">per bulan &middot; bisa berhenti kapan saja</div>
-                <ul class="price-features">
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> 1 Toko / Cabang</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kasir Cepat &amp; Multi-Item</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Cetak Struk Pelanggan &amp; Dapur</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Split Bill / Hold Bill</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Dashboard Omset &amp; Laporan Harian</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Export CSV</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kas &amp; Petty Cash</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Tutup Shift Kasir</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Cloud Sync Google Spreadsheet</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Custom Warna &amp; Dark Mode</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Support via WhatsApp</li>
+                <ul class="price-features" id="basic-features-list">
+                    <!-- generated dari config -->
                 </ul>
-                <button class="price-cta secondary" onclick="selectPlanAndScroll('basic')">
-                    Pilih Basic
+                <button class="price-cta secondary" onclick="selectPlanAndScroll('basic')" id="basic-cta">
+                    <span id="basic-cta-text">Pilih Basic</span>
                 </button>
             </div>
 
@@ -1857,28 +1644,22 @@
                 <div class="price-desc">Untuk bisnis yang serius berkembang</div>
                 <div class="price-amount">
                     <span class="price-currency">Rp</span>
-                    <span class="price-number">75</span>
-                    <span class="price-period">rb</span>
+                    <span class="price-number" id="pro-price-display">75</span>
+                    <span class="price-period" id="pro-price-unit">rb</span>
                 </div>
                 <div class="price-per">per bulan &middot; bisa berhenti kapan saja</div>
-                <div class="price-discount-block">
-                    <span class="price-original">Rp 150.000</span>
+                <div class="price-discount-block" id="pro-discount-block">
+                    <span class="price-original" id="pro-price-original">Rp 150.000</span>
                     <span class="price-save-badge">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
-                        Hemat 50%
+                        <span id="pro-save-text">Hemat 50%</span>
                     </span>
                 </div>
-                <ul class="price-features">
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Semua Fitur Basic</strong></li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>2 Toko / Cabang</strong></li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Manajemen HPP &amp; Margin</strong></li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Laporan Laba Rugi</strong></li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kupon Diskon</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Diskon Per Produk</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Priority Support</strong></li>
+                <ul class="price-features" id="pro-features-list">
+                    <!-- generated dari config -->
                 </ul>
-                <button class="price-cta primary" onclick="selectPlanAndScroll('pro')">
-                    Ambil Promo Pro
+                <button class="price-cta primary" onclick="selectPlanAndScroll('pro')" id="pro-cta">
+                    <span id="pro-cta-text">Ambil Promo Pro</span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
                 </button>
             </div>
@@ -1955,8 +1736,8 @@
                                     <span class="plan-option-name">Basic</span>
                                     <span class="plan-option-badge basic">Standar</span>
                                 </div>
-                                <div class="plan-option-price">Rp 100rb <small>/bln</small></div>
-                                <div class="plan-option-desc">Untuk toko kecil</div>
+                                <div class="plan-option-price"><span id="form-basic-price">Rp 100rb</span> <small>/bln</small></div>
+                                <div class="plan-option-desc" id="form-basic-desc">Untuk toko kecil</div>
                             </label>
                             <label class="plan-option" id="plan-pro-opt">
                                 <input type="radio" name="plan" value="pro" onchange="onPlanChange('pro')" checked>
@@ -1964,8 +1745,8 @@
                                     <span class="plan-option-name">Pro</span>
                                     <span class="plan-option-badge pro">Promo</span>
                                 </div>
-                                <div class="plan-option-price" style="color: var(--orange);">Rp 75rb <small>/bln</small></div>
-                                <div class="plan-option-desc">Hemat Rp 75.000 dari Rp 150.000</div>
+                                <div class="plan-option-price" style="color: var(--orange);"><span id="form-pro-price">Rp 75rb</span> <small>/bln</small></div>
+                                <div class="plan-option-desc" id="form-pro-desc">Hemat Rp 75.000 dari Rp 150.000</div>
                             </label>
                         </div>
                     </div>
@@ -2189,16 +1970,25 @@
 </footer>
 
 <script>
-    const API_BASE = 'https://poskasir.muhasa48.workers.dev/master';
+    /* ============================================================
+       CONFIG — dari config.js
+       ============================================================ */
+    const CFG = window.POS_CONFIG || {};
+
+    const API_BASE = CFG.API_BASE || 'https://poskasir.muhasa48.workers.dev/master';
 
     const QRIS_CONFIG = {
-        imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791515733/IMG_20261009_101239.png',
-        merchantName: 'Muhasa.id',
-        basePrices: { 'basic': 100000, 'pro': 75000 }
+        imageUrl: CFG.QRIS?.imageUrl || '',
+        merchantName: CFG.QRIS?.merchantName || 'Muhasa.id',
+        basePrices: {
+            'basic': CFG.PLANS?.basic?.price || 100000,
+            'pro':   CFG.PLANS?.pro?.price   || 75000
+        }
     };
 
     let pendingRegistration = null;
 
+    /* ============ TOAST ============ */
     let toastTimer = null;
     function showToast(message, iconClass) {
         const toast = document.getElementById('toast');
@@ -2221,6 +2011,7 @@
         }, 2200);
     }
 
+    /* ============ UNDUH QR ============ */
     async function saveQRToGallery() {
         const btn = event?.currentTarget;
         const originalHTML = btn ? btn.innerHTML : '';
@@ -2256,6 +2047,7 @@
         }
     }
 
+    /* ============ SALIN NOMINAL ============ */
     function copyNominal() {
         const amount = pendingRegistration ? pendingRegistration.amount : 75000;
         const raw = amount.toString();
@@ -2289,6 +2081,7 @@
         }
     }
 
+    /* ============ LOGIN ============ */
     async function handleLogin() {
         const email = document.getElementById('login-email').value.trim().toLowerCase();
         const pin = document.getElementById('login-pin').value.trim();
@@ -2347,6 +2140,7 @@
         msg.innerText = text;
     }
 
+    /* ============ PLAN CHANGE ============ */
     function onPlanChange(plan) {
         const basicOpt = document.getElementById('plan-basic-opt');
         const proOpt = document.getElementById('plan-pro-opt');
@@ -2360,10 +2154,7 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        onPlanChange('pro');
-    });
-
+    /* ============ REGISTER ============ */
     async function handleRegister(e) {
         e.preventDefault();
 
@@ -2446,6 +2237,7 @@
         }
     }
 
+    /* ============ SCROLL LOCK ============ */
     let scrollLockY = 0;
 
     function lockBodyScroll() {
@@ -2470,6 +2262,7 @@
         window.scrollTo(0, scrollLockY);
     }
 
+    /* ============ QRIS MODAL ============ */
     function openQRISModal(regData) {
         const amount = Number(regData.amount) ||
             (regData.plan === 'basic' ? 100000 : 75000);
@@ -2519,6 +2312,7 @@
         pendingRegistration = null;
     }
 
+    /* ============ CONFIRM PAYMENT ============ */
     async function confirmQRISPayment() {
         if (!pendingRegistration) return;
 
@@ -2560,7 +2354,7 @@
             lockBodyScroll();
 
             document.getElementById('register-form').reset();
-            onPlanChange('pro');
+            onPlanChange(CFG.DEFAULT_PLAN || 'pro');
             pendingRegistration = null;
 
         } catch (err) {
@@ -2574,6 +2368,7 @@
         }
     }
 
+    /* ============ MODALS ============ */
     function closeSuccessModal() {
         document.getElementById('success-modal').classList.remove('show');
         unlockBodyScroll();
@@ -2591,6 +2386,7 @@
         unlockBodyScroll();
     }
 
+    /* ============ TOGGLE AUTH ============ */
     function switchAuthView(view) {
         const registerSec = document.getElementById('register');
         const loginSec = document.getElementById('login');
@@ -2607,6 +2403,7 @@
         }
     }
 
+    /* ============ SMOOTH SCROLL ============ */
     document.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
@@ -2644,12 +2441,143 @@
         registerSec.scrollIntoView({ behavior: 'smooth' });
     }
 
+    /* ============================================================
+       APPLY CONFIG — generate DOM dari config.js
+       ============================================================ */
+    function applyConfig() {
+        if (!window.POS_CONFIG) {
+            console.warn('[CONFIG] config.js tidak ditemukan, pakai default HTML');
+            return;
+        }
+
+        const C = window.POS_CONFIG;
+        const basic = C.PLANS?.basic;
+        const pro = C.PLANS?.pro;
+        const promo = C.PROMO || {};
+
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el && value != null) el.textContent = value;
+        };
+
+        const setHTML = (id, value) => {
+            const el = document.getElementById(id);
+            if (el && value != null) el.innerHTML = value;
+        };
+
+        const rp = (n) => 'Rp ' + Number(n).toLocaleString('id-ID');
+        const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+        /* ---- Promo ---- */
+        if (promo.enabled) {
+            setText('promo-hero-text', promo.heroBadge);
+            setHTML('promo-banner-title', promo.bannerTitle);
+            setText('promo-banner-subtitle', promo.bannerSubtitle);
+        }
+
+        /* ---- Basic Card Nominal ---- */
+        if (basic) {
+            setText('basic-price-display', basic.priceDisplay);
+            setText('basic-price-unit', basic.priceUnit);
+            setText('basic-cta-text', basic.ctaLabel);
+            setText('form-basic-price', basic.formLabel);
+            setText('form-basic-desc', basic.formDesc);
+        }
+
+        /* ---- Pro Card Nominal ---- */
+        if (pro) {
+            setText('pro-price-display', pro.priceDisplay);
+            setText('pro-price-unit', pro.priceUnit);
+            setText('pro-cta-text', pro.ctaLabel);
+            setText('form-pro-price', pro.formLabel);
+            setText('form-pro-desc', pro.formDesc);
+
+            const discountBlock = document.getElementById('pro-discount-block');
+            if (discountBlock) {
+                if (pro.originalPrice && pro.discountPercent) {
+                    discountBlock.style.display = '';
+                    setText('pro-price-original', rp(pro.originalPrice));
+                    setText('pro-save-text', 'Hemat ' + pro.discountPercent + '%');
+                } else {
+                    discountBlock.style.display = 'none';
+                }
+            }
+        }
+
+        /* ---- Generate FEATURES Section ---- */
+        const featContainer = document.getElementById('features-container');
+        if (featContainer && Array.isArray(C.FEATURES)) {
+            let html = '';
+
+            C.FEATURES.forEach(function (cat) {
+                const items = cat.items || [];
+                html += '<div class="feature-category">';
+                html += '<div class="feature-cat-head">';
+                html += '<div class="feature-cat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="' + esc(cat.icon || '') + '"/></svg></div>';
+                html += '<h3>' + esc(cat.category) + '</h3>';
+                html += '<span class="count">' + items.length + ' fitur</span>';
+                html += '</div>';
+                html += '<div class="features-grid">';
+
+                items.forEach(function (it) {
+                    const isPro = it.tag === 'pro';
+                    html += '<div class="feature-card' + (isPro ? ' pro-feature' : '') + '">';
+                    html += '<div class="feature-top">';
+                    html += '<div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="' + esc(it.icon || '') + '"/></svg></div>';
+                    html += '<span class="feature-tag ' + esc(it.tag) + '">' + (isPro ? 'Pro' : 'Basic') + '</span>';
+                    html += '</div>';
+                    html += '<h4>' + esc(it.title) + '</h4>';
+                    html += '<p>' + esc(it.desc) + '</p>';
+                    html += '</div>';
+                });
+
+                html += '</div></div>';
+            });
+
+            featContainer.innerHTML = html;
+        }
+
+        /* ---- Generate PRICING Features List ---- */
+        const checkSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+
+        function renderPricingFeatures(listId, features) {
+            const ul = document.getElementById(listId);
+            if (!ul || !Array.isArray(features)) return;
+
+            ul.innerHTML = features.map(function (f) {
+                if (typeof f === 'string') {
+                    return '<li>' + checkSvg + ' ' + esc(f) + '</li>';
+                }
+                const t = esc(f.text);
+                const content = f.strong ? '<strong>' + t + '</strong>' : t;
+                return '<li>' + checkSvg + ' ' + content + '</li>';
+            }).join('');
+        }
+
+        renderPricingFeatures('basic-features-list', C.PRICING_FEATURES?.basic);
+        renderPricingFeatures('pro-features-list', C.PRICING_FEATURES?.pro);
+
+        /* ---- Set default plan dari config ---- */
+        const defaultPlan = C.DEFAULT_PLAN || 'pro';
+        const radio = document.querySelector('input[name="plan"][value="' + defaultPlan + '"]');
+        if (radio) radio.checked = true;
+        onPlanChange(defaultPlan);
+    }
+
+    /* ============ KEYBOARD ============ */
     document.getElementById('login-pin').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
     document.getElementById('login-email').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') document.getElementById('login-pin').focus();
     });
+
+    /* ============ INIT ============ */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyConfig);
+    } else {
+        applyConfig();
+    }
 </script>
 
 </body>
