@@ -236,8 +236,6 @@ window.POS_CONFIG = {
             { text: 'Laporan Laba Rugi', strong: true },
             { text: 'Kupon Diskon', strong: true },
             { text: 'Diskon Per Produk', strong: true },
-            'Kupon Diskon',
-            'Diskon Per Produk',
             { text: 'Priority Support', strong: true }
         ]
     }
