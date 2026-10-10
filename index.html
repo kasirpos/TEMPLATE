@@ -829,6 +829,7 @@
             line-height: 1.6;
         }
         .login-footer strong { color: var(--ink); font-weight: 600; }
+        .login-footer a { color: var(--orange); font-weight: 600; text-decoration: none; }
 
         /* ========== SUCCESS / ERROR MODAL ========== */
         .modal-overlay {
@@ -1293,6 +1294,9 @@
         .delay-2 { animation-delay: 0.16s; }
         .delay-3 { animation-delay: 0.24s; }
         .delay-4 { animation-delay: 0.32s; }
+
+        /* ========== TOGGLE AUTH VIEW ========== */
+        .section-hidden { display: none !important; }
 
         /* ========== RESPONSIVE ========== */
         @media (max-width: 968px) {
@@ -1936,7 +1940,7 @@
 </section>
 
 <!-- LOGIN SECTION -->
-<section class="login-section" id="login">
+<section class="login-section section-hidden" id="login">
     <div class="container">
         <div class="login-inner">
             <div class="login-head">
@@ -1967,7 +1971,7 @@
                 </div>
 
                 <div class="login-footer">
-                    Butuh bantuan? Hubungi <strong>@Muhasa_Digital</strong>
+                    Belum punya akun? <a href="#register">Daftar di sini &rarr;</a>
                 </div>
             </div>
         </div>
@@ -2579,11 +2583,43 @@
     }
 
     /* ============================================================
+       TOGGLE AUTH VIEW — Register ↔ Login
+       ============================================================ */
+    function switchAuthView(view) {
+        const registerSec = document.getElementById('register');
+        const loginSec = document.getElementById('login');
+        if (!registerSec || !loginSec) return;
+
+        if (view === 'login') {
+            registerSec.classList.add('section-hidden');
+            loginSec.classList.remove('section-hidden');
+            loginSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            loginSec.classList.add('section-hidden');
+            registerSec.classList.remove('section-hidden');
+            registerSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    /* ============================================================
        SMOOTH SCROLL
        ============================================================ */
     document.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', function (e) {
-            const target = document.querySelector(this.getAttribute('href'));
+            const href = this.getAttribute('href');
+
+            if (href === '#login') {
+                e.preventDefault();
+                switchAuthView('login');
+                return;
+            }
+            if (href === '#register') {
+                e.preventDefault();
+                switchAuthView('register');
+                return;
+            }
+
+            const target = document.querySelector(href);
             if (target) {
                 e.preventDefault();
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2592,12 +2628,18 @@
     });
 
     function selectPlanAndScroll(plan) {
+        // Force register tampil dulu
+        const registerSec = document.getElementById('register');
+        const loginSec = document.getElementById('login');
+        registerSec.classList.remove('section-hidden');
+        loginSec.classList.add('section-hidden');
+
         const radio = document.querySelector(`input[name="plan"][value="${plan}"]`);
         if (radio) {
             radio.checked = true;
             onPlanChange(plan);
         }
-        document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
+        registerSec.scrollIntoView({ behavior: 'smooth' });
     }
 
     /* ============================================================
