@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Hubungi Support - POS Kasir</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html,body{max-width:100vw;overflow-x:hidden;font-size:16px}
+        body{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:#fff;color:#0a0a0a;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+        :root{--ink:#0a0a0a;--ink-soft:#525252;--ink-mute:#a3a3a3;--line:#e5e5e5;--line-soft:#f0f0f0;--paper-soft:#fafafa;--orange:#ff5722;--orange-dark:#e64a19;--orange-soft:#fff3ef;--green:#16a34a;--gold:#ffb800}
+        .container{width:100%;max-width:820px;margin:0 auto;padding:0 20px}
+        .container-wide{width:100%;max-width:1180px;margin:0 auto;padding:0 20px}
+
+        nav{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:1px solid var(--line);z-index:100}
+        .nav-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .nav-brand{display:flex;align-items:center;gap:8px;font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.6px;text-decoration:none;flex-shrink:0}
+        .nav-brand svg{width:28px;height:28px;fill:var(--orange);flex-shrink:0}
+        .nav-links{display:flex;align-items:center;gap:4px}
+        .nav-links a{color:var(--ink-soft);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;transition:all .15s;white-space:nowrap}
+        .nav-links a:hover{color:var(--ink);background:var(--paper-soft)}
+        .nav-links a.nav-btn-primary{background:var(--orange);color:#fff;font-weight:600;padding:9px 18px}
+        .nav-links a.nav-btn-primary:hover{background:var(--orange-dark)}
+
+        .page-hero{padding:60px 0 40px;background:linear-gradient(180deg,#fff 0%,var(--paper-soft) 100%);border-bottom:1px solid var(--line)}
+        .page-kicker{font-size:11px;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;display:inline-flex;align-items:center;gap:8px}
+        .page-kicker::before{content:'';width:24px;height:2px;background:var(--orange);flex-shrink:0}
+        .page-hero h1{font-family:'Fraunces',serif;font-size:44px;font-weight:500;letter-spacing:-1.5px;line-height:1.1;color:var(--ink);margin-bottom:14px}
+        .page-hero p{font-size:15px;color:var(--ink-soft);line-height:1.6;max-width:600px}
+
+        main{flex:1;padding:56px 0 80px}
+
+        .support-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
+        .support-card{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:26px 24px;text-decoration:none;color:var(--ink);transition:all .25s;display:flex;flex-direction:column;position:relative;overflow:hidden}
+        .support-card:hover{transform:translateY(-4px);border-color:var(--orange);box-shadow:0 20px 40px rgba(255,87,34,.12)}
+        .support-card::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,87,34,.04) 0%,transparent 50%);pointer-events:none}
+        .support-icon{width:52px;height:52px;background:var(--orange-soft);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;flex-shrink:0;position:relative;z-index:1}
+        .support-icon i{font-size:24px;color:var(--orange)}
+        .support-card h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;letter-spacing:-.4px;margin-bottom:6px;position:relative;z-index:1}
+        .support-card p{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px;flex:1;position:relative;z-index:1}
+        .support-value{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--orange);position:relative;z-index:1}
+        .support-value i{font-size:14px;transition:transform .2s}
+        .support-card:hover .support-value i{transform:translateX(4px)}
+
+        .info-section{margin-top:40px}
+        .info-section h2{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.5px;color:var(--ink);margin-bottom:18px}
+        .info-list{background:var(--paper-soft);border:1px solid var(--line-soft);border-radius:16px;padding:6px 22px}
+        .info-row{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--line-soft)}
+        .info-row:last-child{border-bottom:none}
+        .info-row-icon{width:36px;height:36px;background:#fff;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .info-row-icon i{font-size:16px;color:var(--orange)}
+        .info-row-body{flex:1;min-width:0}
+        .info-row-label{font-size:12px;color:var(--ink-mute);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+        .info-row-value{font-size:14.5px;color:var(--ink);font-weight:600;line-height:1.5}
+        .info-row-value a{color:var(--orange);text-decoration:none}
+        .info-row-value a:hover{text-decoration:underline}
+        .info-row-note{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.5;font-weight:400}
+
+        .response-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(22,163,74,.1);color:var(--green);font-size:11px;font-weight:700;padding:5px 11px;border-radius:99px;margin-bottom:14px;letter-spacing:.3px}
+        .response-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+        footer{background:var(--ink);color:#fff;padding:56px 0 28px;overflow-x:hidden}
+        .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:24px;align-items:start}
+        .footer-brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:20px;font-weight:600;letter-spacing:-.5px;margin-bottom:12px;text-decoration:none;color:#fff}
+        .footer-brand svg{width:24px;height:24px;fill:var(--orange);flex-shrink:0}
+        .footer-brand-block p{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6}
+        .footer-links-group h5{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.5);margin-bottom:14px;font-weight:700}
+        .footer-links-group a{display:block;color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;padding:4px 0;transition:color .2s}
+        .footer-links-group a:hover{color:#fff}
+        .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:12px;color:rgba(255,255,255,.4)}
+        .footer-social{display:flex;gap:10px}
+        .footer-social a{width:34px;height:34px;background:rgba(255,255,255,.08);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;transition:all .2s}
+        .footer-social a:hover{background:var(--orange);transform:translateY(-2px)}
+        .footer-social i{font-size:15px}
+
+        @media (max-width:968px){
+            .footer-top{grid-template-columns:1fr 1fr;gap:32px 24px}
+            .footer-brand-block{grid-column:span 2}
+        }
+        @media (max-width:640px){
+            .nav-inner{padding:12px 16px}
+            .nav-links a:not(.nav-btn-primary){display:none}
+            .nav-brand{font-size:17px}
+            .nav-brand svg{width:24px;height:24px}
+            .nav-links a.nav-btn-primary{font-size:13px;padding:8px 14px}
+            .page-hero{padding:40px 0 30px}
+            .page-hero h1{font-size:32px;letter-spacing:-1px}
+            .page-hero p{font-size:14px}
+            main{padding:40px 0 60px}
+            .support-grid{grid-template-columns:1fr;gap:14px}
+            .support-card{padding:22px 20px}
+            .support-icon{width:46px;height:46px}
+            .support-icon i{font-size:22px}
+            .support-card h3{font-size:17px}
+            .info-section h2{font-size:18px}
+            .info-list{padding:4px 16px}
+            .info-row{padding:14px 0;gap:12px}
+            .info-row-icon{width:32px;height:32px}
+            .info-row-icon i{font-size:15px}
+            footer{padding:40px 0 24px}
+            .footer-top{grid-template-columns:1fr 1fr;gap:24px 20px;padding-bottom:24px}
+            .footer-brand-block{grid-column:span 2}
+            .footer-bottom{flex-direction:column;text-align:center;gap:12px}
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+                <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+            </svg>
+            POS Kasir
+        </a>
+        <div class="nav-links">
+            <a href="index.html#features">Fitur</a>
+            <a href="index.html#pricing">Harga</a>
+            <a href="index.html#register">Daftar</a>
+            <a href="index.html#login">Masuk</a>
+            <a href="index.html#register" class="nav-btn-primary">Coba Gratis</a>
+        </div>
+    </div>
+</nav>
+
+<section class="page-hero">
+    <div class="container">
+        <div class="page-kicker">Bantuan</div>
+        <h1>Hubungi Support</h1>
+        <p>Tim kami siap membantu Anda. Pilih kanal komunikasi yang paling nyaman.</p>
+    </div>
+</section>
+
+<main>
+    <div class="container">
+
+        <div class="response-badge">
+            <span class="dot"></span>
+            Online · Respon rata-rata &lt; 15 menit
+        </div>
+
+        <div class="support-grid">
+            <a href="https://wa.me/6288216637292?text=Halo%20POS%20Kasir%2C%20saya%20butuh%20bantuan" target="_blank" rel="noopener" class="support-card">
+                <div class="support-icon"><i class="ri-whatsapp-line"></i></div>
+                <h3>WhatsApp</h3>
+                <p>Cara tercepat untuk mendapatkan bantuan. Cocok untuk pertanyaan teknis, aktivasi akun, atau laporan masalah.</p>
+                <span class="support-value">Chat Sekarang <i class="ri-arrow-right-line"></i></span>
+            </a>
+
+            <a href="mailto:support@poskasir.id?subject=Bantuan%20POS%20Kasir" class="support-card">
+                <div class="support-icon"><i class="ri-mail-line"></i></div>
+                <h3>Email</h3>
+                <p>Untuk pertanyaan detail, lampiran screenshot, atau permintaan faktur. Kami balas dalam 1×24 jam kerja.</p>
+                <span class="support-value">Kirim Email <i class="ri-arrow-right-line"></i></span>
+            </a>
+
+            <a href="https://instagram.com/muhasa_digital" target="_blank" rel="noopener" class="support-card">
+                <div class="support-icon"><i class="ri-instagram-line"></i></div>
+                <h3>Instagram</h3>
+                <p>Follow untuk update fitur terbaru, tips bisnis, dan konten edukasi lainnya dari POS Kasir.</p>
+                <span class="support-value">@muhasa_digital <i class="ri-arrow-right-line"></i></span>
+            </a>
+
+            <a href="faq.html" class="support-card">
+                <div class="support-icon"><i class="ri-question-line"></i></div>
+                <h3>FAQ</h3>
+                <p>Sebelum menghubungi kami, cek dulu daftar pertanyaan umum. Mungkin jawabannya sudah ada di sana.</p>
+                <span class="support-value">Lihat FAQ <i class="ri-arrow-right-line"></i></span>
+            </a>
+        </div>
+
+        <div class="info-section">
+            <h2>Informasi Tambahan</h2>
+            <div class="info-list">
+                <div class="info-row">
+                    <div class="info-row-icon"><i class="ri-time-line"></i></div>
+                    <div class="info-row-body">
+                        <div class="info-row-label">Jam Operasional</div>
+                        <div class="info-row-value">Setiap Hari · 09:00 – 21:00 WIB</div>
+                        <div class="info-row-note">Di luar jam ini, pesan Anda akan dibalas keesokan harinya.</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-row-icon"><i class="ri-map-pin-line"></i></div>
+                    <div class="info-row-body">
+                        <div class="info-row-label">Lokasi</div>
+                        <div class="info-row-value">Indonesia</div>
+                        <div class="info-row-note">Layanan kami 100% online — tidak ada kantor fisik untuk dikunjungi.</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-row-icon"><i class="ri-whatsapp-line"></i></div>
+                    <div class="info-row-body">
+                        <div class="info-row-label">WhatsApp Admin</div>
+                        <div class="info-row-value"><a href="https://wa.me/6288216637292" target="_blank" rel="noopener">+62 882-1663-7292</a></div>
+                        <div class="info-row-note">Khusus untuk bantuan teknis dan aktivasi akun.</div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-row-icon"><i class="ri-mail-line"></i></div>
+                    <div class="info-row-body">
+                        <div class="info-row-label">Email Support</div>
+                        <div class="info-row-value"><a href="mailto:support@poskasir.id">support@poskasir.id</a></div>
+                        <div class="info-row-note">Untuk pertanyaan non-mendesak atau permintaan faktur.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer>
+    <div class="container-wide">
+        <div class="footer-top">
+            <div class="footer-brand-block">
+                <a href="index.html" class="footer-brand">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+                        <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+                    </svg>
+                    POS Kasir
+                </a>
+                <p>Platform Point of Sale modern untuk cafe, restoran, dan toko. Terintegrasi dengan Google Spreadsheet &mdash; cepat, ringan, dan aman.</p>
+            </div>
+            <div class="footer-links-group">
+                <h5>Produk</h5>
+                <a href="index.html#features">Fitur</a>
+                <a href="index.html#pricing">Harga</a>
+                <a href="index.html#register">Daftar</a>
+                <a href="index.html#login">Login</a>
+            </div>
+            <div class="footer-links-group">
+                <h5>Bantuan</h5>
+                <a href="support.html">Hubungi Support</a>
+                <a href="faq.html">FAQ</a>
+                <a href="faq.html">Dokumentasi</a>
+            </div>
+            <div class="footer-links-group">
+                <h5>Legal</h5>
+                <a href="syarat.html">Syarat &amp; Ketentuan</a>
+                <a href="privasi.html">Kebijakan Privasi</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>&copy; 2026 KasirPedia.my.id | POS Kasir &middot; v1.2.1</div>
+            <div class="footer-social">
+                <a href="#" title="WhatsApp" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+                <a href="#" title="Instagram" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                <a href="#" title="Email" aria-label="Email"><i class="ri-mail-line"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
