@@ -278,33 +278,81 @@
 
         /* ========== LOGO STRIP ========== */
         .logo-strip {
-            padding: 32px 0;
+            padding: 44px 0 36px;
             border-top: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
             background: var(--paper);
         }
+
         .logo-strip-inner {
-            display: flex; align-items: center; justify-content: center;
-            gap: 32px; flex-wrap: wrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
         }
+
         .logo-strip-label {
-            font-size: 10px; color: var(--ink-mute);
-            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 10px;
+            color: var(--ink-mute);
+            text-transform: uppercase;
+            letter-spacing: 2.2px;
+            font-weight: 700;
+            white-space: nowrap;
         }
-        .logo-strip-items { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+
+        .logo-strip-label::before,
+        .logo-strip-label::after {
+            content: '';
+            width: 28px;
+            height: 1px;
+            background: var(--line);
+            flex-shrink: 0;
+        }
+
+        .logo-strip-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 12px;
+        }
+
         .logo-strip-items span {
             font-family: 'Fraunces', serif;
-            font-size: 18px; font-weight: 500;
-            color: var(--ink-mute); letter-spacing: -0.5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--ink-soft);
+            letter-spacing: -0.2px;
+            white-space: nowrap;
+            padding: 7px 16px;
+            background: var(--paper-soft);
+            border: 1px solid var(--line-soft);
+            border-radius: 99px;
+            transition: all 0.2s ease;
+            line-height: 1;
         }
+
+        .logo-strip-items span:hover {
+            background: var(--orange-soft);
+            border-color: rgba(255, 87, 34, 0.25);
+            color: var(--orange);
+            transform: translateY(-1px);
+        }
+
         .logo-strip-more {
             text-align: center;
             font-size: 11px;
             color: var(--ink-mute);
-            margin-top: 16px;
             font-weight: 500;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.4px;
             font-style: italic;
+            opacity: 0.85;
         }
 
         /* ========== FEATURES ========== */
@@ -1392,11 +1440,28 @@
             .visual-card-inner { padding: 16px; }
             .visual-badge { font-size: 10px; padding: 7px 12px; bottom: -8px; right: 12px; }
 
-            .logo-strip { padding: 24px 0; }
-            .logo-strip-inner { gap: 20px; }
-            .logo-strip-items { gap: 20px; }
-            .logo-strip-items span { font-size: 15px; }
-            .logo-strip-more { font-size: 10px; margin-top: 12px; }
+            .logo-strip { padding: 32px 0 26px; }
+            .logo-strip-inner { gap: 18px; }
+            .logo-strip-label {
+                font-size: 9px;
+                letter-spacing: 1.8px;
+                gap: 10px;
+            }
+            .logo-strip-label::before,
+            .logo-strip-label::after {
+                width: 18px;
+            }
+            .logo-strip-items {
+                gap: 6px;
+                padding: 0 8px;
+            }
+            .logo-strip-items span {
+                font-size: 12.5px;
+                padding: 6px 12px;
+            }
+            .logo-strip-more {
+                font-size: 10px;
+            }
 
             .features { padding: 56px 0; }
             .section-head { margin-bottom: 32px; }
