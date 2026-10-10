@@ -1816,7 +1816,7 @@
                     <div class="terms-row">
                         <input type="checkbox" id="reg-terms" required>
                         <label for="reg-terms">
-                            Saya setuju dengan <a href="#">Syarat &amp; Ketentuan</a> dan <a href="#">Kebijakan Privasi</a>. Saya memahami bahwa langganan dapat dibatalkan kapan saja.
+                            Saya setuju dengan <a href="syarat.html">Syarat &amp; Ketentuan</a> dan <a href="privasi.html">Kebijakan Privasi</a>. Saya memahami bahwa langganan dapat dibatalkan kapan saja.
                         </label>
                     </div>
 
@@ -2003,15 +2003,15 @@
 
             <div class="footer-links-group">
                 <h5>Bantuan</h5>
-                <a href="#login">Hubungi Support</a>
-                <a href="#login">Dokumentasi</a>
-                <a href="#login">FAQ</a>
+                <a href="support.html">Hubungi Support</a>
+                <a href="faq.html">FAQ</a>
+                <a href="faq.html">Dokumentasi</a>
             </div>
 
             <div class="footer-links-group">
                 <h5>Legal</h5>
-                <a href="#login">Syarat &amp; Ketentuan</a>
-                <a href="#login">Kebijakan Privasi</a>
+                <a href="syarat.html">Syarat &amp; Ketentuan</a>
+                <a href="privasi.html">Kebijakan Privasi</a>
             </div>
         </div>
 
@@ -2651,11 +2651,31 @@
         if (e.key === 'Enter') document.getElementById('login-pin').focus();
     });
 
+    /* ============ HANDLE HASH DARI SUBPAGE ============ */
+    function handleInitialHash() {
+        const hash = window.location.hash;
+        if (hash === '#login') {
+            switchAuthView('login');
+        } else if (hash === '#register') {
+            switchAuthView('register');
+        } else if (hash === '#pricing') {
+            switchAuthView('register');
+            setTimeout(() => {
+                const el = document.getElementById('pricing');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+
     /* ============ INIT ============ */
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyConfig);
+        document.addEventListener('DOMContentLoaded', () => {
+            applyConfig();
+            handleInitialHash();
+        });
     } else {
         applyConfig();
+        handleInitialHash();
     }
 </script>
 
