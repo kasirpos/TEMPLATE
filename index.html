@@ -85,7 +85,6 @@
             --amber: #f59e0b;
             --gold: #ffb800;
             --blue: #0057ff;
-            --red: #dc2626;
         }
 
         body {
@@ -1005,35 +1004,6 @@
             font-weight: 600;
         }
 
-        /* === BARU: Warning kotak untuk kode unik === */
-        .qris-unique-warning {
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 8px;
-            padding: 7px 10px;
-            margin-top: 8px;
-            font-size: 10.5px;
-            color: #fff;
-            line-height: 1.4;
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            text-align: left;
-        }
-        .qris-unique-warning i {
-            flex-shrink: 0;
-            margin-top: 1px;
-            font-size: 13px;
-            color: #fff;
-        }
-        .qris-unique-warning strong {
-            font-weight: 800;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 1px 5px;
-            border-radius: 4px;
-        }
-
         .qris-image-box {
             background: transparent;
             border: none;
@@ -1132,13 +1102,6 @@
             display: inline;
             font-size: inherit;
         }
-        .qris-instructions .exact-amount {
-            color: var(--red);
-            font-weight: 800;
-            background: rgba(220, 38, 38, 0.1);
-            padding: 1px 4px;
-            border-radius: 3px;
-        }
 
         .qris-actions {
             display: flex;
@@ -1235,7 +1198,6 @@
             .qris-instructions { font-size: 10.5px; padding: 8px 10px; }
             .qris-instructions ol { padding-left: 14px; }
             .qris-actions button { padding: 10px; font-size: 12px; }
-            .qris-unique-warning { font-size: 10px; padding: 6px 8px; }
         }
 
         @media (max-width: 380px) {
@@ -1257,7 +1219,6 @@
             .qris-quick-btn { padding: 7px 8px; font-size: 10.5px; }
             .qris-instructions { font-size: 10px; padding: 7px 10px; line-height: 1.4; }
             .qris-actions button { padding: 9px; font-size: 11.5px; }
-            .qris-unique-warning { font-size: 9.5px; padding: 5px 8px; }
         }
 
         @media (max-height: 600px) {
@@ -1877,7 +1838,7 @@
                 <div class="reg-note">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
                     <div>
-                        <strong>Info:</strong> Setelah daftar, Anda akan diarahkan ke <b>pembayaran QRIS</b>. Anda akan mendapat <b>nominal unik</b> (3 digit terakhir) untuk memudahkan verifikasi. Akun disetup setelah pembayaran diverifikasi (5-15 menit, jam kerja 09:00&ndash;21:00).
+                        <strong>Info:</strong> Setelah daftar, Anda akan diarahkan ke <b>pembayaran QRIS</b>. Akun akan disetup setelah pembayaran diverifikasi (5-15 menit, jam kerja 09:00&ndash;21:00).
                     </div>
                 </div>
 
@@ -2019,18 +1980,9 @@
         </div>
 
         <div class="qris-amount-box">
-            <div class="qris-amount-label">Nominal Pembayaran (TEPAT)</div>
-            <div class="qris-amount-value" id="qris-amount-display">Rp 75.001</div>
+            <div class="qris-amount-label">Nominal Pembayaran</div>
+            <div class="qris-amount-value" id="qris-amount-display">Rp 75.000</div>
             <div class="qris-amount-plan" id="qris-plan-label">Paket Pro &middot; Bulan Pertama</div>
-
-            <!-- === Warning Kode Unik === -->
-            <div class="qris-unique-warning">
-                <i class="ri-alert-fill"></i>
-                <div>
-                    Transfer <strong id="qris-exact-amount">Rp 75.001</strong> — harus PERSIS.<br>
-                    3 digit terakhir adalah <b>kode unik</b> Anda untuk verifikasi.
-                </div>
-            </div>
         </div>
 
         <div class="qris-image-box" id="qris-image-box">
@@ -2054,8 +2006,8 @@
             <strong>Cara Bayar:</strong>
             <ol>
                 <li>Buka m-banking / e-wallet</li>
-                <li>Pilih <strong>Scan QRIS</strong> atau <strong>Upload QR</strong></li>
-                <li>Masukkan nominal <strong class="exact-amount" id="qris-instruction-amount">Rp 75.001</strong> — harus PERSIS!</li>
+                <li>Pilih <strong>Scan QRIS</strong></li>
+                <li>Masukkan nominal <strong id="qris-instruction-amount">Rp 75.000</strong></li>
                 <li>Konfirmasi &amp; simpan bukti</li>
             </ol>
         </div>
@@ -2085,8 +2037,6 @@
             <div><span>Nama Toko:</span> <strong id="modal-store">-</strong></div>
             <div><span>Email Login:</span> <strong id="modal-email">-</strong></div>
             <div><span>Paket:</span> <strong id="modal-plan">-</strong></div>
-            <div><span>Nominal Transfer:</span> <strong id="modal-amount">-</strong></div>
-            <div><span>Kode Unik:</span> <strong id="modal-unique" style="color: var(--orange);">-</strong></div>
             <div><span>Status:</span> <strong style="color: var(--orange);">Menunggu Verifikasi</strong></div>
         </div>
 
@@ -2155,7 +2105,7 @@
 
 <script>
     /* ============================================================
-       KONFIGURASI — API Worker
+       KONFIGURASI — API Worker (token tidak ada di client)
        ============================================================ */
     const API_BASE = 'https://poskasir.muhasa48.workers.dev/master';
 
@@ -2172,78 +2122,6 @@
     };
 
     let pendingRegistration = null;
-
-    /* ============================================================
-       GENERATE KODE UNIK 3 DIGIT (100-999)
-       Menggunakan kombinasi waktu + random
-       ============================================================ */
-    function generateUniqueCode() {
-        const timeSeed = Math.floor(Date.now() / 1000) % 100; // 0-99
-        const randomSeed = Math.floor(Math.random() * 9) + 1; // 1-9
-        const code = randomSeed * 100 + timeSeed;
-        return code < 100 ? 100 : code;
-    }
-
-    /* ============================================================
-       VALIDASI DUPLIKAT — FETCH KODE TERPAKAI HARI INI
-       Cek ke Worker, list kode unik yang sudah dipakai (pending & paid)
-       ============================================================ */
-    async function fetchUsedCodes() {
-        try {
-            const response = await fetch(API_BASE, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'getUsedCodes' })
-            });
-
-            const result = await response.json();
-
-            // Worker mengembalikan array of { uniqueCode, plan } atau array number
-            if (result && result.success && Array.isArray(result.data)) {
-                return result.data;
-            }
-            // Fallback: kalau Worker tidak mengembalikan format yang benar
-            return [];
-        } catch (err) {
-            console.warn('[DUPLICATE CHECK] Gagal ambil daftar kode (bisa diabaikan):', err.message);
-            // Kalau Worker belum support, return empty → tetap lanjut (server tetap validasi)
-            return [];
-        }
-    }
-
-    /* ============================================================
-       GENERATE KODE UNIK ANTI-DUPLIKAT
-       Retry max 20x sampai dapat kode yang belum terpakai
-       ============================================================ */
-    function generateUniqueCodeSafe(usedCodes, plan) {
-        const MAX_RETRY = 20;
-        const usedSet = new Set(
-            usedCodes
-                .filter(item => {
-                    // Filter berdasarkan plan yang sama saja
-                    if (typeof item === 'object' && item !== null) {
-                        return !item.plan || item.plan === plan;
-                    }
-                    return true; // kalau cuma number, anggap semua plan
-                })
-                .map(item => typeof item === 'object' ? item.uniqueCode : item)
-        );
-
-        for (let i = 0; i < MAX_RETRY; i++) {
-            const code = generateUniqueCode();
-            if (!usedSet.has(code)) {
-                console.log(`[UNIQUE CODE] Dapat kode ${code} setelah ${i + 1} percobaan. Terpakai: ${usedSet.size}`);
-                return code;
-            }
-            console.warn(`[UNIQUE CODE] Kode ${code} bentrok, coba lagi... (${i + 1}/${MAX_RETRY})`);
-        }
-
-        // Kalau setelah 20x masih bentrok → pakai kode berbasis timestamp penuh
-        // (99% tidak akan pernah sampai sini kecuali traffic sangat tinggi)
-        const fallbackCode = (Math.floor(Date.now() / 1000) % 900) + 100;
-        console.warn(`[UNIQUE CODE] Fallback ke kode ${fallbackCode}`);
-        return fallbackCode;
-    }
 
     /* ============================================================
        TOAST NOTIFICATION
@@ -2310,12 +2188,10 @@
     }
 
     /* ============================================================
-       SALIN NOMINAL UNIK
+       SALIN NOMINAL
        ============================================================ */
     function copyNominal() {
-        const amount = pendingRegistration && pendingRegistration.finalAmount
-            ? pendingRegistration.finalAmount
-            : 75000;
+        const amount = pendingRegistration ? pendingRegistration.amount : 75000;
         const raw = amount.toString();
 
         if (navigator.clipboard && window.isSecureContext) {
@@ -2435,7 +2311,6 @@
 
     /* ============================================================
        REGISTER — HANDLE FORM SUBMIT
-       + VALIDASI DUPLIKAT (Client-side, layer 1)
        ============================================================ */
     async function handleRegister(e) {
         e.preventDefault();
@@ -2459,49 +2334,18 @@
             return;
         }
 
-        const btn = document.getElementById('btn-register');
-        const originalHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Memeriksa ketersediaan...';
+        pendingRegistration = {
+            storeName: store,
+            ownerName: owner,
+            phone: phone,
+            email: email,
+            businessType: type,
+            plan: plan,
+            notes: notes,
+            amount: QRIS_CONFIG.prices[plan] || 75000
+        };
 
-        try {
-            // === LAPIS 1: Fetch daftar kode terpakai hari ini ===
-            const usedCodes = await fetchUsedCodes();
-            console.log(`[REGISTER] Total kode terpakai hari ini: ${usedCodes.length}`);
-
-            // === Generate kode unik anti-duplikat ===
-            const baseAmount = QRIS_CONFIG.prices[plan] || 75000;
-            const uniqueCode = generateUniqueCodeSafe(usedCodes, plan);
-            const finalAmount = baseAmount + uniqueCode;
-
-            console.log(`[REGISTER] Base: Rp ${baseAmount}, Kode Unik: ${uniqueCode}, Final: Rp ${finalAmount}`);
-
-            pendingRegistration = {
-                storeName: store,
-                ownerName: owner,
-                phone: phone,
-                email: email,
-                businessType: type,
-                plan: plan,
-                notes: notes,
-                baseAmount: baseAmount,
-                uniqueCode: uniqueCode,
-                finalAmount: finalAmount,
-                amount: finalAmount
-            };
-
-            // Reset tombol
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-
-            openQRISModal(pendingRegistration);
-
-        } catch (err) {
-            console.error('[REGISTER] Error saat validasi:', err);
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            alert('Gagal memproses pendaftaran. Coba lagi atau hubungi WA.');
-        }
+        openQRISModal(pendingRegistration);
     }
 
     /* ============================================================
@@ -2532,14 +2376,10 @@
     }
 
     function openQRISModal(regData) {
-        const finalAmount = regData.finalAmount || regData.amount;
-        const amountStr = 'Rp ' + finalAmount.toLocaleString('id-ID');
+        const amountStr = 'Rp ' + regData.amount.toLocaleString('id-ID');
 
         document.getElementById('qris-amount-display').innerText = amountStr;
         document.getElementById('qris-instruction-amount').innerText = amountStr;
-
-        const exactEl = document.getElementById('qris-exact-amount');
-        if (exactEl) exactEl.innerText = amountStr;
 
         const planLabel = regData.plan === 'pro'
             ? 'Paket Pro · Bulan Pertama'
@@ -2556,174 +2396,4 @@
                     <div class="qris-error">
                         <strong>Gagal memuat QR Code</strong><br>
                         Hubungi admin via WhatsApp untuk melanjutkan.<br><br>
-                        <a href="https://wa.me/6288216637292?text=Halo%20admin,%20saya%20ingin%20daftar"
-                           target="_blank"
-                           style="color: var(--orange); font-weight: 700; text-decoration: none;">
-                            Hubungi WhatsApp &rarr;
-                        </a>
-                    </div>
-                `;
-            };
-        }
-
-        const btn = document.getElementById('qris-confirm-btn');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
-        }
-
-        document.getElementById('qris-modal').classList.add('show');
-        lockBodyScroll();
-    }
-
-    function closeQRISModal() {
-        document.getElementById('qris-modal').classList.remove('show');
-        unlockBodyScroll();
-        pendingRegistration = null;
-    }
-
-    /* ============================================================
-       CONFIRM QRIS PAYMENT
-       + Validasi Server-side (layer 2) — handle kalau server return error 409
-       ============================================================ */
-    async function confirmQRISPayment() {
-        if (!pendingRegistration) return;
-
-        const btn = document.getElementById('qris-confirm-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Mengirim...';
-
-        try {
-            const response = await fetch(API_BASE, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'register',
-                    data: {
-                        ...pendingRegistration,
-                        paymentStatus: 'paid_pending_verification',
-                        paidAmount: pendingRegistration.finalAmount,
-                        userClaimedAmount: pendingRegistration.finalAmount,
-                        paidAt: new Date().toISOString()
-                    }
-                })
-            });
-
-            const result = await response.json();
-
-            // === LAPIS 2: Handle duplicate code dari server ===
-            if (!result.success && result.code === 'DUPLICATE_UNIQUE_CODE') {
-                console.warn('[SERVER] Kode unik bentrok, regenerate...');
-
-                // Server kirim kode baru yang sudah diregenerasi
-                if (result.data && result.data.newUniqueCode) {
-                    pendingRegistration.uniqueCode = result.data.newUniqueCode;
-                    pendingRegistration.finalAmount = pendingRegistration.baseAmount + result.data.newUniqueCode;
-                    pendingRegistration.amount = pendingRegistration.finalAmount;
-
-                    // Update UI
-                    const newAmountStr = 'Rp ' + pendingRegistration.finalAmount.toLocaleString('id-ID');
-                    document.getElementById('qris-amount-display').innerText = newAmountStr;
-                    document.getElementById('qris-instruction-amount').innerText = newAmountStr;
-                    const exactEl = document.getElementById('qris-exact-amount');
-                    if (exactEl) exactEl.innerText = newAmountStr;
-
-                    showToast('Nominal diperbarui — silakan transfer ulang');
-
-                    btn.disabled = false;
-                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
-                    return;
-                }
-
-                // Kalau server tidak kirim kode baru, generate ulang lokal
-                const usedCodes = await fetchUsedCodes();
-                const newCode = generateUniqueCodeSafe(usedCodes, pendingRegistration.plan);
-                pendingRegistration.uniqueCode = newCode;
-                pendingRegistration.finalAmount = pendingRegistration.baseAmount + newCode;
-                pendingRegistration.amount = pendingRegistration.finalAmount;
-
-                const newAmountStr = 'Rp ' + pendingRegistration.finalAmount.toLocaleString('id-ID');
-                document.getElementById('qris-amount-display').innerText = newAmountStr;
-                document.getElementById('qris-instruction-amount').innerText = newAmountStr;
-                const exactEl = document.getElementById('qris-exact-amount');
-                if (exactEl) exactEl.innerText = newAmountStr;
-
-                showToast('Nominal diperbarui — silakan transfer ulang');
-                btn.disabled = false;
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
-                return;
-            }
-
-            if (!result.success) throw new Error(result.error || 'Pendaftaran gagal');
-
-            document.getElementById('qris-modal').classList.remove('show');
-            unlockBodyScroll();
-
-            document.getElementById('modal-name').innerText = pendingRegistration.ownerName;
-            document.getElementById('modal-store').innerText = pendingRegistration.storeName;
-            document.getElementById('modal-email').innerText = pendingRegistration.email;
-            document.getElementById('modal-plan').innerText = pendingRegistration.plan === 'pro'
-                ? 'Pro (Rp 75.000/bln)'
-                : 'Basic (Rp 100.000/bln)';
-
-            const finalStr = 'Rp ' + pendingRegistration.finalAmount.toLocaleString('id-ID');
-            const amountEl = document.getElementById('modal-amount');
-            const uniqueEl = document.getElementById('modal-unique');
-            if (amountEl) amountEl.innerText = finalStr;
-            if (uniqueEl) uniqueEl.innerText = '#' + pendingRegistration.uniqueCode;
-
-            document.getElementById('success-modal').classList.add('show');
-            lockBodyScroll();
-
-            document.getElementById('register-form').reset();
-            onPlanChange('pro');
-            pendingRegistration = null;
-
-        } catch (err) {
-            console.error('Register error:', err);
-            alert('❌ ' + (err.message || 'Gagal mengirim data. Coba lagi atau hubungi WA.'));
-            btn.disabled = false;
-            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
-        }
-    }
-
-    function closeSuccessModal() {
-        document.getElementById('success-modal').classList.remove('show');
-        unlockBodyScroll();
-    }
-
-    /* ============================================================
-       SMOOTH SCROLL
-       ============================================================ */
-    document.querySelectorAll('a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
-
-    function selectPlanAndScroll(plan) {
-        const radio = document.querySelector(`input[name="plan"][value="${plan}"]`);
-        if (radio) {
-            radio.checked = true;
-            onPlanChange(plan);
-        }
-        document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    /* ============================================================
-       KEYBOARD HANDLERS
-       ============================================================ */
-    document.getElementById('login-pin').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
-    document.getElementById('login-email').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') document.getElementById('login-pin').focus();
-    });
-</script>
-
-</body>
-</html>
+                        <a href="https://wa.me/6288216637292?text=Halo%20admin,%20saya%20
