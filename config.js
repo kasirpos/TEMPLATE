@@ -234,6 +234,8 @@ window.POS_CONFIG = {
             { text: '2 Toko / Cabang', strong: true },
             { text: 'Manajemen HPP & Margin', strong: true },
             { text: 'Laporan Laba Rugi', strong: true },
+            { text: 'Kupon Diskon', strong: true },
+            { text: 'Diskon Per Produk', strong: true },
             'Kupon Diskon',
             'Diskon Per Produk',
             { text: 'Priority Support', strong: true }
