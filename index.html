@@ -345,12 +345,14 @@
             flex-shrink: 0;
         }
 
-        /* Feature grid: icon di kiri, teks di kanan */
+        /* Feature grid */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 14px;
         }
+
+        /* Feature card: icon sejajar judul, deskripsi di bawah icon */
         .feature-card {
             background: #fff;
             border: 1px solid var(--line);
@@ -361,8 +363,8 @@
             display: grid;
             grid-template-columns: 40px 1fr;
             column-gap: 12px;
-            row-gap: 2px;
-            align-items: start;
+            row-gap: 6px;
+            align-items: center;
             min-width: 0;
         }
         .feature-card:hover {
@@ -378,10 +380,12 @@
             border-color: var(--orange);
             box-shadow: 0 16px 32px rgba(255, 87, 34, 0.12);
         }
+
         .feature-top { display: contents; }
+
         .feature-icon {
             grid-column: 1;
-            grid-row: 1 / span 2;
+            grid-row: 1;
             width: 40px;
             height: 40px;
             background: var(--orange-soft);
@@ -390,24 +394,26 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            align-self: start;
+            align-self: center;
         }
         .feature-icon svg { width: 20px; height: 20px; fill: var(--orange); }
+
         .feature-tag {
-            grid-column: 2;
-            grid-row: 1;
-            justify-self: end;
-            align-self: start;
+            position: absolute;
+            top: 14px;
+            right: 16px;
             font-size: 8px;
             font-weight: 800;
             letter-spacing: 0.5px;
-            padding: 3px 7px;
+            padding: 3px 8px;
             border-radius: 5px;
             text-transform: uppercase;
             white-space: nowrap;
+            z-index: 1;
         }
         .feature-tag.basic { background: #f0f0f0; color: var(--ink-soft); }
         .feature-tag.pro { background: rgba(255, 87, 34, 0.15); color: var(--orange); }
+
         .feature-card h4 {
             grid-column: 2;
             grid-row: 1;
@@ -419,15 +425,16 @@
             margin: 0;
             padding-right: 55px;
             line-height: 1.3;
-            align-self: start;
+            align-self: center;
         }
+
         .feature-card p {
-            grid-column: 2;
+            grid-column: 1 / -1;
             grid-row: 2;
             font-size: 12px;
             color: var(--ink-soft);
             line-height: 1.55;
-            margin-top: 4px;
+            margin: 0;
         }
 
         /* ========== PRICING ========== */
@@ -1632,7 +1639,7 @@
             </div>
         </div>
 
-        <!-- KATEGORI 2 — LAPORAN & ANALISA -->
+        <!-- KATEGORI 2 — LAPORAN & ANALISA (Export CSV naik ke atas HPP) -->
         <div class="feature-category">
             <div class="feature-cat-head">
                 <div class="feature-cat-icon">
@@ -1662,6 +1669,16 @@
                     <h4>Laporan Harian</h4>
                     <p>Rekap transaksi per hari &mdash; omset, jumlah transaksi, produk terlaris, dan total tunai.</p>
                 </div>
+                <div class="feature-card">
+                    <div class="feature-top">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        </div>
+                        <span class="feature-tag basic">Basic</span>
+                    </div>
+                    <h4>Export CSV</h4>
+                    <p>Download riwayat transaksi ke CSV. Mudah diolah di Excel untuk laporan pajak atau audit.</p>
+                </div>
                 <div class="feature-card pro-feature">
                     <div class="feature-top">
                         <div class="feature-icon">
@@ -1681,16 +1698,6 @@
                     </div>
                     <h4>Laporan Laba Rugi</h4>
                     <p>Lihat profit bersih toko per periode. Omset dikurangi HPP = margin asli bisnis Anda.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-top">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                        </div>
-                        <span class="feature-tag basic">Basic</span>
-                    </div>
-                    <h4>Export CSV</h4>
-                    <p>Download riwayat transaksi ke CSV. Mudah diolah di Excel untuk laporan pajak atau audit.</p>
                 </div>
             </div>
         </div>
@@ -1818,10 +1825,15 @@
                 <div class="price-per">per bulan &middot; bisa berhenti kapan saja</div>
                 <ul class="price-features">
                     <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> 1 Toko / Cabang</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kasir &amp; Transaksi Cepat</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Cetak Struk Pelanggan</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kasir Cepat &amp; Multi-Item</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Cetak Struk Pelanggan &amp; Dapur</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Split Bill / Hold Bill</li>
                     <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Dashboard Omset &amp; Laporan Harian</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Export CSV</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kas &amp; Petty Cash</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Tutup Shift Kasir</li>
                     <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Cloud Sync Google Spreadsheet</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Custom Warna &amp; Dark Mode</li>
                     <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Support via WhatsApp</li>
                 </ul>
                 <button class="price-cta secondary" onclick="selectPlanAndScroll('basic')">
@@ -1857,13 +1869,12 @@
                     </span>
                 </div>
                 <ul class="price-features">
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Semua fitur Basic</strong></li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Semua Fitur Basic</strong></li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>2 Toko / Cabang</strong></li>
                     <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Manajemen HPP &amp; Margin</strong></li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Laporan Laba Rugi Lengkap</strong></li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kupon Diskon &amp; Diskon Produk</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Split Bill / Hold Bill</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Cetak Struk Dapur (Kitchen)</li>
-                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kas &amp; Petty Cash + Tutup Shift</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Laporan Laba Rugi</strong></li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Kupon Diskon</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Diskon Per Produk</li>
                     <li><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> <strong>Priority Support</strong></li>
                 </ul>
                 <button class="price-cta primary" onclick="selectPlanAndScroll('pro')">
@@ -2178,9 +2189,6 @@
 </footer>
 
 <script>
-    /* ============================================================
-       KONFIGURASI — API Worker
-       ============================================================ */
     const API_BASE = 'https://poskasir.muhasa48.workers.dev/master';
 
     const QRIS_CONFIG = {
@@ -2191,7 +2199,6 @@
 
     let pendingRegistration = null;
 
-    /* ============ TOAST ============ */
     let toastTimer = null;
     function showToast(message, iconClass) {
         const toast = document.getElementById('toast');
@@ -2214,7 +2221,6 @@
         }, 2200);
     }
 
-    /* ============ UNDUH QR ============ */
     async function saveQRToGallery() {
         const btn = event?.currentTarget;
         const originalHTML = btn ? btn.innerHTML : '';
@@ -2250,7 +2256,6 @@
         }
     }
 
-    /* ============ SALIN NOMINAL ============ */
     function copyNominal() {
         const amount = pendingRegistration ? pendingRegistration.amount : 75000;
         const raw = amount.toString();
@@ -2284,7 +2289,6 @@
         }
     }
 
-    /* ============ LOGIN ============ */
     async function handleLogin() {
         const email = document.getElementById('login-email').value.trim().toLowerCase();
         const pin = document.getElementById('login-pin').value.trim();
@@ -2343,7 +2347,6 @@
         msg.innerText = text;
     }
 
-    /* ============ PLAN CHANGE ============ */
     function onPlanChange(plan) {
         const basicOpt = document.getElementById('plan-basic-opt');
         const proOpt = document.getElementById('plan-pro-opt');
@@ -2361,7 +2364,6 @@
         onPlanChange('pro');
     });
 
-    /* ============ REGISTER ============ */
     async function handleRegister(e) {
         e.preventDefault();
 
@@ -2444,7 +2446,6 @@
         }
     }
 
-    /* ============ SCROLL LOCK ============ */
     let scrollLockY = 0;
 
     function lockBodyScroll() {
@@ -2469,7 +2470,6 @@
         window.scrollTo(0, scrollLockY);
     }
 
-    /* ============ QRIS MODAL ============ */
     function openQRISModal(regData) {
         const amount = Number(regData.amount) ||
             (regData.plan === 'basic' ? 100000 : 75000);
@@ -2519,7 +2519,6 @@
         pendingRegistration = null;
     }
 
-    /* ============ CONFIRM PAYMENT ============ */
     async function confirmQRISPayment() {
         if (!pendingRegistration) return;
 
@@ -2575,7 +2574,6 @@
         }
     }
 
-    /* ============ MODALS ============ */
     function closeSuccessModal() {
         document.getElementById('success-modal').classList.remove('show');
         unlockBodyScroll();
@@ -2593,7 +2591,6 @@
         unlockBodyScroll();
     }
 
-    /* ============ TOGGLE AUTH ============ */
     function switchAuthView(view) {
         const registerSec = document.getElementById('register');
         const loginSec = document.getElementById('login');
@@ -2610,7 +2607,6 @@
         }
     }
 
-    /* ============ SMOOTH SCROLL + TOGGLE ============ */
     document.querySelectorAll('a[href^="#"]').forEach(link => {
         link.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
@@ -2648,7 +2644,6 @@
         registerSec.scrollIntoView({ behavior: 'smooth' });
     }
 
-    /* ============ KEYBOARD ============ */
     document.getElementById('login-pin').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
