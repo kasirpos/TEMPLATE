@@ -1937,7 +1937,7 @@
                     </div>
 
                     <button type="submit" class="btn-register" id="btn-register">
-                        <i class="ri-rocket-line"></i> Daftar &amp; Bayar Sekarang
+                        <i class="ri-arrow-right-circle-line"></i> Lanjutkan Pendaftaran
                     </button>
                 </form>
 
@@ -2002,9 +2002,9 @@
 
         <div class="qris-amount-box">
             <div class="qris-amount-label">Transfer TEPAT</div>
-            <div class="qris-amount-value" id="qris-amount-display">Rp 75.427</div>
+            <div class="qris-amount-value" id="qris-amount-display">Rp 75.001</div>
             <div class="qris-amount-plan" id="qris-plan-label">
-                Termasuk kode unik <b>427</b>
+                Paket Pro &middot; Sebulan &middot; Kode unik <b>001</b>
             </div>
         </div>
 
@@ -2030,7 +2030,7 @@
             <ol>
                 <li>Buka m-banking / e-wallet</li>
                 <li>Pilih <strong>Scan QRIS</strong></li>
-                <li>Masukkan nominal <strong id="qris-instruction-amount">Rp 75.427</strong></li>
+                <li>Masukkan nominal <strong id="qris-instruction-amount">Rp 75.001</strong></li>
                 <li>Konfirmasi &amp; simpan bukti</li>
             </ol>
             <div class="qris-warning">
@@ -2381,7 +2381,7 @@
         const btn = document.getElementById('btn-register');
         const orig = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Menyiapkan kode unik...';
+        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Memproses pendaftaran Anda...';
 
         try {
             const res = await fetch(API_BASE, {
@@ -2471,13 +2471,14 @@
         const codeStr = regData.uniqueCode != null
             ? String(regData.uniqueCode).padStart(3, '0')
             : '—';
+        const planName = regData.plan === 'pro' ? 'Paket Pro' : 'Paket Basic';
 
         const amountStr = 'Rp ' + amount.toLocaleString('id-ID');
 
         document.getElementById('qris-amount-display').innerText = amountStr;
         document.getElementById('qris-instruction-amount').innerText = amountStr;
         document.getElementById('qris-plan-label').innerHTML =
-            'Termasuk kode unik <b>' + codeStr + '</b>';
+            planName + ' &middot; Sebulan &middot; Kode unik <b>' + codeStr + '</b>';
 
         const imageBox = document.getElementById('qris-image-box');
         imageBox.innerHTML = '<img src="' + QRIS_CONFIG.imageUrl + '" alt="QRIS Code" id="qris-img">';
