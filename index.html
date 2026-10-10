@@ -85,6 +85,7 @@
             --amber: #f59e0b;
             --gold: #ffb800;
             --blue: #0057ff;
+            --red: #dc2626;
         }
 
         body {
@@ -829,7 +830,7 @@
         }
         .login-footer strong { color: var(--ink); font-weight: 600; }
 
-        /* ========== SUCCESS MODAL ========== */
+        /* ========== SUCCESS / ERROR MODAL ========== */
         .modal-overlay {
             position: fixed; inset: 0;
             background: rgba(10, 10, 10, 0.6);
@@ -2000,10 +2001,10 @@
         </div>
 
         <div class="qris-amount-box">
-            <div class="qris-amount-label">Nominal Pembayaran (TEPAT)</div>
+            <div class="qris-amount-label">Transfer TEPAT</div>
             <div class="qris-amount-value" id="qris-amount-display">Rp 75.427</div>
             <div class="qris-amount-plan" id="qris-plan-label">
-                Paket Pro &middot; Kode Unik <b>427</b>
+                Termasuk kode unik <b>427</b>
             </div>
         </div>
 
@@ -2076,6 +2077,22 @@
     </div>
 </div>
 
+<!-- ERROR MODAL -->
+<div class="modal-overlay" id="error-modal">
+    <div class="modal-card">
+        <div class="modal-icon" style="background:#fee2e2;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" style="fill:#dc2626;">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+        </div>
+        <h3 id="error-modal-title">Perhatian</h3>
+        <p id="error-modal-text">-</p>
+        <button onclick="closeErrorModal()">
+            <i class="ri-check-line"></i> Mengerti
+        </button>
+    </div>
+</div>
+
 <!-- Toast Notification -->
 <div class="toast" id="toast">
     <i class="ri-checkbox-circle-fill"></i>
@@ -2119,7 +2136,7 @@
         </div>
 
         <div class="footer-bottom">
-            <div>&copy; 2026 POS Kasir Multi-Buyer Edition &middot; v1.2.0</div>
+            <div>&copy; 2026 POS Kasir Multi-Buyer Edition &middot; v1.2.1</div>
             <div class="footer-social">
                 <a href="#" title="WhatsApp" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
                 <a href="#" title="Instagram" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
@@ -2353,11 +2370,11 @@
         const plan = planEl ? planEl.value : 'pro';
 
         if (!store || !owner || !phone || !email || !type) {
-            alert('Mohon lengkapi semua field wajib (*)');
+            showErrorModal('Mohon lengkapi semua field wajib bertanda (*).', 'Data Belum Lengkap');
             return;
         }
         if (!terms) {
-            alert('Mohon setuju dengan Syarat & Ketentuan');
+            showErrorModal('Mohon setujui Syarat & Ketentuan dan Kebijakan Privasi sebelum melanjutkan.', 'Persetujuan Diperlukan');
             return;
         }
 
@@ -2385,7 +2402,13 @@
             });
 
             const result = await res.json();
+            console.log('[REGISTER RESPONSE]', result);
+
             if (!result.success) throw new Error(result.error || 'Gagal membuat reservasi');
+            if (!result.data || result.data.amount === undefined) {
+                console.error('[REGISTER] data.amount tidak ada di response:', result);
+                throw new Error('Server tidak mengirim nominal unik. Hubungi admin.');
+            }
 
             pendingRegistration = {
                 storeName: store,
@@ -2405,7 +2428,10 @@
 
         } catch (err) {
             console.error('Register error:', err);
-            alert('❌ ' + (err.message || 'Gagal mendaftar. Coba lagi atau hubungi WA.'));
+            showErrorModal(
+                err.message || 'Gagal mendaftar. Coba lagi atau hubungi WhatsApp.',
+                'Pendaftaran Tidak Bisa Dilanjutkan'
+            );
         } finally {
             btn.disabled = false;
             btn.innerHTML = orig;
@@ -2440,16 +2466,18 @@
     }
 
     function openQRISModal(regData) {
-        const amountStr = 'Rp ' + regData.amount.toLocaleString('id-ID');
-        const baseStr = 'Rp ' + regData.basePrice.toLocaleString('id-ID');
-        const codeStr = String(regData.uniqueCode).padStart(3, '0');
+        const amount = Number(regData.amount) ||
+            (regData.plan === 'basic' ? 100000 : 75000);
+        const codeStr = regData.uniqueCode != null
+            ? String(regData.uniqueCode).padStart(3, '0')
+            : '—';
+
+        const amountStr = 'Rp ' + amount.toLocaleString('id-ID');
 
         document.getElementById('qris-amount-display').innerText = amountStr;
         document.getElementById('qris-instruction-amount').innerText = amountStr;
-
-        const planLabel = (regData.plan === 'pro' ? 'Paket Pro' : 'Paket Basic') +
-            ' &middot; ' + baseStr + ' + Kode <b>' + codeStr + '</b>';
-        document.getElementById('qris-plan-label').innerHTML = planLabel;
+        document.getElementById('qris-plan-label').innerHTML =
+            'Termasuk kode unik <b>' + codeStr + '</b>';
 
         const imageBox = document.getElementById('qris-image-box');
         imageBox.innerHTML = '<img src="' + QRIS_CONFIG.imageUrl + '" alt="QRIS Code" id="qris-img">';
@@ -2534,14 +2562,35 @@
 
         } catch (err) {
             console.error('Confirm error:', err);
-            alert('❌ ' + (err.message || 'Gagal mengirim konfirmasi. Coba lagi atau hubungi WA.'));
+            showErrorModal(
+                err.message || 'Gagal mengirim konfirmasi. Coba lagi atau hubungi WhatsApp.',
+                'Konfirmasi Gagal'
+            );
             btn.disabled = false;
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
         }
     }
 
+    /* ============================================================
+       SUCCESS MODAL
+       ============================================================ */
     function closeSuccessModal() {
         document.getElementById('success-modal').classList.remove('show');
+        unlockBodyScroll();
+    }
+
+    /* ============================================================
+       ERROR MODAL
+       ============================================================ */
+    function showErrorModal(message, title) {
+        document.getElementById('error-modal-title').innerText = title || 'Perhatian';
+        document.getElementById('error-modal-text').innerText = message || 'Terjadi kesalahan.';
+        document.getElementById('error-modal').classList.add('show');
+        lockBodyScroll();
+    }
+
+    function closeErrorModal() {
+        document.getElementById('error-modal').classList.remove('show');
         unlockBodyScroll();
     }
 
