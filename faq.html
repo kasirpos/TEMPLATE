@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FAQ - POS Kasir</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html,body{max-width:100vw;overflow-x:hidden;font-size:16px}
+        body{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:#fff;color:#0a0a0a;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+        :root{--ink:#0a0a0a;--ink-soft:#525252;--ink-mute:#a3a3a3;--line:#e5e5e5;--line-soft:#f0f0f0;--paper-soft:#fafafa;--orange:#ff5722;--orange-dark:#e64a19;--orange-soft:#fff3ef;--green:#16a34a;--gold:#ffb800}
+        .container{width:100%;max-width:820px;margin:0 auto;padding:0 20px}
+        .container-wide{width:100%;max-width:1180px;margin:0 auto;padding:0 20px}
+
+        nav{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:1px solid var(--line);z-index:100}
+        .nav-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .nav-brand{display:flex;align-items:center;gap:8px;font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.6px;text-decoration:none;flex-shrink:0}
+        .nav-brand svg{width:28px;height:28px;fill:var(--orange);flex-shrink:0}
+        .nav-links{display:flex;align-items:center;gap:4px}
+        .nav-links a{color:var(--ink-soft);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;transition:all .15s;white-space:nowrap}
+        .nav-links a:hover{color:var(--ink);background:var(--paper-soft)}
+        .nav-links a.nav-btn-primary{background:var(--orange);color:#fff;font-weight:600;padding:9px 18px}
+        .nav-links a.nav-btn-primary:hover{background:var(--orange-dark)}
+
+        .page-hero{padding:60px 0 40px;background:linear-gradient(180deg,#fff 0%,var(--paper-soft) 100%);border-bottom:1px solid var(--line)}
+        .page-kicker{font-size:11px;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;display:inline-flex;align-items:center;gap:8px}
+        .page-kicker::before{content:'';width:24px;height:2px;background:var(--orange);flex-shrink:0}
+        .page-hero h1{font-family:'Fraunces',serif;font-size:44px;font-weight:500;letter-spacing:-1.5px;line-height:1.1;color:var(--ink);margin-bottom:14px}
+        .page-hero p{font-size:15px;color:var(--ink-soft);line-height:1.6;max-width:600px}
+
+        main{flex:1;padding:56px 0 80px}
+
+        .faq-group{margin-bottom:40px}
+        .faq-group:last-child{margin-bottom:0}
+        .faq-group-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.5px;color:var(--ink);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+        .faq-group-title i{font-size:20px;color:var(--orange)}
+
+        .faq-item{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:all .2s}
+        .faq-item[open]{border-color:var(--orange);background:linear-gradient(180deg,#fff 0%,#fff8f6 100%);box-shadow:0 8px 24px rgba(255,87,34,.08)}
+        .faq-item summary{padding:16px 20px;cursor:pointer;font-size:15px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;line-height:1.4}
+        .faq-item summary::-webkit-details-marker{display:none}
+        .faq-item summary::after{content:'\ea4c';font-family:'remixicon';font-size:18px;color:var(--ink-mute);transition:transform .2s;flex-shrink:0;line-height:1}
+        .faq-item[open] summary::after{transform:rotate(180deg);color:var(--orange)}
+        .faq-item[open] summary{color:var(--orange)}
+        .faq-answer{padding:0 20px 18px;font-size:14px;color:var(--ink-soft);line-height:1.75}
+        .faq-answer p{margin-bottom:10px}
+        .faq-answer p:last-child{margin-bottom:0}
+        .faq-answer a{color:var(--orange);text-decoration:none;font-weight:600}
+        .faq-answer a:hover{text-decoration:underline}
+        .faq-answer code{background:var(--paper-soft);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px;color:var(--ink);border:1px solid var(--line-soft)}
+
+        .cta-box{margin-top:48px;background:linear-gradient(135deg,var(--orange) 0%,#ff7a45 100%);border-radius:20px;padding:32px 28px;text-align:center;color:#fff}
+        .cta-box h3{font-family:'Fraunces',serif;font-size:24px;font-weight:600;letter-spacing:-.5px;margin-bottom:8px;color:#fff}
+        .cta-box p{font-size:14px;color:rgba(255,255,255,.9);margin-bottom:20px;line-height:1.6}
+        .cta-box a{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--orange);padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;transition:transform .2s;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+        .cta-box a:hover{transform:translateY(-2px)}
+
+        footer{background:var(--ink);color:#fff;padding:56px 0 28px;overflow-x:hidden}
+        .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:24px;align-items:start}
+        .footer-brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:20px;font-weight:600;letter-spacing:-.5px;margin-bottom:12px;text-decoration:none;color:#fff}
+        .footer-brand svg{width:24px;height:24px;fill:var(--orange);flex-shrink:0}
+        .footer-brand-block p{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6}
+        .footer-links-group h5{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.5);margin-bottom:14px;font-weight:700}
+        .footer-links-group a{display:block;color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;padding:4px 0;transition:color .2s}
+        .footer-links-group a:hover{color:#fff}
+        .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:12px;color:rgba(255,255,255,.4)}
+        .footer-social{display:flex;gap:10px}
+        .footer-social a{width:34px;height:34px;background:rgba(255,255,255,.08);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;transition:all .2s}
+        .footer-social a:hover{background:var(--orange);transform:translateY(-2px)}
+        .footer-social i{font-size:15px}
+
+        @media (max-width:968px){
+            .footer-top{grid-template-columns:1fr 1fr;gap:32px 24px}
+            .footer-brand-block{grid-column:span 2}
+        }
+        @media (max-width:640px){
+            .nav-inner{padding:12px 16px}
+            .nav-links a:not(.nav-btn-primary){display:none}
+            .nav-brand{font-size:17px}
+            .nav-brand svg{width:24px;height:24px}
+            .nav-links a.nav-btn-primary{font-size:13px;padding:8px 14px}
+            .page-hero{padding:40px 0 30px}
+            .page-hero h1{font-size:32px;letter-spacing:-1px}
+            .page-hero p{font-size:14px}
+            main{padding:40px 0 60px}
+            .faq-group-title{font-size:18px}
+            .faq-item summary{padding:14px 16px;font-size:14px}
+            .faq-answer{padding:0 16px 16px;font-size:13.5px}
+            .cta-box{padding:26px 22px}
+            .cta-box h3{font-size:20px}
+            footer{padding:40px 0 24px}
+            .footer-top{grid-template-columns:1fr 1fr;gap:24px 20px;padding-bottom:24px}
+            .footer-brand-block{grid-column:span 2}
+            .footer-bottom{flex-direction:column;text-align:center;gap:12px}
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-brand">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+                <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+            </svg>
+            POS Kasir
+        </a>
+        <div class="nav-links">
+            <a href="index.html#features">Fitur</a>
+            <a href="index.html#pricing">Harga</a>
+            <a href="index.html#register">Daftar</a>
+            <a href="index.html#login">Masuk</a>
+            <a href="index.html#register" class="nav-btn-primary">Coba Gratis</a>
+        </div>
+    </div>
+</nav>
+
+<section class="page-hero">
+    <div class="container">
+        <div class="page-kicker">Bantuan</div>
+        <h1>Pertanyaan Umum</h1>
+        <p>Jawaban cepat untuk pertanyaan yang paling sering ditanyakan.</p>
+    </div>
+</section>
+
+<main>
+    <div class="container">
+
+        <div class="faq-group">
+            <div class="faq-group-title"><i class="ri-information-line"></i>Umum</div>
+
+            <details class="faq-item">
+                <summary>Apa itu POS Kasir?</summary>
+                <div class="faq-answer">
+                    <p>POS Kasir adalah aplikasi Point of Sale (kasir) berbasis web yang dirancang untuk cafe, restoran, dan toko retail. Semua data transaksi tersimpan otomatis ke Google Spreadsheet pribadi Anda, sehingga ringan, aman, dan bisa diakses dari mana saja.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Apakah perlu install aplikasi?</summary>
+                <div class="faq-answer">
+                    <p>Tidak perlu install apa pun. Cukup buka browser (Chrome, Safari, Edge) dan login ke akun Anda. Aplikasi akan segera berjalan tanpa unduhan.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Apa bedanya paket Basic dan Pro?</summary>
+                <div class="faq-answer">
+                    <p>Paket <strong>Basic</strong> cocok untuk toko kecil dengan 1 cabang. Paket <strong>Pro</strong> mendukung 2 cabang, dilengkapi Manajemen HPP &amp; Margin, Laporan Laba Rugi, Kupon Diskon, Diskon Per Produk, dan Priority Support.</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="faq-group">
+            <div class="faq-group-title"><i class="ri-user-line"></i>Akun &amp; Login</div>
+
+            <details class="faq-item">
+                <summary>Bagaimana cara mendaftar akun?</summary>
+                <div class="faq-answer">
+                    <p>Klik tombol <strong>Daftar</strong> di halaman utama, isi data toko Anda, pilih paket, lalu bayar via QRIS. Akun akan diaktifkan oleh admin dalam 5–15 menit setelah pembayaran diverifikasi.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Lupa PIN akses saya, bagaimana?</summary>
+                <div class="faq-answer">
+                    <p>Hubungi tim support melalui <a href="support.html">halaman Hubungi Support</a> dengan menyertakan email toko Anda. Kami akan membantu reset PIN setelah verifikasi kepemilikan akun.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Bisakah satu email mendaftar lebih dari satu toko?</summary>
+                <div class="faq-answer">
+                    <p>Satu email hanya untuk satu akun toko. Jika ingin mengelola beberapa cabang, upgrade ke paket Pro atau daftar ulang dengan email berbeda.</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="faq-group">
+            <div class="faq-group-title"><i class="ri-secure-payment-line"></i>Pembayaran</div>
+
+            <details class="faq-item">
+                <summary>Metode pembayaran apa saja yang diterima?</summary>
+                <div class="faq-answer">
+                    <p>Saat ini kami menerima pembayaran melalui <strong>QRIS</strong> yang dapat dipindai dari semua m-banking dan e-wallet (GoPay, OVO, DANA, ShopeePay, LinkAja, dan sejenisnya).</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Kenapa nominal pembayaran saya berbeda (ada angka unik)?</summary>
+                <div class="faq-answer">
+                    <p>Kami menggunakan <strong>kode unik 3 digit</strong> (misal 75.427) untuk memverifikasi pembayaran Anda secara otomatis. Sistem hanya dapat mencocokkan pembayaran dengan nominal yang tepat. Mohon transfer sesuai nominal yang tertera tanpa dibulatkan.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Berapa lama akun diaktifkan setelah bayar?</summary>
+                <div class="faq-answer">
+                    <p>Setelah Anda klik <strong>Sudah Bayar</strong>, admin akan memverifikasi pembayaran Anda. Rata-rata proses aktivasi 5–15 menit pada jam kerja (09:00–21:00 WIB).</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Apakah ada garansi uang kembali?</summary>
+                <div class="faq-answer">
+                    <p>Ya. Kami memberikan <strong>garansi 7 hari uang kembali</strong> jika Anda tidak puas dengan Layanan. Hubungi support untuk proses pengembalian dana.</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="faq-group">
+            <div class="faq-group-title"><i class="ri-star-line"></i>Fitur</div>
+
+            <details class="faq-item">
+                <summary>Apakah bisa cetak struk ke printer thermal?</summary>
+                <div class="faq-answer">
+                    <p>Bisa. Fitur cetak struk mendukung printer thermal 58mm standar kasir. Cukup hubungkan printer ke perangkat Anda, dan klik tombol cetak di aplikasi.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Apakah data saya aman?</summary>
+                <div class="faq-answer">
+                    <p>Sangat aman. Data Anda tersimpan di Google Spreadsheet pribadi yang hanya bisa diakses oleh akun Google Anda dan sistem POS Kasir. Setiap toko memiliki spreadsheet terpisah (isolasi data). Semua transmisi dienkripsi dengan HTTPS.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Apakah bisa digunakan di HP?</summary>
+                <div class="faq-answer">
+                    <p>Ya, POS Kasir responsif dan dioptimalkan untuk HP, tablet, dan desktop. Anda bisa mengelola toko dari mana saja tanpa perlu laptop.</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="faq-group">
+            <div class="faq-group-title"><i class="ri-tools-line"></i>Teknis</div>
+
+            <details class="faq-item">
+                <summary>Browser apa yang direkomendasikan?</summary>
+                <div class="faq-answer">
+                    <p>Kami merekomendasikan <strong>Google Chrome</strong> versi terbaru, atau <strong>Safari</strong> (iOS/macOS) dan <strong>Edge</strong> (Windows). Pastikan browser Anda selalu diperbarui.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Saya tidak bisa login, apa yang salah?</summary>
+                <div class="faq-answer">
+                    <p>Beberapa hal yang dapat dicek:</p>
+                    <p>1. Pastikan email dan PIN yang dimasukkan benar (perhatikan spasi dan huruf kapital).<br>
+                       2. Cek apakah masa aktif langganan Anda masih berlaku.<br>
+                       3. Jika masih bermasalah, hubungi <a href="support.html">Support</a>.</p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary>Bagaimana jika koneksi internet terputus?</summary>
+                <div class="faq-answer">
+                    <p>POS Kasir memerlukan koneksi internet untuk sinkronisasi data. Jika koneksi terputus, transaksi tidak akan tersimpan. Pastikan jaringan Anda stabil sebelum memproses transaksi penting.</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="cta-box">
+            <h3>Masih ada pertanyaan?</h3>
+            <p>Tim support kami siap membantu Anda setiap hari, 09:00–21:00 WIB.</p>
+            <a href="support.html">
+                <i class="ri-customer-service-2-line"></i>
+                Hubungi Support
+            </a>
+        </div>
+
+    </div>
+</main>
+
+<footer>
+    <div class="container-wide">
+        <div class="footer-top">
+            <div class="footer-brand-block">
+                <a href="index.html" class="footer-brand">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+                        <path d="M94.7 136.3C101.6 112.4 123.5 96 148.4 96L492.4 96C517.3 96 539.2 112.4 546.2 136.3L569.6 216.5C582.4 260.2 549.5 304 504 304C477.7 304 454.6 289.1 443.2 266.9C431.6 288.8 408.6 304 381.8 304C355.2 304 332.1 289 320.5 267C308.9 289 285.8 304 259.2 304C232.4 304 209.4 288.9 197.8 266.9C186.4 289 163.3 304 137 304C91.4 304 58.6 260.3 71.4 216.5L94.7 136.3zM160.4 416L480.4 416L480.4 349.6C488 351.2 495.9 352 503.9 352C518.2 352 531.9 349.4 544.4 344.8L544.4 496C544.4 522.5 522.9 544 496.4 544L144.4 544C117.9 544 96.4 522.5 96.4 496L96.4 344.8C108.9 349.4 122.5 352 136.9 352C145 352 152.8 351.2 160.4 349.6L160.4 416z"/>
+                    </svg>
+                    POS Kasir
+                </a>
+                <p>Platform Point of Sale modern untuk cafe, restoran, dan toko. Terintegrasi dengan Google Spreadsheet &mdash; cepat, ringan, dan aman.</p>
+            </div>
+            <div class="footer-links-group">
+                <h5>Produk</h5>
+                <a href="index.html#features">Fitur</a>
+                <a href="index.html#pricing">Harga</a>
+                <a href="index.html#register">Daftar</a>
+                <a href="index.html#login">Login</a>
+            </div>
+            <div class="footer-links-group">
+                <h5>Bantuan</h5>
+                <a href="support.html">Hubungi Support</a>
+                <a href="faq.html">FAQ</a>
+                <a href="faq.html">Dokumentasi</a>
+            </div>
+            <div class="footer-links-group">
+                <h5>Legal</h5>
+                <a href="syarat.html">Syarat &amp; Ketentuan</a>
+                <a href="privasi.html">Kebijakan Privasi</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>&copy; 2026 KasirPedia.my.id | POS Kasir &middot; v1.2.1</div>
+            <div class="footer-social">
+                <a href="#" title="WhatsApp" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
+                <a href="#" title="Instagram" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+                <a href="#" title="Email" aria-label="Email"><i class="ri-mail-line"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
