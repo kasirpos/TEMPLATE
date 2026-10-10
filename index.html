@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
-    <!-- CONFIG — edit config.js untuk ubah harga/fitur/teks -->
+    <!-- CONFIG — edit config.js untuk ubah harga/fitur/teks/toko -->
     <script src="config.js"></script>
 
     <script>
@@ -296,6 +296,15 @@
             font-family: 'Fraunces', serif;
             font-size: 18px; font-weight: 500;
             color: var(--ink-mute); letter-spacing: -0.5px;
+        }
+        .logo-strip-more {
+            text-align: center;
+            font-size: 11px;
+            color: var(--ink-mute);
+            margin-top: 16px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            font-style: italic;
         }
 
         /* ========== FEATURES ========== */
@@ -1387,6 +1396,7 @@
             .logo-strip-inner { gap: 20px; }
             .logo-strip-items { gap: 20px; }
             .logo-strip-items span { font-size: 15px; }
+            .logo-strip-more { font-size: 10px; margin-top: 12px; }
 
             .features { padding: 56px 0; }
             .section-head { margin-bottom: 32px; }
@@ -1488,7 +1498,7 @@
             <div class="hero-text">
                 <div class="hero-badge fade-in" id="promo-hero-badge">
                     <span class="hero-badge-dot"></span>
-                    <span id="promo-hero-text">Promo Bulan Ini &middot; Pro hanya Rp 75.000</span>
+                    <span id="promo-hero-text">Tanpa Install &middot; Setup 5 Menit &middot; Support 24/7</span>
                 </div>
                 <h1 class="fade-in delay-1">
                     Bisnis rapi.<br>
@@ -1561,14 +1571,17 @@
 <section class="logo-strip">
     <div class="container">
         <div class="logo-strip-inner">
-            <span class="logo-strip-label">Dipercaya oleh</span>
-            <div class="logo-strip-items">
-                <span>Kala Space</span>
+            <span class="logo-strip-label" id="logo-strip-label">Dipercaya oleh</span>
+            <div class="logo-strip-items" id="logo-strip-items">
+                <span>Kala Space Cafe</span>
                 <span>Kopi Senja</span>
                 <span>Warung Rti</span>
                 <span>Bakery Co.</span>
+                <span>Cafe Break</span>
+                <span>Waroeng Iga Bakar &amp; Steak</span>
             </div>
         </div>
+        <p class="logo-strip-more" id="logo-strip-more">+50 toko lainnya di seluruh Indonesia</p>
     </div>
 </section>
 
@@ -1604,7 +1617,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
             </div>
             <div class="countdown-text">
-                <strong id="promo-banner-title">Promo Bulan Ini &mdash; <em>Pro dari Rp 150.000 jadi Rp 75.000</em></strong>
+                <strong id="promo-banner-title">Promo Spesial &mdash; <em>Pro dari Rp 150.000 jadi Rp 75.000</em></strong>
                 <span id="promo-banner-subtitle">Hemat Rp 75.000/bulan &middot; berlaku untuk 50 pembeli pertama</span>
             </div>
         </div>
@@ -1979,7 +1992,7 @@
 
     const QRIS_CONFIG = {
         imageUrl: CFG.QRIS?.imageUrl || '',
-        merchantName: CFG.QRIS?.merchantName || 'kasirpedia.my.id',
+        merchantName: CFG.QRIS?.merchantName || 'Muhasa.id',
         basePrices: {
             'basic': CFG.PLANS?.basic?.price || 100000,
             'pro':   CFG.PLANS?.pro?.price   || 75000
@@ -2473,6 +2486,29 @@
             setText('promo-hero-text', promo.heroBadge);
             setHTML('promo-banner-title', promo.bannerTitle);
             setText('promo-banner-subtitle', promo.bannerSubtitle);
+        }
+
+        /* ---- Logo Strip ---- */
+        const LS = C.LOGO_STRIP;
+        if (LS) {
+            setText('logo-strip-label', LS.label);
+
+            const itemsEl = document.getElementById('logo-strip-items');
+            if (itemsEl && Array.isArray(LS.stores)) {
+                itemsEl.innerHTML = LS.stores.map(function (s) {
+                    return '<span>' + esc(s) + '</span>';
+                }).join('');
+            }
+
+            const moreEl = document.getElementById('logo-strip-more');
+            if (moreEl) {
+                if (LS.moreText) {
+                    moreEl.textContent = LS.moreText;
+                    moreEl.style.display = '';
+                } else {
+                    moreEl.style.display = 'none';
+                }
+            }
         }
 
         /* ---- Basic Card Nominal ---- */
