@@ -1003,6 +1003,12 @@
             margin-top: 3px;
             font-weight: 600;
         }
+        .qris-amount-plan b {
+            color: #fff;
+            font-weight: 800;
+            font-family: 'Fraunces', serif;
+            letter-spacing: -0.5px;
+        }
 
         .qris-image-box {
             background: transparent;
@@ -1015,7 +1021,7 @@
             min-height: 0;
             overflow: visible;
         }
-        
+
         .qris-image-box img {
             width: 100%;
             max-width: 190px;
@@ -1026,7 +1032,7 @@
             border-radius: 12px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
-        
+
         .qris-image-box .qris-loading {
             font-size: 12px;
             color: var(--ink-mute);
@@ -1101,6 +1107,20 @@
             color: var(--orange);
             display: inline;
             font-size: inherit;
+        }
+        .qris-instructions .qris-warning {
+            margin-top: 6px;
+            padding: 7px 9px;
+            background: #fff7ed;
+            border-radius: 7px;
+            border-left: 3px solid #ff5722;
+            font-size: 10.5px;
+            line-height: 1.5;
+            color: #7c2d12;
+        }
+        .qris-instructions .qris-warning strong {
+            color: #dc2626;
+            display: inline;
         }
 
         .qris-actions {
@@ -1838,7 +1858,7 @@
                 <div class="reg-note">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
                     <div>
-                        <strong>Info:</strong> Setelah daftar, Anda akan diarahkan ke <b>pembayaran QRIS</b>. Akun akan disetup setelah pembayaran diverifikasi (5-15 menit, jam kerja 09:00&ndash;21:00).
+                        <strong>Info:</strong> Setelah daftar, Anda akan diarahkan ke <b>pembayaran QRIS</b> dengan nominal unik untuk verifikasi otomatis. Akun disetup setelah pembayaran diverifikasi (5-15 menit, jam kerja 09:00&ndash;21:00).
                     </div>
                 </div>
 
@@ -1980,9 +2000,11 @@
         </div>
 
         <div class="qris-amount-box">
-            <div class="qris-amount-label">Nominal Pembayaran</div>
-            <div class="qris-amount-value" id="qris-amount-display">Rp 75.000</div>
-            <div class="qris-amount-plan" id="qris-plan-label">Paket Pro &middot; Bulan Pertama</div>
+            <div class="qris-amount-label">Nominal Pembayaran (TEPAT)</div>
+            <div class="qris-amount-value" id="qris-amount-display">Rp 75.427</div>
+            <div class="qris-amount-plan" id="qris-plan-label">
+                Paket Pro &middot; Kode Unik <b>427</b>
+            </div>
         </div>
 
         <div class="qris-image-box" id="qris-image-box">
@@ -2007,9 +2029,12 @@
             <ol>
                 <li>Buka m-banking / e-wallet</li>
                 <li>Pilih <strong>Scan QRIS</strong></li>
-                <li>Masukkan nominal <strong id="qris-instruction-amount">Rp 75.000</strong></li>
+                <li>Masukkan nominal <strong id="qris-instruction-amount">Rp 75.427</strong></li>
                 <li>Konfirmasi &amp; simpan bukti</li>
             </ol>
+            <div class="qris-warning">
+                <strong>⚠️ WAJIB</strong> transfer <b>tepat</b> sesuai nominal di atas. Beda 1 rupiah = verifikasi gagal.
+            </div>
         </div>
 
         <div class="qris-actions">
@@ -2037,6 +2062,7 @@
             <div><span>Nama Toko:</span> <strong id="modal-store">-</strong></div>
             <div><span>Email Login:</span> <strong id="modal-email">-</strong></div>
             <div><span>Paket:</span> <strong id="modal-plan">-</strong></div>
+            <div><span>Nominal Transfer:</span> <strong id="modal-amount">-</strong></div>
             <div><span>Status:</span> <strong style="color: var(--orange);">Menunggu Verifikasi</strong></div>
         </div>
 
@@ -2093,7 +2119,7 @@
         </div>
 
         <div class="footer-bottom">
-            <div>&copy; 2026 POS Kasir Multi-Buyer Edition &middot; v1.1.5</div>
+            <div>&copy; 2026 POS Kasir Multi-Buyer Edition &middot; v1.2.0</div>
             <div class="footer-social">
                 <a href="#" title="WhatsApp" aria-label="WhatsApp"><i class="ri-whatsapp-line"></i></a>
                 <a href="#" title="Instagram" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
@@ -2115,7 +2141,7 @@
     const QRIS_CONFIG = {
         imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791515733/IMG_20261009_101239.png',
         merchantName: 'Muhasa.id',
-        prices: {
+        basePrices: {
             'basic': 100000,
             'pro': 75000
         }
@@ -2311,6 +2337,7 @@
 
     /* ============================================================
        REGISTER — HANDLE FORM SUBMIT
+       Kirim ke server DULU untuk dapat kode unik, baru buka QRIS modal
        ============================================================ */
     async function handleRegister(e) {
         e.preventDefault();
@@ -2322,8 +2349,8 @@
         const type = document.getElementById('reg-type').value;
         const notes = document.getElementById('reg-notes').value.trim();
         const terms = document.getElementById('reg-terms').checked;
-        const planRadio = document.querySelector('input[name="plan"]:checked');
-        const plan = planRadio ? planRadio.value : 'pro';
+        const planEl = document.querySelector('input[name="plan"]:checked');
+        const plan = planEl ? planEl.value : 'pro';
 
         if (!store || !owner || !phone || !email || !type) {
             alert('Mohon lengkapi semua field wajib (*)');
@@ -2334,18 +2361,55 @@
             return;
         }
 
-        pendingRegistration = {
-            storeName: store,
-            ownerName: owner,
-            phone: phone,
-            email: email,
-            businessType: type,
-            plan: plan,
-            notes: notes,
-            amount: QRIS_CONFIG.prices[plan] || 75000
-        };
+        const btn = document.getElementById('btn-register');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 0.8s linear infinite; display: inline-block;"></i> Menyiapkan kode unik...';
 
-        openQRISModal(pendingRegistration);
+        try {
+            const res = await fetch(API_BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'register',
+                    data: {
+                        storeName: store,
+                        ownerName: owner,
+                        phone: phone,
+                        email: email,
+                        businessType: type,
+                        plan: plan,
+                        notes: notes
+                    }
+                })
+            });
+
+            const result = await res.json();
+            if (!result.success) throw new Error(result.error || 'Gagal membuat reservasi');
+
+            pendingRegistration = {
+                storeName: store,
+                ownerName: owner,
+                phone: phone,
+                email: email,
+                businessType: type,
+                plan: plan,
+                notes: notes,
+                regId: result.data.regId,
+                amount: result.data.amount,
+                basePrice: result.data.basePrice,
+                uniqueCode: result.data.uniqueCode
+            };
+
+            openQRISModal(pendingRegistration);
+
+        } catch (err) {
+            console.error('Register error:', err);
+            alert('❌ ' + (err.message || 'Gagal mendaftar. Coba lagi atau hubungi WA.'));
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
     }
 
     /* ============================================================
@@ -2377,32 +2441,31 @@
 
     function openQRISModal(regData) {
         const amountStr = 'Rp ' + regData.amount.toLocaleString('id-ID');
+        const baseStr = 'Rp ' + regData.basePrice.toLocaleString('id-ID');
+        const codeStr = String(regData.uniqueCode).padStart(3, '0');
 
         document.getElementById('qris-amount-display').innerText = amountStr;
         document.getElementById('qris-instruction-amount').innerText = amountStr;
 
-        const planLabel = regData.plan === 'pro'
-            ? 'Paket Pro · Bulan Pertama'
-            : 'Paket Basic · Bulan Pertama';
-        document.getElementById('qris-plan-label').innerText = planLabel;
+        const planLabel = (regData.plan === 'pro' ? 'Paket Pro' : 'Paket Basic') +
+            ' &middot; ' + baseStr + ' + Kode <b>' + codeStr + '</b>';
+        document.getElementById('qris-plan-label').innerHTML = planLabel;
 
         const imageBox = document.getElementById('qris-image-box');
-        imageBox.innerHTML = `<img src="${QRIS_CONFIG.imageUrl}" alt="QRIS Code" id="qris-img">`;
+        imageBox.innerHTML = '<img src="' + QRIS_CONFIG.imageUrl + '" alt="QRIS Code" id="qris-img">';
 
         const img = document.getElementById('qris-img');
         if (img) {
-            img.onerror = function() {
-                imageBox.innerHTML = `
-                    <div class="qris-error">
-                        <strong>Gagal memuat QR Code</strong><br>
-                        Hubungi admin via WhatsApp untuk melanjutkan.<br><br>
-                        <a href="https://wa.me/6288216637292?text=Halo%20admin,%20saya%20ingin%20daftar"
-                           target="_blank"
-                           style="color: var(--orange); font-weight: 700; text-decoration: none;">
-                            Hubungi WhatsApp &rarr;
-                        </a>
-                    </div>
-                `;
+            img.onerror = function () {
+                imageBox.innerHTML =
+                    '<div class="qris-error">' +
+                    '<strong>Gagal memuat QR Code</strong><br>' +
+                    'Hubungi admin via WhatsApp untuk melanjutkan.<br><br>' +
+                    '<a href="https://wa.me/6288216637292?text=Halo%20admin,%20saya%20ingin%20daftar" ' +
+                    'target="_blank" ' +
+                    'style="color: var(--orange); font-weight: 700; text-decoration: none;">' +
+                    'Hubungi WhatsApp &rarr;</a>' +
+                    '</div>';
             };
         }
 
@@ -2423,7 +2486,7 @@
     }
 
     /* ============================================================
-       CONFIRM QRIS PAYMENT
+       CONFIRM QRIS PAYMENT — pakai action confirmPayment
        ============================================================ */
     async function confirmQRISPayment() {
         if (!pendingRegistration) return;
@@ -2437,19 +2500,14 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({
-                    action: 'register',
-                    data: {
-                        ...pendingRegistration,
-                        paymentStatus: 'paid_pending_verification',
-                        paidAmount: pendingRegistration.amount,
-                        userClaimedAmount: pendingRegistration.amount,
-                        paidAt: new Date().toISOString()
-                    }
+                    action: 'confirmPayment',
+                    email: pendingRegistration.email,
+                    amount: pendingRegistration.amount
                 })
             });
 
             const result = await response.json();
-            if (!result.success) throw new Error(result.error || 'Pendaftaran gagal');
+            if (!result.success) throw new Error(result.error || 'Konfirmasi gagal');
 
             document.getElementById('qris-modal').classList.remove('show');
             unlockBodyScroll();
@@ -2457,9 +2515,15 @@
             document.getElementById('modal-name').innerText = pendingRegistration.ownerName;
             document.getElementById('modal-store').innerText = pendingRegistration.storeName;
             document.getElementById('modal-email').innerText = pendingRegistration.email;
-            document.getElementById('modal-plan').innerText = pendingRegistration.plan === 'pro'
-                ? 'Pro (Rp 75.000/bln)'
-                : 'Basic (Rp 100.000/bln)';
+
+            const planLabel = (pendingRegistration.plan === 'pro' ? 'Pro' : 'Basic') +
+                ' (Kode ' + String(pendingRegistration.uniqueCode).padStart(3, '0') + ')';
+            document.getElementById('modal-plan').innerText = planLabel;
+
+            const amtEl = document.getElementById('modal-amount');
+            if (amtEl) {
+                amtEl.innerText = 'Rp ' + pendingRegistration.amount.toLocaleString('id-ID');
+            }
 
             document.getElementById('success-modal').classList.add('show');
             lockBodyScroll();
@@ -2469,8 +2533,8 @@
             pendingRegistration = null;
 
         } catch (err) {
-            console.error('Register error:', err);
-            alert('❌ ' + (err.message || 'Gagal mengirim data. Coba lagi atau hubungi WA.'));
+            console.error('Confirm error:', err);
+            alert('❌ ' + (err.message || 'Gagal mengirim konfirmasi. Coba lagi atau hubungi WA.'));
             btn.disabled = false;
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Sudah Bayar';
         }
@@ -2485,7 +2549,7 @@
        SMOOTH SCROLL
        ============================================================ */
     document.querySelectorAll('a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
                 e.preventDefault();
