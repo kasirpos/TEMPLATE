@@ -27,7 +27,7 @@ window.POS_CONFIG = {
        ============================================================ */
     QRIS: {
         imageUrl: 'https://res.cloudinary.com/n5omj6b6/image/upload/v1791515733/IMG_20261009_101239.png',
-        merchantName: 'Muhasa.id'
+        merchantName: 'kasirpedia.my.id'
     },
 
 
