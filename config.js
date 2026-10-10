@@ -36,10 +36,6 @@ window.POS_CONFIG = {
        ============================================================ */
     PROMO: {
         enabled: true,
-
-        // Hero badge di bagian atas
-        heroBadge: 'Tanpa Install · Setup 5 Menit · Support 24/7',
-
         // Countdown banner di section pricing
         bannerTitle: 'Promo Spesial — <em>Pro dari Rp 150.000 jadi Rp 75.000</em>',
         bannerSubtitle: 'Hemat Rp 75.000/bulan · berlaku untuk 50 pembeli pertama'
