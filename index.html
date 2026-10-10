@@ -145,26 +145,6 @@
             display: grid; grid-template-columns: 1.05fr 0.95fr;
             gap: 60px; align-items: center;
         }
-        .hero-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: linear-gradient(135deg, #fff3ef 0%, #fff8f6 100%);
-            border: 1px solid rgba(255, 87, 34, 0.2);
-            color: var(--orange);
-            padding: 6px 14px; border-radius: 99px;
-            font-size: 11px; font-weight: 700;
-            margin-bottom: 20px;
-            max-width: 100%;
-        }
-        .hero-badge-dot {
-            width: 6px; height: 6px;
-            background: var(--orange); border-radius: 50%;
-            animation: pulse 2s infinite;
-            flex-shrink: 0;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.4); }
-        }
         .hero h1 {
             font-family: 'Fraunces', serif;
             font-size: 64px; font-weight: 500;
@@ -248,6 +228,10 @@
             width: 6px; height: 6px;
             background: var(--green); border-radius: 50%;
             animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.4); }
         }
         .visual-stat-row {
             display: flex; justify-content: space-between;
@@ -1430,7 +1414,6 @@
             .hero { padding: 40px 0; }
             .hero h1 { font-size: 34px; letter-spacing: -1.2px; }
             .hero .lede { font-size: 14px; }
-            .hero-badge { font-size: 10px; padding: 5px 12px; }
             .hero-actions { flex-direction: column; width: 100%; }
             .hero-actions .btn { width: 100%; }
             .hero-stats { gap: 20px; padding-top: 20px; margin-top: 28px; }
@@ -1561,18 +1544,14 @@
     <div class="container">
         <div class="hero-inner">
             <div class="hero-text">
-                <div class="hero-badge fade-in" id="promo-hero-badge">
-                    <span class="hero-badge-dot"></span>
-                    <span id="promo-hero-text">Tanpa Install &middot; Setup 5 Menit &middot; Support 24/7</span>
-                </div>
-                <h1 class="fade-in delay-1">
+                <h1 class="fade-in">
                     Bisnis rapi.<br>
                     <em>Hidup lebih tenang.</em>
                 </h1>
-                <p class="lede fade-in delay-2">
+                <p class="lede fade-in delay-1">
                     Platform Point of Sale modern untuk cafe, restoran, dan toko. Kelola transaksi, laporan, dan tim &mdash; semua dalam satu aplikasi yang ringan &amp; cepat.
                 </p>
-                <div class="hero-actions fade-in delay-3">
+                <div class="hero-actions fade-in delay-2">
                     <a href="#register" class="btn btn-orange">
                         Daftar Sekarang <i class="ri-arrow-right-line"></i>
                     </a>
@@ -1580,7 +1559,7 @@
                         Sudah punya akun?
                     </a>
                 </div>
-                <div class="hero-stats fade-in delay-4">
+                <div class="hero-stats fade-in delay-3">
                     <div class="hero-stat">
                         <div class="stat-value">50+</div>
                         <div class="stat-label">Toko Aktif</div>
@@ -1596,7 +1575,7 @@
                 </div>
             </div>
 
-            <div class="hero-visual fade-in delay-2">
+            <div class="hero-visual fade-in delay-1">
                 <div class="visual-frame">
                     <div class="visual-card-inner">
                         <div class="visual-header">
@@ -1659,7 +1638,7 @@
                 Semua yang dibutuhkan,<br>
                 <em>dalam satu aplikasi.</em>
             </h2>
-            <p>Tidak perlu belajar rumit. Tidak perlu install. Cukup buka browser dan mulai berjualan.</p>
+            <p>Tidak perlu belajar rumit. Antarmuka modern, fitur lengkap, dan siap pakai untuk semua jenis bisnis.</p>
         </div>
         <div id="features-container"></div>
     </div>
@@ -2548,7 +2527,6 @@
 
         /* ---- Promo ---- */
         if (promo.enabled) {
-            setText('promo-hero-text', promo.heroBadge);
             setHTML('promo-banner-title', promo.bannerTitle);
             setText('promo-banner-subtitle', promo.bannerSubtitle);
         }
